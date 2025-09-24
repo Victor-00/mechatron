@@ -235,7 +235,7 @@
         }));
         
         try {
-            await fetch('http://127.0.0.1:3000/submit-quiz', {
+            await fetch('/submit-quiz', {
               method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(submissionData),
             });
         } catch (error) { console.error('Failed to submit quiz to server:', error); }
@@ -244,7 +244,7 @@
         window.location.href = 'results.html';
       }
       
-      async function fetchQuestions() { try { const response = await fetch('http://127.0.0.1:3000/questions'); questions = await response.json(); questions.forEach(q => { q.answered = false; q.skipped = false; q.selected = null; }); startQuiz(); } catch (error) { console.error('Failed to fetch questions:', error); questionText.textContent = 'Error: Could not load quiz questions.'; } }
+      async function fetchQuestions() { try { const response = await fetch('/questions'); questions = await response.json(); questions.forEach(q => { q.answered = false; q.skipped = false; q.selected = null; }); startQuiz(); } catch (error) { console.error('Failed to fetch questions:', error); questionText.textContent = 'Error: Could not load quiz questions.'; } }
       function startQuiz() { renderDiceMenu(); renderQuestion(); startTimer(); }
       function renderQuestion() { document.querySelector('.menu-dice.active')?.classList.remove('active'); const question = questions[currentQuestionIndex]; if (!question) { endQuiz(); return; } questionText.textContent = question.questionText; optionsList.innerHTML = ''; question.options.forEach((option, index) => { const li = document.createElement('li'); li.textContent = option; li.className = 'option-item'; li.dataset.index = index; if (question.selected === index) { li.classList.add('selected'); } li.onclick = () => handleAnswer(index); optionsList.appendChild(li); }); questionCounter.textContent = `Question ${currentQuestionIndex + 1}/${questions.length}`; document.querySelector(`.menu-dice[data-index="${currentQuestionIndex}"]`)?.classList.add('active'); updateButtonVisibility(); }
       function handleAnswer(selectedIndex) { optionsList.querySelector('.selected')?.classList.remove('selected'); optionsList.querySelector(`[data-index="${selectedIndex}"]`).classList.add('selected'); const question = questions[currentQuestionIndex]; question.answered = true; question.skipped = false; question.selected = selectedIndex; updateDiceMenu(); updateButtonVisibility(); }
