@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snakes and Ladders Quiz</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #6d28d9; --success-color: #22c55e; --danger-color: #ef4444;
+            --warning-color: #f59e0b; --light-grey: #f3f4f6; --dark-grey: #4b5563;
+            --text-light: #ffffff; --text-dark: #1f2937;
+        }
+        body {
+            margin: 0; font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #f5d742 0%, #4ade80 100%);
+            color: var(--text-dark); display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; padding: 20px; box-sizing: border-box;
+        }
+        #entry-gate, .warning-overlay {
+            position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(10px);
+            display: flex; justify-content: center; align-items: center; z-index: 1000;
+            color: white; text-align: center;
+        }
+        .warning-overlay {
+            background-color: rgba(120, 0, 0, 0.7); z-index: 1001;
+        }
+        .entry-content {
+            background: rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 40px;
+            max-width: 500px; animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        .entry-content h2 { font-size: 2rem; margin-top: 0; }
+        .entry-content ul { text-align: left; display: inline-block; margin-bottom: 30px; }
+        .entry-button, .resume-button {
+            color: white; padding: 15px 30px; border: none; border-radius: 12px;
+            font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: transform 0.2s ease;
+        }
+        #start-quiz-button { background-color: var(--success-color); }
+        .resume-button { background-color: var(--warning-color); }
+        .entry-button:hover, .resume-button:hover { transform: scale(1.05); }
+        .quiz-wrapper {
+            width: 90%; max-width: 1200px; display: grid; grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto 1fr; gap: 20px;
+            grid-template-areas: "meta timer" "main menu";
+        }
+        .info-box, .quiz-container, .menu-container {
+            background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(10px);
+            border-radius: 20px; padding: 25px; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        .meta-data { grid-area: meta; justify-self: start; }
+        .meta-data h2 { margin: 0; font-size: 1.5rem; color: var(--primary-color); }
+        #team-id { font-weight: 700; font-size: 1.8rem; }
+        .timer-box { grid-area: timer; text-align: right; justify-self: end; }
+        .timer-box h2 { margin: 0; font-size: 1.5rem; color: var(--primary-color); }
+        #quiz-timer { font-weight: 700; font-size: 1.8rem; }
+        .quiz-container { grid-area: main; display: flex; flex-direction: column; }
+        #question-counter { font-size: 1rem; font-weight: 600; color: var(--dark-grey); margin-bottom: 15px; }
+        .question-text { font-size: 1.4rem; font-weight: 600; margin-bottom: 25px; flex-grow: 1; }
+        .options-list { list-style: none; padding: 0; margin: 0 0 25px 0; }
+        .option-item { background: var(--light-grey); padding: 15px; margin-bottom: 12px; border-radius: 12px; border: 2px solid transparent; cursor: pointer; transition: all 0.2s ease-in-out; }
+        .option-item:hover { border-color: var(--primary-color); transform: translateY(-2px); }
+        .option-item.selected { background-color: var(--primary-color); color: var(--text-light); border-color: var(--primary-color); font-weight: 600; }
+        .control-buttons { display: flex; gap: 15px; margin-top: auto; }
+        .control-button { padding: 12px 24px; border-radius: 12px; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; transition: all 0.2s ease; flex-grow: 1; }
+        .control-button:hover { transform: scale(1.05); }
+        #skip-button { background-color: var(--warning-color); color: var(--text-light); }
+        #clear-button { background-color: var(--danger-color); color: var(--text-light); }
+        #next-button { background-color: var(--success-color); color: var(--text-light); }
+        .menu-container { grid-area: menu; }
+        .menu-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 20px; color: var(--primary-color); }
+        .dice-menu { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 15px; }
+        .menu-dice { width: 90%; aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; border-radius: 10px; cursor: pointer; transition: all 0.3s ease; border: 2px solid var(--light-grey); background-color: #fff; }
+        .menu-dice:not(.answered):not(.skipped):hover { border-color: var(--primary-color); color: var(--primary-color); }
+        .menu-dice.active { border-color: var(--primary-color); transform: scale(1.1); box-shadow: 0 0 15px rgba(109, 40, 217, 0.5); }
+        .menu-dice.answered { background-color: var(--success-color); color: white; border-color: var(--success-color); }
+        .menu-dice.skipped { background-color: var(--danger-color); color: white; border-color: var(--danger-color); }
+        @media (max-width: 900px) {
+            .quiz-wrapper { grid-template-columns: 1fr; grid-template-rows: auto; grid-template-areas: "meta" "timer" "main" "menu"; }
+            .timer-box { text-align: left; }
+        }
+    </style>
+</head>
+<body>
+    <div id="entry-gate">
+        <div class="entry-content">
+            <h2>Quiz Rules & Instructions</h2>
+            <p>To ensure fairness, this quiz will run in a secured fullscreen mode.</p>
+            <ul>
+                <li style="color: #ffcccc;"><strong>Switching tabs will terminate the quiz immediately.</strong></li>
+                <li>You will receive two warnings for exiting fullscreen (ESC key).</li>
+                <li>A third violation for exiting fullscreen will terminate the quiz.</li>
+            </ul>
+            <button id="start-quiz-button" class="entry-button">Click Here to Begin</button>
+        </div>
+    </div>
+
+    <div id="esc-warning-1" class="warning-overlay" style="display: none;"><div class="entry-content"><h2>Warning 1 of 2</h2><p>Exiting fullscreen is not allowed.</p><button class="resume-button">Click to Resume</button></div></div>
+    <div id="esc-warning-2" class="warning-overlay" style="display: none;"><div class="entry-content"><h2>Final Warning</h2><p>Exiting fullscreen again will terminate the quiz.</p><button class="resume-button">Click to Resume</button></div></div>
+    <div id="tab-warning-1" class="warning-overlay" style="display: none;"><div class="entry-content"><h2>Warning 1 of 2</h2><p>Switching tabs is not allowed.</p><button class="resume-button">Click to Resume</button></div></div>
+    <div id="tab-warning-2" class="warning-overlay" style="display: none;"><div class="entry-content"><h2>Final Warning</h2><p>Switching tabs again will terminate the quiz.</p><button class="resume-button">Click to Resume</button></div></div>
+
+    <div class="quiz-wrapper" style="display: none;">
+        <div class="info-box meta-data"><h2>Team ID</h2><span id="team-id">Loading...</span></div>
+        <div class="info-box timer-box"><h2>Time Left</h2><span id="quiz-timer">5:00</span></div>
+        <div class="quiz-container"><div id="question-counter">Question 1/5</div><h3 class="question-text" id="question-text">Loading question...</h3><ul id="options-list" class="options-list"></ul><div class="control-buttons"><button id="skip-button" class="control-button">Skip</button><button id="clear-button" class="control-button" style="display:none;">Clear Choice</button><button id="next-button" class="control-button" style="display:none;">Next</button></div></div>
+        <div class="menu-container"><h4 class="menu-title">Question Menu</h4><div id="dice-menu" class="dice-menu"></div></div>
+    </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      
+      const entryGate = document.getElementById('entry-gate');
+      const startButton = document.getElementById('start-quiz-button');
+      const quizWrapper = document.querySelector('.quiz-wrapper');
+      
+      const overlays = {
+          esc1: document.getElementById('esc-warning-1'),
+          esc2: document.getElementById('esc-warning-2'),
+          tab1: document.getElementById('tab-warning-1'),
+          tab2: document.getElementById('tab-warning-2'),
+      };
+      
+      document.querySelectorAll('.resume-button').forEach(btn => btn.addEventListener('click', resumeFromWarning));
+      
+      const questionText = document.getElementById('question-text');
+      const optionsList = document.getElementById('options-list');
+      const questionCounter = document.getElementById('question-counter');
+      const quizTimerDisplay = document.getElementById('quiz-timer');
+      const teamIdDisplay = document.getElementById('team-id');
+      const diceMenu = document.getElementById('dice-menu');
+      const skipButton = document.getElementById('skip-button');
+      const nextButton = document.getElementById('next-button');
+      const clearButton = document.getElementById('clear-button');
+
+     
+      let questions = [];
+      let currentQuestionIndex = 0;
+      let score = 0;
+      let quizTimer;
+      let quizHasEnded = false;
+      let teamId = localStorage.getItem('currentTeamId');
+      let escWarningCount = 0;
+      let tabSwitchCount = 0;
+      let timeLeft = 300;
+      let initialWidth, initialHeight;
+
+      if (!teamId) {
+        window.location.href = 'login.html';
+        return;
+      }
+      teamIdDisplay.textContent = teamId;
+
+      startButton.addEventListener('click', startAndSecureQuiz);
+
+      function startAndSecureQuiz() {
+          if (document.documentElement.requestFullscreen) {
+              document.documentElement.requestFullscreen();
+          }
+          entryGate.style.display = 'none';
+          quizWrapper.style.display = 'grid';
+        initialWidth = window.screen.width;
+        initialHeight = window.screen.height;
+          activateSecurityListeners();
+          fetchQuestions();
+      }
+
+      function resumeFromWarning() {
+          if (document.documentElement.requestFullscreen) {
+              document.documentElement.requestFullscreen();
+          }
+          Object.values(overlays).forEach(overlay => overlay.style.display = 'none');
+          resumeTimer();
+      }
+
+      
+      function activateSecurityListeners() {
+          document.addEventListener('visibilitychange', () => {
+              if (document.hidden && !quizHasEnded) {
+                  alert("Cheating detected. Switching tabs is not allowed and will terminate the quiz.");
+                  endQuiz({ reason: 'violation_limit' });
+              }
+          });
+          window.addEventListener('resize', () => {
+            if (quizHasEnded || !initialWidth || !initialHeight) return;
+
+            // This threshold is now 60%. It will only trigger on a drastic resize (split-screen)
+            // and will ignore the minor resize from simply exiting fullscreen.
+            const widthThreshold = initialWidth * 0.6;
+            const heightThreshold = initialHeight * 0.6;
+
+            if (window.innerWidth < widthThreshold || window.innerHeight < heightThreshold) {
+                alert("Cheating detected. Splitting the screen is not allowed and will terminate the quiz.");
+                endQuiz({ reason: 'violation_limit' });
+            }
+          });
+          
+          document.addEventListener('fullscreenchange', () => {
+              if (!document.fullscreenElement && !quizHasEnded) {
+                  escWarningCount++;
+                  pauseTimer();
+                  if (escWarningCount === 1) { overlays.esc1.style.display = 'flex'; }
+                  else if (escWarningCount === 2) { overlays.esc2.style.display = 'flex'; }
+                  else {
+                      alert("Third violation (ESC Press). Quiz terminated.");
+                      endQuiz({ reason: 'violation_limit' });
+                  }
+              }
+          });
+          
+          window.addEventListener('beforeunload', (e) => { if (!quizHasEnded) { e.preventDefault(); e.returnValue = ''; } });
+          document.addEventListener('contextmenu', (e) => e.preventDefault());
+          const disableEvent = (e) => e.preventDefault();
+          ['copy', 'paste', 'cut'].forEach(event => document.addEventListener(event, disableEvent));
+          document.addEventListener('keydown', (e) => { if (!quizHasEnded && (e.key === 'F5' || (e.ctrlKey && e.key === 'r'))) { e.preventDefault(); } });
+      }
+      
+      function pauseTimer() { clearInterval(quizTimer); }
+      function resumeTimer() {
+        quizTimer = setInterval(() => {
+          timeLeft--;
+          const minutes = Math.floor(timeLeft / 60);
+          const seconds = timeLeft % 60;
+          quizTimerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+          if (timeLeft <= 0) { clearInterval(quizTimer); endQuiz(); }
+        }, 1000);
+      }
+      function startTimer() { timeLeft = 300; resumeTimer(); }
+      
+      async function endQuiz(options = {}) {
+        if (quizHasEnded) return;
+        quizHasEnded = true;
+        pauseTimer();
+
+        calculateScore();
+        const finalTimeInSeconds = 300 - timeLeft;
+        
+        const submissionData = {
+          teamId: teamId, score: score, timeTaken: finalTimeInSeconds,
+          answeredQuestions: questions.filter(q => q.answered).length, totalQuestions: questions.length, status: 'Completed'
+        };
+        
+        if (options.reason === 'violation_limit') {
+            submissionData.status = 'Terminated - Cheating Detected';
+        }
+
+        localStorage.setItem('quizResults', JSON.stringify({
+          teamId: teamId, score: score, totalQuestions: questions.length, timeTaken: finalTimeInSeconds
+        }));
+        
+        try {
+            await fetch('http://127.0.0.1:3000/submit-quiz', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(submissionData),
+            });
+        } catch (error) { console.error('Failed to submit quiz to server:', error); }
+        
+        if (document.exitFullscreen) { document.exitFullscreen(); }
+        window.location.href = 'results.html';
+      }
+      
+      async function fetchQuestions() { try { const response = await fetch('http://127.0.0.1:3000/questions'); questions = await response.json(); questions.forEach(q => { q.answered = false; q.skipped = false; q.selected = null; }); startQuiz(); } catch (error) { console.error('Failed to fetch questions:', error); questionText.textContent = 'Error: Could not load quiz questions.'; } }
+      function startQuiz() { renderDiceMenu(); renderQuestion(); startTimer(); }
+      function renderQuestion() { document.querySelector('.menu-dice.active')?.classList.remove('active'); const question = questions[currentQuestionIndex]; if (!question) { endQuiz(); return; } questionText.textContent = question.questionText; optionsList.innerHTML = ''; question.options.forEach((option, index) => { const li = document.createElement('li'); li.textContent = option; li.className = 'option-item'; li.dataset.index = index; if (question.selected === index) { li.classList.add('selected'); } li.onclick = () => handleAnswer(index); optionsList.appendChild(li); }); questionCounter.textContent = `Question ${currentQuestionIndex + 1}/${questions.length}`; document.querySelector(`.menu-dice[data-index="${currentQuestionIndex}"]`)?.classList.add('active'); updateButtonVisibility(); }
+      function handleAnswer(selectedIndex) { optionsList.querySelector('.selected')?.classList.remove('selected'); optionsList.querySelector(`[data-index="${selectedIndex}"]`).classList.add('selected'); const question = questions[currentQuestionIndex]; question.answered = true; question.skipped = false; question.selected = selectedIndex; updateDiceMenu(); updateButtonVisibility(); }
+      function handleClearChoice() { const question = questions[currentQuestionIndex]; question.answered = false; question.skipped = false; question.selected = null; optionsList.querySelector('.selected')?.classList.remove('selected'); updateDiceMenu(); updateButtonVisibility(); }
+      function handleSkip() { const question = questions[currentQuestionIndex]; question.skipped = true; question.answered = false; question.selected = null; goToNextQuestion(); }
+      function goToNextQuestion() { updateDiceMenu(); currentQuestionIndex++; if (currentQuestionIndex >= questions.length) { endQuiz(); } else { renderQuestion(); } }
+      function updateButtonVisibility() { const question = questions[currentQuestionIndex]; if (question.answered) { skipButton.style.display = 'none'; clearButton.style.display = 'block'; nextButton.style.display = 'block'; } else { skipButton.style.display = 'block'; clearButton.style.display = 'none'; nextButton.style.display = 'none'; } }
+      function renderDiceMenu() { diceMenu.innerHTML = ''; questions.forEach((q, i) => { const dice = document.createElement('div'); dice.className = 'menu-dice'; dice.textContent = i + 1; dice.dataset.index = i; dice.onclick = () => { currentQuestionIndex = i; renderQuestion(); }; diceMenu.appendChild(dice); }); }
+      function updateDiceMenu() { const dice = document.querySelector(`.menu-dice[data-index="${currentQuestionIndex}"]`); if (!dice) return; dice.classList.remove('answered', 'skipped'); if (questions[currentQuestionIndex].answered) { dice.classList.add('answered'); } else if (questions[currentQuestionIndex].skipped) { dice.classList.add('skipped'); } }
+      function calculateScore() { score = 0; questions.forEach(q => { if (q.answered && q.selected === q.correctAnswerIndex) { score++; } }); }
+
+      skipButton.onclick = handleSkip;
+      clearButton.onclick = handleClearChoice;
+      nextButton.onclick = goToNextQuestion;
+    });
+  </script>
+</body>
+</html>
