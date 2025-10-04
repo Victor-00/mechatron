@@ -1,23 +1,19 @@
 {
   "version": 2,
   "builds": [
-    { "src": "*.html", "use": "@vercel/static" },
+    { "src": "public/**", "use": "@vercel/static" },
     { "src": "*.json", "use": "@vercel/static" }
   ],
   "routes": [
     { "src": "/login", "dest": "/api/login" },
     { "src": "/questions", "dest": "/api/questions" },
     { "src": "/submit-quiz", "dest": "/api/submit-quiz" },
-    { "src": "/", "dest": "/api/index" },
-    { "src": "/login.html", "dest": "/api/index" },
-    { "src": "/quiz.html", "dest": "/api/index" },
-    { "src": "/results.html", "dest": "/api/index" },
-    { "src": "/(.*)", "dest": "/api/index" }
+    { "src": "/", "dest": "/public/login.html" },
+    { "src": "/login.html", "dest": "/public/login.html" },
+    { "src": "/quiz.html", "dest": "/public/quiz.html" },
+    { "src": "/results.html", "dest": "/public/results.html" }
   ],
   "functions": {
-    "api/index.js": {
-      "maxDuration": 30
-    },
     "api/login.js": {
       "maxDuration": 30
     },

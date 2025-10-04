@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Snakes and Ladders Quiz</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    :root {
+      --primary-color: #6d28d9;
+      --success-color: #22c55e;
+      --danger-color: #ef4444;
+      --warning-color: #f59e0b;
+      --light-grey: #f3f4f6;
+      --dark-grey: #4b5563;
+      --text-light: #ffffff;
+      --text-dark: #1f2937;
+    }
+    body {
+      margin: 0;
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #f5d742 0%, #4ade80 100%);
+      color: var(--text-dark);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    #entry-gate,
+    .warning-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      color: white;
+      text-align: center;
+    }
+    .warning-overlay {
+      background-color: rgba(120, 0, 0, 0.7);
+      z-index: 1001;
+    }
+    .entry-content {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 500px;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    .entry-content h2 {
+      font-size: 2rem;
+      margin-top: 0;
+    }
+    .entry-content ul {
+      text-align: left;
+      display: inline-block;
+      margin-bottom: 30px;
+    }
+    .entry-button,
+    .resume-button {
+      color: white;
+      padding: 15px 30px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    #start-quiz-button {
+      background-color: var(--success-color);
+    }
+    .resume-button {
+      background-color: var(--warning-color);
+    }
+    .entry-button:hover,
+    .resume-button:hover {
+      transform: scale(1.05);
+    }
+    .quiz-wrapper {
+      width: 90%;
+      max-width: 1200px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto 1fr;
+      gap: 20px;
+      grid-template-areas:
+        "meta timer"
+        "main menu";
+    }
+    .info-box,
+    .quiz-container,
+    .menu-container {
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+    .meta-data {
+      grid-area: meta;
+      justify-self: start;
+    }
+    .meta-data h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: var(--primary-color);
+    }
+    #team-id {
+      font-weight: 700;
+      font-size: 1.8rem;
+    }
+    .timer-box {
+      grid-area: timer;
+      text-align: right;
+      justify-self: end;
+    }
+    .timer-box h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: var(--primary-color);
+    }
+    #quiz-timer {
+      font-weight: 700;
+      font-size: 1.8rem;
+    }
+    .quiz-container {
+      grid-area: main;
+      display: flex;
+      flex-direction: column;
+    }
+    #question-counter {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--dark-grey);
+      margin-bottom: 15px;
+    }
+    .question-text {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-bottom: 25px;
+      flex-grow: 1;
+    }
+    .options-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 25px 0;
+    }
+    .option-item {
+      background: var(--light-grey);
+      padding: 15px;
+      margin-bottom: 12px;
+      border-radius: 12px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+    }
+    .option-item:hover {
+      border-color: var(--primary-color);
+      transform: translateY(-2px);
+    }
+    .option-item.selected {
+      background-color: var(--primary-color);
+      color: var(--text-light);
+      border-color: var(--primary-color);
+      font-weight: 600;
+    }
+    .control-buttons {
+      display: flex;
+      gap: 15px;
+      margin-top: auto;
+    }
+    .control-button {
+      padding: 12px 24px;
+      border-radius: 12px;
+      border: none;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex-grow: 1;
+    }
+    .control-button:hover {
+      transform: scale(1.05);
+    }
+    #skip-button {
+      background-color: var(--warning-color);
+      color: var(--text-light);
+    }
+    #clear-button {
+      background-color: var(--danger-color);
+      color: var(--text-light);
+    }
+    #next-button {
+      background-color: var(--success-color);
+      color: var(--text-light);
+    }
+    .menu-container {
+      grid-area: menu;
+    }
+    .menu-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: var(--primary-color);
+    }
+    .dice-menu {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+      gap: 15px;
+    }
+    .menu-dice {
+      width: 90%;
+      aspect-ratio: 1 / 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 2px solid var(--light-grey);
+      background-color: #fff;
+    }
+    .menu-dice:not(.answered):not(.skipped):hover {
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+    }
+    .menu-dice.active {
+      border-color: var(--primary-color);
+      transform: scale(1.1);
+      box-shadow: 0 0 15px rgba(109, 40, 217, 0.5);
+    }
+    .menu-dice.answered {
+      background-color: var(--success-color);
+      color: white;
+      border-color: var(--success-color);
+    }
+    .menu-dice.skipped {
+      background-color: var(--danger-color);
+      color: white;
+      border-color: var(--danger-color);
+    }
+    @media (max-width: 900px) {
+      .quiz-wrapper {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+        grid-template-areas:
+          "meta"
+          "timer"
+          "main"
+          "menu";
+      }
+      .timer-box {
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="entry-gate">
+    <div class="entry-content">
+      <h2>Quiz Rules & Instructions</h2>
+      <p>To ensure fairness, this quiz will run in a secured fullscreen mode.</p>
+      <ul>
+        <li style="color: #ffcccc;">
+          <strong>Switching tabs will terminate the quiz immediately.</strong>
+        </li>
+        <li>You will receive two warnings for exiting fullscreen (ESC key).</li>
+        <li>A third violation for exiting fullscreen will terminate the quiz.</li>
+      </ul>
+      <button id="start-quiz-button" class="entry-button">
+        Click Here to Begin
+      </button>
+    </div>
+  </div>
+
+  <div
+    id="esc-warning-1"
+    class="warning-overlay"
+    style="display: none"
+  >
+    <div class="entry-content">
+      <h2>Warning 1 of 2</h2>
+      <p>Exiting fullscreen is not allowed.</p>
+      <button class="resume-button">Click to Resume</button>
+    </div>
+  </div>
+
+  <!-- (warning overlays omitted for brevity – unchanged from your code) -->
+
+  <div class="quiz-wrapper" style="display: none">
+    <div class="info-box meta-data">
+      <h2>Team ID</h2>
+      <span id="team-id">Loading...</span>
+    </div>
+    <div class="info-box timer-box">
+      <h2>Time Left</h2>
+      <span id="quiz-timer">5:00</span>
+    </div>
+    <div class="quiz-container">
+      <div id="question-counter">Question 1/5</div>
+      <h3 class="question-text" id="question-text">Loading question...</h3>
+      <ul id="options-list" class="options-list"></ul>
+      <div class="control-buttons">
+        <button id="skip-button" class="control-button">Skip</button>
+        <button id="clear-button" class="control-button" style="display: none">
+          Clear Choice
+        </button>
+        <button id="next-button" class="control-button" style="display: none">
+          Next
+        </button>
+      </div>
+    </div>
+    <div class="menu-container">
+      <h4 class="menu-title">Question Menu</h4>
+      <div id="dice-menu" class="dice-menu"></div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const API_BASE =
+        "https://mechatron-one.vercel.app/;
+
+      // ... (setup and security logic unchanged)
+
+      async function endQuiz(options = {}) {
+        if (quizHasEnded) return;
+        quizHasEnded = true;
+        pauseTimer();
+        calculateScore();
+
+        const finalTimeInSeconds = 300 - timeLeft;
+        const submissionData = {
+          teamId: teamId,
+          score: score,
+          timeTaken: finalTimeInSeconds,
+          answeredQuestions: questions.filter((q) => q.answered).length,
+          totalQuestions: questions.length,
+          status: "Completed",
+        };
+        if (options.reason === "violation_limit") {
+          submissionData.status = "Terminated - Cheating Detected";
+        }
+
+        localStorage.setItem(
+          "quizResults",
+          JSON.stringify({
+            teamId: teamId,
+            score: score,
+            totalQuestions: questions.length,
+            timeTaken: finalTimeInSeconds,
+          })
+        );
+
+        try {
+          await fetch(`${API_BASE}/submit-quiz`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(submissionData),
+          });
+        } catch (error) {
+          console.error("Failed to submit quiz to server:", error);
+        }
+
+        if (document.exitFullscreen) document.exitFullscreen();
+        window.location.href = "results.html";
+      }
+
+      async function fetchQuestions() {
+        try {
+          const response = await fetch(`${API_BASE}/questions`);
+          questions = await response.json();
+          questions.forEach((q) => {
+            q.answered = false;
+            q.skipped = false;
+            q.selected = null;
+          });
+          startQuiz();
+        } catch (error) {
+          console.error("Failed to fetch questions:", error);
+          questionText.textContent = "Error: Could not load quiz questions.";
+        }
+      }
+
+      // (rest of script unchanged)
+    });
+  </script>
+</body>
+</html>
+

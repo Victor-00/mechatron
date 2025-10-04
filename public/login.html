@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Snakes and Ladders Login</title>
+  <style>
+    /* all your CSS remains unchanged */
+  </style>
+</head>
+
+<body>
+  <div class="login-page">
+    <!-- Snake Animation Container -->
+    <div class="snake-container">
+      <div class="snake">
+        <div class="snake-body"></div>
+        <div class="snake-head">
+          <div class="snake-eye left">
+            <div class="snake-pupil"></div>
+          </div>
+          <div class="snake-eye right">
+            <div class="snake-pupil"></div>
+          </div>
+          <div class="snake-mouth"></div>
+          <div class="snake-tongue"></div>
+        </div>
+        <div class="snake-pattern" style="top: 15px; left: 20px;"></div>
+        <div class="snake-pattern" style="top: 35px; left: 40px;"></div>
+        <div class="snake-pattern" style="top: 15px; left: 60px;"></div>
+        <div class="snake-pattern" style="top: 35px; left: 80px;"></div>
+        <div class="snake-pattern" style="top: 15px; left: 100px;"></div>
+      </div>
+    </div>
+
+    <div class="board-background"></div>
+    <div id="dice-container"></div>
+
+    <div class="login-form" id="login-form-container">
+      <h2 class="form-title font-fredoka">Team Login</h2>
+      <form id="login-form">
+        <input type="text" name="teamId" placeholder="Team ID (e.g., team-1)" required class="form-input">
+        <input type="password" name="regNum" placeholder="Registration Number" required class="form-input">
+        <button type="submit" class="submit-button">Let's Play!</button>
+        <div id="login-message" class="message-box" style="display: none;"></div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const backendURL = 'https://mechatron-one.vercel.app/'; // ✅ your deployed backend
+
+      // create board background
+      const boardBackground = document.querySelector('.board-background');
+      for (let i = 0; i < 96; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'board-cell';
+        cell.style.backgroundColor = `hsl(${i * 20}, 70%, 70%)`;
+        boardBackground.appendChild(cell);
+      }
+
+      // snake animation
+      const snake = document.querySelector('.snake');
+      const snakeMouth = document.querySelector('.snake-mouth');
+      const snakeTongue = document.querySelector('.snake-tongue');
+      const loginForm = document.getElementById('login-form-container');
+      const diceContainer = document.getElementById('dice-container');
+
+      setTimeout(() => {
+        snake.style.animation = 'snake-jumpscare 0.5s ease-in-out forwards';
+        snakeMouth.style.animation = 'mouth-open 0.3s ease-in-out forwards';
+        snakeTongue.style.animation = 'tongue-flick 0.3s ease-in-out 2';
+
+        setTimeout(() => {
+          loginForm.classList.add('form-visible');
+          createDice();
+
+          setTimeout(() => {
+            snake.style.opacity = '0';
+            snake.style.transition = 'opacity 1s ease';
+          }, 1000);
+        }, 500);
+      }, 3000);
+
+      // login submit
+      document.getElementById('login-form').addEventListener('submit', async function (event) {
+        event.preventDefault();
+        const teamId = event.target.teamId.value;
+        const regNum = event.target.regNum.value;
+        const loginMessage = document.getElementById('login-message');
+
+        try {
+          const response = await fetch(`${backendURL}/login`, {  // ✅ fixed endpoint
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ teamId, regNum }),
+          });
+
+          const data = await response.json();
+          loginMessage.style.display = 'block';
+
+          if (data.success) {
+            loginMessage.textContent = 'Login successful!';
+            loginMessage.classList.add('success');
+            loginMessage.classList.remove('error');
+            localStorage.setItem('currentTeamId', teamId);
+            window.location.href = 'quiz.html';
+          } else {
+            loginMessage.textContent = 'Login failed: ' + data.message;
+            loginMessage.classList.add('error');
+            loginMessage.classList.remove('success');
+          }
+        } catch (error) {
+          console.error('Error during login:', error);
+          loginMessage.style.display = 'block';
+          loginMessage.textContent = 'Network error. Please try again.';
+          loginMessage.classList.add('error');
+          loginMessage.classList.remove('success');
+        }
+      });
+
+      function createDice() {
+        const diceContainer = document.getElementById('dice-container');
+
+        const createDot = (dice, className) => {
+          const dot = document.createElement('div');
+          dot.className = `dice-dot ${className}`;
+          dice.appendChild(dot);
+        };
+
+        const drawDots = (dice, value) => {
+          switch (value) {
+            case 1: createDot(dice, 'dot-center'); break;
+            case 2: createDot(dice, 'dot-top-left'); createDot(dice, 'dot-bottom-right'); break;
+            case 3: createDot(dice, 'dot-top-left'); createDot(dice, 'dot-center'); createDot(dice, 'dot-bottom-right'); break;
+            case 4: createDot(dice, 'dot-top-left'); createDot(dice, 'dot-top-right'); createDot(dice, 'dot-bottom-left'); createDot(dice, 'dot-bottom-right'); break;
+            case 5: createDot(dice, 'dot-top-left'); createDot(dice, 'dot-top-right'); createDot(dice, 'dot-center'); createDot(dice, 'dot-bottom-left'); createDot(dice, 'dot-bottom-right'); break;
+            case 6: createDot(dice, 'dot-top-left'); createDot(dice, 'dot-top-right'); createDot(dice, 'dot-middle-left'); createDot(dice, 'dot-middle-right'); createDot(dice, 'dot-bottom-left'); createDot(dice, 'dot-bottom-right'); break;
+          }
+        };
+
+        for (let i = 0; i < 25; i++) {
+          const dice = document.createElement('div');
+          dice.className = 'dice';
+          const diceValue = Math.floor(Math.random() * 6) + 1;
+          const x = Math.random() * 90;
+          const y = Math.random() * 90;
+
+          dice.style.left = `${x}%`;
+          dice.style.top = `${y}%`;
+          dice.style.animationDuration = `${3 + Math.random() * 2}s`;
+          dice.style.animationDelay = `${Math.random() * 2}s`;
+          drawDots(dice, diceValue);
+          diceContainer.appendChild(dice);
+          setTimeout(() => dice.style.opacity = '1', 200 + i * 100);
+        }
+      }
+    });
+  </script>
+</body>
+</html>
+

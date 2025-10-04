@@ -1,7 +1,5 @@
 // api/login.js - Login endpoint
 
-require('dotenv').config();
-
 // This in-memory 'Set' will track logged-in teams.
 // It resets whenever the serverless function restarts.
 const loggedInTeams = new Set();
