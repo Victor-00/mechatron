@@ -7,9 +7,17 @@ const cors = require('cors');
 const teamsFilePath = path.join(__dirname, 'teams.json');
 let teams = JSON.parse(fs.readFileSync(teamsFilePath, 'utf8'));
 
+// CORS configuration for production
+const corsOptions = {
+    origin: '*', // Allow all origins (or specify your domain)
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type'],
+    credentials: false
+};
+
 // Create a function to handle requests with CORS enabled
 const handleRequest = (req, res) => {
-    const corsMiddleware = cors();
+    const corsMiddleware = cors(corsOptions);
     corsMiddleware(req, res, () => {
         // Serve login.html, quiz.html, or results.html
         if (req.method === 'GET' && (req.url === '/' || req.url === '/login.html')) {
@@ -46,7 +54,6 @@ const handleRequest = (req, res) => {
                 }
             });
         } else if (req.method === 'POST' && req.url === '/login') {
-            // --- MODIFIED LOGIN LOGIC ---
             let body = '';
             req.on('data', chunk => {
                 body += chunk.toString();
@@ -56,19 +63,16 @@ const handleRequest = (req, res) => {
                     const { teamId, regNum } = JSON.parse(body);
                     const user = teams.find(team => team.teamId === teamId && team.regNum === regNum);
 
-                    
                     if (!user) {
                         res.writeHead(200, { 'Content-Type': 'application/json' });
                         return res.end(JSON.stringify({ success: false, message: 'Invalid credentials.' }));
                     }
 
-                    
                     if (user.logged === true) {
                         res.writeHead(200, { 'Content-Type': 'application/json' });
                         return res.end(JSON.stringify({ success: false, message: 'This team has already logged in.' }));
                     }
 
-                    
                     user.logged = true; 
                     fs.writeFileSync(teamsFilePath, JSON.stringify(teams, null, 2)); 
 
@@ -129,7 +133,10 @@ const handleRequest = (req, res) => {
 
 const server = http.createServer(handleRequest);
 
-const PORT = 3000;
-server.listen(PORT, '172.23.221.241', () => {
-    console.log(`Server running at http://172.23.221.241:${PORT}/`);
+// Use PORT from environment variable (Render provides this)
+const PORT = process.env.PORT || 3000;
+
+// Listen on 0.0.0.0 for Render (not a specific IP)
+server.listen(PORT, '0.0.0.0', () => {
+    console.log(`✅ Server running on port ${PORT}`);
 });
