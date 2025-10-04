@@ -23,9 +23,7 @@
             display: flex; justify-content: center; align-items: center; z-index: 1000;
             color: white; text-align: center;
         }
-        .warning-overlay {
-            background-color: rgba(120, 0, 0, 0.7); z-index: 1001;
-        }
+        .warning-overlay { background-color: rgba(120, 0, 0, 0.7); z-index: 1001; }
         .entry-content {
             background: rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 40px;
             max-width: 500px; animation: fadeIn 0.5s ease-in-out;
@@ -175,27 +173,42 @@
           resumeTimer();
       }
 
-      
       function activateSecurityListeners() {
-          document.addEventListener('visibilitychange', () => {
-              if (document.hidden && !quizHasEnded) {
-                  alert("Cheating detected. Switching tabs is not allowed and will terminate the quiz.");
+
+          // === Cross-platform tab/window switch detection ===
+          const isLinux = navigator.userAgent.toLowerCase().includes('linux');
+
+          function handleTabSwitch() {
+              if (quizHasEnded) return;
+              tabSwitchCount++;
+              pauseTimer();
+
+              if (tabSwitchCount === 1) overlays.tab1.style.display = 'flex';
+              else if (tabSwitchCount === 2) overlays.tab2.style.display = 'flex';
+              else {
+                  alert("Third violation (Tab/Window Switch). Quiz terminated.");
                   endQuiz({ reason: 'violation_limit' });
               }
+          }
+
+          document.addEventListener('visibilitychange', () => {
+              if (document.hidden) handleTabSwitch();
           });
+
+          window.addEventListener('blur', () => {
+              if (isLinux) handleTabSwitch();
+          });
+
+          // === Existing security events ===
           window.addEventListener('resize', () => {
-            if (quizHasEnded || !initialWidth || !initialHeight) return;
-
-            // This threshold is now 60%. It will only trigger on a drastic resize (split-screen)
-            // and will ignore the minor resize from simply exiting fullscreen.
-            const widthThreshold = initialWidth * 0.6;
-            const heightThreshold = initialHeight * 0.6;
-
-            if (window.innerWidth < widthThreshold || window.innerHeight < heightThreshold) {
-                alert("Cheating detected. Splitting the screen is not allowed and will terminate the quiz.");
-                endQuiz({ reason: 'violation_limit' });
-            }
-          });
+            if (quizHasEnded || !initialWidth || !initialHeight) return;
+            const widthThreshold = initialWidth * 0.6;
+            const heightThreshold = initialHeight * 0.6;
+            if (window.innerWidth < widthThreshold || window.innerHeight < heightThreshold) {
+                alert("Cheating detected. Splitting the screen is not allowed and will terminate the quiz.");
+                endQuiz({ reason: 'violation_limit' });
+            }
+          });
           
           document.addEventListener('fullscreenchange', () => {
               if (!document.fullscreenElement && !quizHasEnded) {
@@ -260,22 +273,30 @@
         window.location.href = 'results.html';
       }
       
-      async function fetchQuestions() { try { const response = await fetch('/questions'); questions = await response.json(); questions.forEach(q => { q.answered = false; q.skipped = false; q.selected = null; }); startQuiz(); } catch (error) { console.error('Failed to fetch questions:', error); questionText.textContent = 'Error: Could not load quiz questions.'; } }
-      function startQuiz() { renderDiceMenu(); renderQuestion(); startTimer(); }
-      function renderQuestion() { document.querySelector('.menu-dice.active')?.classList.remove('active'); const question = questions[currentQuestionIndex]; if (!question) { endQuiz(); return; } questionText.textContent = question.questionText; optionsList.innerHTML = ''; question.options.forEach((option, index) => { const li = document.createElement('li'); li.textContent = option; li.className = 'option-item'; li.dataset.index = index; if (question.selected === index) { li.classList.add('selected'); } li.onclick = () => handleAnswer(index); optionsList.appendChild(li); }); questionCounter.textContent = `Question ${currentQuestionIndex + 1}/${questions.length}`; document.querySelector(`.menu-dice[data-index="${currentQuestionIndex}"]`)?.classList.add('active'); updateButtonVisibility(); }
-      function handleAnswer(selectedIndex) { optionsList.querySelector('.selected')?.classList.remove('selected'); optionsList.querySelector(`[data-index="${selectedIndex}"]`).classList.add('selected'); const question = questions[currentQuestionIndex]; question.answered = true; question.skipped = false; question.selected = selectedIndex; updateDiceMenu(); updateButtonVisibility(); }
-      function handleClearChoice() { const question = questions[currentQuestionIndex]; question.answered = false; question.skipped = false; question.selected = null; optionsList.querySelector('.selected')?.classList.remove('selected'); updateDiceMenu(); updateButtonVisibility(); }
-      function handleSkip() { const question = questions[currentQuestionIndex]; question.skipped = true; question.answered = false; question.selected = null; goToNextQuestion(); }
-      function goToNextQuestion() { updateDiceMenu(); currentQuestionIndex++; if (currentQuestionIndex >= questions.length) { endQuiz(); } else { renderQuestion(); } }
-      function updateButtonVisibility() { const question = questions[currentQuestionIndex]; if (question.answered) { skipButton.style.display = 'none'; clearButton.style.display = 'block'; nextButton.style.display = 'block'; } else { skipButton.style.display = 'block'; clearButton.style.display = 'none'; nextButton.style.display = 'none'; } }
-      function renderDiceMenu() { diceMenu.innerHTML = ''; questions.forEach((q, i) => { const dice = document.createElement('div'); dice.className = 'menu-dice'; dice.textContent = i + 1; dice.dataset.index = i; dice.onclick = () => { currentQuestionIndex = i; renderQuestion(); }; diceMenu.appendChild(dice); }); }
-      function updateDiceMenu() { const dice = document.querySelector(`.menu-dice[data-index="${currentQuestionIndex}"]`); if (!dice) return; dice.classList.remove('answered', 'skipped'); if (questions[currentQuestionIndex].answered) { dice.classList.add('answered'); } else if (questions[currentQuestionIndex].skipped) { dice.classList.add('skipped'); } }
-      function calculateScore() { score = 0; questions.forEach(q => { if (q.answered && q.selected === q.correctAnswerIndex) { score++; } }); }
+      async function fetchQuestions() { 
+        try { 
+          const response = await fetch('/questions'); 
+          questions = await response.json(); 
+          questions.forEach(q => { q.answered = false; q.skipped = false; q.selected = null; }); 
+          startQuiz(); 
+        } catch (error) { 
+          console.error('Failed to fetch questions:', error); 
+          questionText.textContent = 'Error: Could not load quiz questions.'; 
+        } 
+      }
 
-      skipButton.onclick = handleSkip;
-      clearButton.onclick = handleClearChoice;
-      nextButton.onclick = goToNextQuestion;
+      function startQuiz() { renderDiceMenu(); renderQuestion(); startTimer(); }
+      function renderQuestion() { document.querySelectorAll('.menu-dice').forEach(dice => dice.classList.remove('active')); document.getElementById(`dice-${currentQuestionIndex}`).classList.add('active'); const currentQuestion = questions[currentQuestionIndex]; questionCounter.textContent = `Question ${currentQuestionIndex + 1} / ${questions.length}`; questionText.textContent = currentQuestion.question; optionsList.innerHTML = ''; currentQuestion.options.forEach((option, index) => { const li = document.createElement('li'); li.classList.add('option-item'); li.textContent = option; li.onclick = () => selectOption(index); optionsList.appendChild(li); }); clearButton.style.display = 'none'; nextButton.style.display = 'none'; skipButton.style.display = currentQuestion.skipped ? 'none' : 'block'; }
+      function selectOption(index) { const currentQuestion = questions[currentQuestionIndex]; currentQuestion.selected = index; currentQuestion.answered = true; Array.from(optionsList.children).forEach((li, i) => { li.classList.toggle('selected', i === index); }); clearButton.style.display = 'block'; nextButton.style.display = 'block'; skipButton.style.display = 'none'; updateDiceStatus(); }
+      function clearChoice() { const currentQuestion = questions[currentQuestionIndex]; currentQuestion.selected = null; currentQuestion.answered = false; Array.from(optionsList.children).forEach(li => li.classList.remove('selected')); clearButton.style.display = 'none'; nextButton.style.display = 'none'; skipButton.style.display = 'block'; updateDiceStatus(); }
+      function skipQuestion() { questions[currentQuestionIndex].skipped = true; updateDiceStatus(); nextQuestion(); }
+      function nextQuestion() { const next = questions.findIndex((q, i) => !q.answered && !q.skipped && i > currentQuestionIndex); if (next !== -1) { currentQuestionIndex = next; renderQuestion(); } else { endQuiz(); } }
+      function renderDiceMenu() { diceMenu.innerHTML = ''; questions.forEach((q, i) => { const dice = document.createElement('div'); dice.classList.add('menu-dice'); dice.id = `dice-${i}`; dice.textContent = i + 1; dice.addEventListener('click', () => { currentQuestionIndex = i; renderQuestion(); }); diceMenu.appendChild(dice); }); }
+      function updateDiceStatus() { questions.forEach((q, i) => { const dice = document.getElementById(`dice-${i}`); dice.classList.remove('answered', 'skipped'); if (q.answered) dice.classList.add('answered'); else if (q.skipped) dice.classList.add('skipped'); }); }
+      function calculateScore() { score = questions.reduce((acc, q) => acc + (q.selected === q.correct ? 1 : 0), 0); }
+      skipButton.addEventListener('click', skipQuestion); nextButton.addEventListener('click', nextQuestion); clearButton.addEventListener('click', clearChoice);
     });
   </script>
 </body>
 </html>
+
