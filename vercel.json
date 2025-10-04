@@ -11,7 +11,8 @@
     { "src": "/", "dest": "/api/index" },
     { "src": "/login.html", "dest": "/api/index" },
     { "src": "/quiz.html", "dest": "/api/index" },
-    { "src": "/results.html", "dest": "/api/index" }
+    { "src": "/results.html", "dest": "/api/index" },
+    { "src": "/(.*)", "dest": "/api/index" }
   ],
   "functions": {
     "api/index.js": {
