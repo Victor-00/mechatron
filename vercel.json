@@ -1,11 +1,19 @@
 {
   "version": 2,
   "builds": [
-    { "src": "server.js", "use": "@vercel/node" },
     { "src": "*.html", "use": "@vercel/static" },
     { "src": "*.json", "use": "@vercel/static" }
   ],
   "routes": [
-    { "src": "/(.*)", "dest": "server.js" }
-  ]
+    { "src": "/login", "dest": "/api" },
+    { "src": "/questions", "dest": "/api" },
+    { "src": "/submit-quiz", "dest": "/api" },
+    { "src": "/", "dest": "/api" },
+    { "src": "/(.*)", "dest": "/api" }
+  ],
+  "functions": {
+    "api/index.js": {
+      "maxDuration": 30
+    }
+  }
 }

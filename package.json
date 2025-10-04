@@ -1,5 +1,16 @@
 {
+  "name": "snakes-ladders-quiz",
+  "version": "1.0.0",
+  "main": "api/index.js",
+  "scripts": {
+    "start": "vercel dev",
+    "dev": "vercel dev",
+    "build": "echo 'No build step required'"
+  },
   "dependencies": {
-    "cors": "^2.8.5"
+    "dotenv": "^16.0.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

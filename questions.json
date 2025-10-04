@@ -1,52 +1,52 @@
 [
 {
-"questionText": "What does CSS stand for?",
+"question": "What does CSS stand for?",
 "options": [
 "Colorful Style Sheets",
 "Cascading Style Sheets",
 "Creative Style Sheets",
 "Computer Style Sheets"
 ],
-"correctAnswerIndex": 1
+"correct": 1
 },
 {
-"questionText": "Which programming language is a superset of JavaScript?",
+"question": "Which programming language is a superset of JavaScript?",
 "options": [
 "Python",
 "C++",
 "TypeScript",
 "Java"
 ],
-"correctAnswerIndex": 2
+"correct": 2
 },
 {
-"questionText": "What is the primary function of the 'git pull' command?",
+"question": "What is the primary function of the 'git pull' command?",
 "options": [
 "To save changes to the local repository",
 "To merge changes from a remote repository",
 "To create a new branch",
 "To delete a file"
 ],
-"correctAnswerIndex": 1
+"correct": 1
 },
 {
-"questionText": "In what year was the first iPhone released?",
+"question": "In what year was the first iPhone released?",
 "options": [
 "2005",
 "2007",
 "2009",
 "2010"
 ],
-"correctAnswerIndex": 1
+"correct": 1
 },
 {
-"questionText": "What company developed the React framework?",
+"question": "What company developed the React framework?",
 "options": [
 "Google",
 "Microsoft",
 "Apple",
 "Meta (Facebook)"
 ],
-"correctAnswerIndex": 3
+"correct": 3
 }
 ]
