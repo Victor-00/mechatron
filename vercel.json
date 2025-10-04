@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 {
   "version": 2,
   "builds": [
@@ -12,7 +11,8 @@
     { "src": "/", "dest": "/api/index" },
     { "src": "/login.html", "dest": "/api/index" },
     { "src": "/quiz.html", "dest": "/api/index" },
-    { "src": "/results.html", "dest": "/api/index" }
+    { "src": "/results.html", "dest": "/api/index" },
+    { "src": "/(.*)", "dest": "/api/index" }
   ],
   "functions": {
     "api/index.js": {
@@ -29,24 +29,3 @@
     }
   }
 }
-=======
-{
-  "version": 2,
-  "builds": [
-    { "src": "*.html", "use": "@vercel/static" },
-    { "src": "*.json", "use": "@vercel/static" }
-  ],
-  "routes": [
-    { "src": "/login", "dest": "/api" },
-    { "src": "/questions", "dest": "/api" },
-    { "src": "/submit-quiz", "dest": "/api" },
-    { "src": "/", "dest": "/api" },
-    { "src": "/(.*)", "dest": "/api" }
-  ],
-  "functions": {
-    "api/index.js": {
-      "maxDuration": 30
-    }
-  }
-}
->>>>>>> 40ce2d720d22fbb128bdba102d18bc9e6205a19d
