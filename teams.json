@@ -1,0 +1,21 @@
+[
+  {
+    "teamId": "3456",
+    "regNum": "12345",
+    "logged": true
+  },
+  {
+    "teamId": "34556",
+    "regNum": "123345",
+    "logged": true
+  },
+  {
+    "teamId": "34456",
+    "regNum": "122345",
+    "logged": true
+  },
+  {
+    "teamId": "3",
+    "regNum": "12345"
+  }
+]
