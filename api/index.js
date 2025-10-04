@@ -10,6 +10,23 @@ const path = require('path');
 // It resets whenever the serverless function restarts.
 const loggedInTeams = new Set();
 
+// Helper function to parse request body
+const parseBody = (req) => {
+    return new Promise((resolve) => {
+        let body = '';
+        req.on('data', chunk => {
+            body += chunk.toString();
+        });
+        req.on('end', () => {
+            try {
+                resolve(JSON.parse(body));
+            } catch (error) {
+                resolve(null);
+            }
+        });
+    });
+};
+
 // Vercel serverless function handler
 module.exports = async (req, res) => {
     // Enable CORS
@@ -23,35 +40,64 @@ module.exports = async (req, res) => {
     }
 
     try {
+        // Get the path from the request
+        const url = new URL(req.url, `http://${req.headers.host}`);
+        const pathname = url.pathname;
+
         // --- SERVE HTML PAGES ---
-        if (req.method === 'GET' && (req.url === '/' || req.url === '/login.html')) {
-            const loginPath = path.join(__dirname, '..', 'login.html');
-            const data = fs.readFileSync(loginPath, 'utf8');
-            res.setHeader('Content-Type', 'text/html');
-            res.status(200).send(data);
-            return;
+        if (req.method === 'GET' && (pathname === '/' || pathname === '/login.html')) {
+            try {
+                const loginPath = path.join(process.cwd(), 'login.html');
+                const data = fs.readFileSync(loginPath, 'utf8');
+                res.setHeader('Content-Type', 'text/html');
+                res.status(200).send(data);
+                return;
+            } catch (error) {
+                console.error('Error serving login page:', error);
+                res.status(500).send('Error loading login page');
+                return;
+            }
         } 
         
-        if (req.method === 'GET' && req.url === '/quiz.html') {
-            const quizPath = path.join(__dirname, '..', 'quiz.html');
-            const data = fs.readFileSync(quizPath, 'utf8');
-            res.setHeader('Content-Type', 'text/html');
-            res.status(200).send(data);
-            return;
+        if (req.method === 'GET' && pathname === '/quiz.html') {
+            try {
+                const quizPath = path.join(process.cwd(), 'quiz.html');
+                const data = fs.readFileSync(quizPath, 'utf8');
+                res.setHeader('Content-Type', 'text/html');
+                res.status(200).send(data);
+                return;
+            } catch (error) {
+                console.error('Error serving quiz page:', error);
+                res.status(500).send('Error loading quiz page');
+                return;
+            }
         } 
         
-        if (req.method === 'GET' && req.url === '/results.html') {
-            const resultsPath = path.join(__dirname, '..', 'results.html');
-            const data = fs.readFileSync(resultsPath, 'utf8');
-            res.setHeader('Content-Type', 'text/html');
-            res.status(200).send(data);
-            return;
+        if (req.method === 'GET' && pathname === '/results.html') {
+            try {
+                const resultsPath = path.join(process.cwd(), 'results.html');
+                const data = fs.readFileSync(resultsPath, 'utf8');
+                res.setHeader('Content-Type', 'text/html');
+                res.status(200).send(data);
+                return;
+            } catch (error) {
+                console.error('Error serving results page:', error);
+                res.status(500).send('Error loading results page');
+                return;
+            }
         }
 
         // --- LOGIN LOGIC ---
-        if (req.method === 'POST' && req.url === '/login') {
+        if (req.method === 'POST' && pathname === '/login') {
             try {
-                const { teamId, regNum } = req.body;
+                const body = await parseBody(req);
+                if (!body) {
+                    res.setHeader('Content-Type', 'application/json');
+                    res.status(400).json({ success: false, message: 'Invalid request format.' });
+                    return;
+                }
+
+                const { teamId, regNum } = body;
 
                 // 1. Check if this team is already logged in
                 if (loggedInTeams.has(teamId)) {
@@ -86,9 +132,9 @@ module.exports = async (req, res) => {
         }
 
         // --- SERVE QUESTIONS.JSON ---
-        if (req.method === 'GET' && req.url === '/questions') {
+        if (req.method === 'GET' && pathname === '/questions') {
             try {
-                const questionsPath = path.join(__dirname, '..', 'questions.json');
+                const questionsPath = path.join(process.cwd(), 'questions.json');
                 const data = fs.readFileSync(questionsPath, 'utf8');
                 res.setHeader('Content-Type', 'application/json');
                 res.status(200).send(data);
@@ -102,9 +148,16 @@ module.exports = async (req, res) => {
         }
 
         // --- HANDLE QUIZ SUBMISSION ---
-        if (req.method === 'POST' && req.url === '/submit-quiz') {
+        if (req.method === 'POST' && pathname === '/submit-quiz') {
             try {
-                const quizResult = req.body;
+                const body = await parseBody(req);
+                if (!body) {
+                    res.setHeader('Content-Type', 'application/json');
+                    res.status(400).json({ success: false, message: 'Invalid request format.' });
+                    return;
+                }
+
+                const quizResult = body;
                 
                 // For Vercel, we'll store scores in memory for now
                 // In production, you might want to use a database
