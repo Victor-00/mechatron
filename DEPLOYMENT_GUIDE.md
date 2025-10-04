@@ -8,6 +8,8 @@ The following issues have been resolved:
 2. **Moved HTML files to /public** - Static files now served from `/public` folder
 3. **Updated vercel.json** - Proper routing for static files and API endpoints
 4. **Removed server.js dependency** - Pure serverless setup
+5. **Fixed package.json main field** - Removed reference to deleted api/index.js
+6. **Updated vercel.json builds** - Added explicit @vercel/node for API functions
 
 ## 🚀 Deployment Steps
 
@@ -24,13 +26,21 @@ TEAM_3=your_password_for_team_3
 
 ### 2. Deploy to Vercel
 
+**Option A: Using Vercel Dashboard (Recommended)**
+1. Push your changes to GitHub/GitLab
+2. Go to Vercel Dashboard → Your Project
+3. Click "Redeploy" to force a fresh deployment
+
+**Option B: Using Vercel CLI**
 ```bash
 # Install Vercel CLI if you haven't
 npm i -g vercel
 
-# Deploy
-vercel --prod
+# Deploy with force to clear cache
+vercel --prod --force
 ```
+
+**Important:** Use `--force` flag to clear any cached deployments that might still reference the old server.js file.
 
 ## 📁 Project Structure
 

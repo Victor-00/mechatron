@@ -1,7 +1,6 @@
 {
   "name": "snakes-ladders-quiz",
   "version": "1.0.0",
-  "main": "api/index.js",
   "scripts": {
     "start": "vercel dev",
     "dev": "vercel dev",
