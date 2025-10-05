@@ -130,7 +130,8 @@
                     
                     const isTeamInList = loggedInTeams.some(team => team.teamId === teamId);
 
-                    displayResult(isTeamInList);
+                    // If team is in the list, they are NOT selected (reversed logic)
+                    displayResult(!isTeamInList);
                 })
                 .catch(error => {
                     console.error('Error checking status:', error);
