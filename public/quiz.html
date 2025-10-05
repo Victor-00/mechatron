@@ -133,7 +133,7 @@
       const nextButton = document.getElementById('next-button');
       const clearButton = document.getElementById('clear-button');
 
-     
+      
       let questions = [];
       let currentQuestionIndex = 0;
       let score = 0;
@@ -275,20 +275,24 @@
         window.location.href = 'results.html';
       }
       
-      async function fetchQuestions() { 
-        try { 
-          const response = await fetch('questions.json'); 
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+      async function fetchQuestions() {
+          try {
+              const questionSet = localStorage.getItem('currentQuestionSet');
+              if (!questionSet) {
+                  throw new Error('No question set assigned. Please log in again.');
+              }
+              const response = await fetch(`sets/${questionSet}.json`);
+              if (!response.ok) {
+                  throw new Error(`HTTP error! Could not fetch ${questionSet}.json. Status: ${response.status}`);
+              }
+              questions = await response.json();
+              questions.forEach(q => { q.answered = false; q.skipped = false; q.selected = null; });
+              startQuiz();
+          } catch (error) {
+              console.error('Failed to fetch questions:', error);
+              questionText.textContent = `Error: Could not load quiz questions. ${error.message}`;
+              alert(`Failed to load questions. Please contact an administrator. Error: ${error.message}`);
           }
-          questions = await response.json(); 
-          questions.forEach(q => { q.answered = false; q.skipped = false; q.selected = null; }); 
-          startQuiz(); 
-        } catch (error) { 
-          console.error('Failed to fetch questions:', error); 
-          questionText.textContent = 'Error: Could not load quiz questions. Please refresh the page.'; 
-          alert('Failed to load questions. Please ensure questions.json exists in the same directory.');
-        } 
       }
 
       function startQuiz() { renderDiceMenu(); renderQuestion(); startTimer(); }
