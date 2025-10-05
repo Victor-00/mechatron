@@ -50,12 +50,22 @@
             transform: scale(1.05);
         }
 
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         button.danger {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         }
 
         button.success {
             background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        button.warning {
+            background: linear-gradient(135deg, #ffa500 0%, #ff6347 100%);
         }
 
         .stats {
@@ -107,7 +117,7 @@
             font-weight: 600;
         }
 
-        tr:hover {
+        tbody tr:hover {
             background: #f5f5f5;
         }
 
@@ -142,6 +152,27 @@
             flex-wrap: wrap;
         }
 
+        .checkbox-cell {
+            text-align: center;
+            width: 50px;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .selection-info {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            font-weight: 600;
+            color: #667eea;
+            margin-right: 10px;
+        }
+
         @media (max-width: 768px) {
             .teams-table {
                 padding: 20px;
@@ -153,6 +184,14 @@
 
             th, td {
                 padding: 10px;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
             }
         }
     </style>
@@ -166,6 +205,10 @@
                 <div class="stat-number" id="total-teams">0</div>
                 <div class="stat-label">Logged In Teams</div>
             </div>
+            <div class="stat-card">
+                <div class="stat-number" id="selected-count">0</div>
+                <div class="stat-label">Selected Teams</div>
+            </div>
         </div>
 
         <div class="teams-table">
@@ -174,15 +217,18 @@
             
             <div class="controls">
                 <button class="success" onclick="refreshData()">🔄 Refresh</button>
+                <button class="warning" id="remove-selected-btn" onclick="removeSelectedTeams()" disabled>🗑️ Remove Selected</button>
                 <button class="danger" onclick="resetAllLogins()">🗑️ Reset All Logins</button>
             </div>
 
             <table>
                 <thead>
                     <tr>
+                        <th class="checkbox-cell">
+                            <input type="checkbox" id="select-all" onchange="toggleSelectAll()">
+                        </th>
                         <th>Team ID</th>
                         <th>Login Time</th>
-                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="teams-tbody">
@@ -195,6 +241,8 @@
     </div>
 
     <script>
+        let allTeams = [];
+
         // Load data on page load
         document.addEventListener('DOMContentLoaded', function() {
             loadData();
@@ -217,28 +265,114 @@
                     return;
                 }
 
-                const teams = data.loggedInTeams || [];
-                document.getElementById('total-teams').textContent = teams.length;
+                allTeams = data.loggedInTeams || [];
+                document.getElementById('total-teams').textContent = allTeams.length;
+                updateSelectedCount();
 
                 const tbody = document.getElementById('teams-tbody');
-                if (teams.length === 0) {
+                if (allTeams.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">No teams have logged in yet</td></tr>';
                     return;
                 }
 
-                tbody.innerHTML = teams.map(team => `
+                tbody.innerHTML = allTeams.map(team => `
                     <tr>
+                        <td class="checkbox-cell">
+                            <input type="checkbox" class="team-checkbox" value="${team.teamId}" onchange="updateSelectedCount()">
+                        </td>
                         <td>${team.teamId}</td>
                         <td>${new Date(team.loginTime).toLocaleString()}</td>
-                        <td>
-                            <button class="action-btn danger" onclick="removeTeam('${team.teamId}')">Remove</button>
-                        </td>
                     </tr>
                 `).join('');
             })
             .catch(error => {
                 console.error('Error loading data:', error);
                 showMessage('Error loading data', 'error');
+            });
+        }
+
+        function toggleSelectAll() {
+            const selectAllCheckbox = document.getElementById('select-all');
+            const teamCheckboxes = document.querySelectorAll('.team-checkbox');
+            
+            teamCheckboxes.forEach(checkbox => {
+                checkbox.checked = selectAllCheckbox.checked;
+            });
+            
+            updateSelectedCount();
+        }
+
+        function updateSelectedCount() {
+            const selectedCheckboxes = document.querySelectorAll('.team-checkbox:checked');
+            const count = selectedCheckboxes.length;
+            
+            document.getElementById('selected-count').textContent = count;
+            
+            const removeBtn = document.getElementById('remove-selected-btn');
+            removeBtn.disabled = count === 0;
+            
+            // Update select-all checkbox state
+            const allCheckboxes = document.querySelectorAll('.team-checkbox');
+            const selectAllCheckbox = document.getElementById('select-all');
+            if (allCheckboxes.length > 0) {
+                selectAllCheckbox.checked = count === allCheckboxes.length;
+            }
+        }
+
+        function getSelectedTeamIds() {
+            const selectedCheckboxes = document.querySelectorAll('.team-checkbox:checked');
+            return Array.from(selectedCheckboxes).map(cb => cb.value);
+        }
+
+        function removeSelectedTeams() {
+            const selectedTeamIds = getSelectedTeamIds();
+            
+            if (selectedTeamIds.length === 0) {
+                showMessage('No teams selected', 'error');
+                return;
+            }
+
+            const confirmMsg = selectedTeamIds.length === 1 
+                ? `Remove team ${selectedTeamIds[0]}? They will be able to login again.`
+                : `Remove ${selectedTeamIds.length} selected teams? They will be able to login again.`;
+
+            if (!confirm(confirmMsg)) {
+                return;
+            }
+
+            // Remove teams one by one
+            let successCount = 0;
+            let failCount = 0;
+
+            const removePromises = selectedTeamIds.map(teamId => 
+                fetch('/admin/remove-team', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ teamId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        successCount++;
+                    } else {
+                        failCount++;
+                    }
+                })
+                .catch(() => {
+                    failCount++;
+                })
+            );
+
+            Promise.all(removePromises).then(() => {
+                if (successCount > 0) {
+                    showMessage(`Successfully removed ${successCount} team(s)`, 'success');
+                }
+                if (failCount > 0) {
+                    showMessage(`Failed to remove ${failCount} team(s)`, 'error');
+                }
+                loadData();
             });
         }
 
@@ -270,33 +404,6 @@
             .catch(error => {
                 console.error('Error resetting logins:', error);
                 showMessage('Error resetting logins', 'error');
-            });
-        }
-
-        function removeTeam(teamId) {
-            if (!confirm(`Remove team ${teamId}? They will be able to login again.`)) {
-                return;
-            }
-
-            fetch('/admin/remove-team', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ teamId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showMessage(`Team ${teamId} removed successfully`);
-                    loadData();
-                } else {
-                    showMessage('Failed to remove team', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error removing team:', error);
-                showMessage('Error removing team', 'error');
             });
         }
     </script>
