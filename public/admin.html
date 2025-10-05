@@ -20,7 +20,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
@@ -66,6 +66,11 @@
 
         button.warning {
             background: linear-gradient(135deg, #ffa500 0%, #ff6347 100%);
+        }
+
+        button.primary {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            color: #333;
         }
 
         .stats {
@@ -157,6 +162,19 @@
             width: 50px;
         }
 
+        .rank-cell {
+            text-align: center;
+            width: 60px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .marks-cell {
+            text-align: center;
+            width: 100px;
+            font-weight: 600;
+        }
+
         input[type="checkbox"] {
             width: 18px;
             height: 18px;
@@ -193,6 +211,7 @@
         @media (max-width: 768px) {
             .teams-table {
                 padding: 20px;
+                overflow-x: auto;
             }
 
             table {
@@ -250,19 +269,27 @@
                 <button class="warning action-btn" onclick="selectSpecificTeams()">🎯 Select Teams</button>
             </div>
 
+            <div class="controls" style="align-items: center;">
+                <input type="number" id="top-n" placeholder="Top N candidates" min="1" style="width: 200px;">
+                <button class="primary action-btn" onclick="selectTopN()">🏆 Select Top N</button>
+            </div>
+
             <table>
                 <thead>
                     <tr>
                         <th class="checkbox-cell">
                             <input type="checkbox" id="select-all" onchange="toggleSelectAll()">
                         </th>
+                        <th class="rank-cell">Rank</th>
                         <th>Team ID</th>
+                        <th class="marks-cell">Marks</th>
                         <th>Login Time</th>
+                        <th>End Time</th>
                     </tr>
                 </thead>
                 <tbody id="teams-tbody">
                     <tr>
-                        <td colspan="3" style="text-align: center;">Loading...</td>
+                        <td colspan="6" style="text-align: center;">Loading...</td>
                     </tr>
                 </tbody>
             </table>
@@ -315,23 +342,41 @@
                 }
 
                 allTeams = data.loggedInTeams || [];
+                
+                // Sort teams by marks (descending), then by endTime (ascending - earlier is better)
+                allTeams.sort((a, b) => {
+                    // First compare marks (higher is better)
+                    if (b.marks !== a.marks) {
+                        return b.marks - a.marks;
+                    }
+                    // If marks are equal, compare endTime (earlier is better)
+                    const aTime = a.endTime ? new Date(a.endTime).getTime() : Infinity;
+                    const bTime = b.endTime ? new Date(b.endTime).getTime() : Infinity;
+                    return aTime - bTime;
+                });
+                
                 document.getElementById('total-teams').textContent = allTeams.length;
                 updateSelectedCount();
 
                 const tbody = document.getElementById('teams-tbody');
                 if (allTeams.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">No teams have logged in yet</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No teams have logged in yet</td></tr>';
                     return;
                 }
 
-                tbody.innerHTML = allTeams.map(team => {
+                tbody.innerHTML = allTeams.map((team, index) => {
+                    const endTime = team.endTime ? new Date(team.endTime).toLocaleString() : 'Not completed';
+                    const marks = team.marks !== undefined ? team.marks : 'N/A';
                     return `
                     <tr>
                         <td class="checkbox-cell">
-                            <input type="checkbox" class="team-checkbox" value="${team.teamId}" onchange="updateSelectedCount()">
+                            <input type="checkbox" class="team-checkbox" value="${team.teamId}" data-rank="${index + 1}" onchange="updateSelectedCount()">
                         </td>
+                        <td class="rank-cell">#${index + 1}</td>
                         <td>${team.teamId}</td>
+                        <td class="marks-cell">${marks}</td>
                         <td>${new Date(team.loginTime).toLocaleString()}</td>
+                        <td>${endTime}</td>
                     </tr>
                     `;
                 }).join('');
@@ -599,6 +644,41 @@
             // Clear inputs
             numTeamsInput.value = '';
             teamIdsInput.value = '';
+        }
+
+        function selectTopN() {
+            const topNInput = document.getElementById('top-n');
+            const n = parseInt(topNInput.value);
+            
+            if (!n || n < 1) {
+                showMessage('Please enter a valid number', 'error');
+                return;
+            }
+            
+            const allCheckboxes = document.querySelectorAll('.team-checkbox');
+            
+            if (n > allCheckboxes.length) {
+                showMessage(`Only ${allCheckboxes.length} teams available. Selecting all.`, 'error');
+            }
+            
+            // Uncheck all first
+            allCheckboxes.forEach(cb => cb.checked = false);
+            document.getElementById('select-all').checked = false;
+            
+            // Select top N (they are already sorted by rank)
+            let selectedCount = 0;
+            allCheckboxes.forEach((checkbox, index) => {
+                if (index < n) {
+                    checkbox.checked = true;
+                    selectedCount++;
+                }
+            });
+            
+            updateSelectedCount();
+            showMessage(`Selected top ${selectedCount} candidate(s)`, 'success');
+            
+            // Clear input
+            topNInput.value = '';
         }
     </script>
 </body>
