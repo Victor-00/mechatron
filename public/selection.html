@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selection Status</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --success-color: #22c55e;
+            --danger-color: #ef4444;
+            --text-dark: #1f2937;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5d742 0%, #4ade80 100%);
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .status-container {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 50px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .status-heading {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-top: 0;
+            margin-bottom: 20px;
+            transition: color 0.3s ease;
+        }
+
+        .status-message {
+            font-size: 1.2rem;
+            color: #4b5563;
+        }
+
+        .team-id-display {
+            font-size: 1rem;
+            color: #6b7280;
+            margin-top: 30px;
+            font-weight: 600;
+        }
+
+        /* Status-specific styling */
+        .selected .status-heading {
+            color: var(--success-color);
+        }
+
+        .not-selected .status-heading {
+            color: var(--danger-color);
+        }
+        
+        #loading-message {
+            font-style: italic;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="status-container" class="status-container">
+        <h2 id="status-heading" class="status-heading">Checking Status...</h2>
+        <p id="status-message" class="status-message">Please wait while we verify your team's result.</p>
+        <p id="team-id-display" class="team-id-display"></p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const teamId = localStorage.getItem('currentTeamId');
+
+            const container = document.getElementById('status-container');
+            const heading = document.getElementById('status-heading');
+            const message = document.getElementById('status-message');
+            const teamIdDisplay = document.getElementById('team-id-display');
+
+            if (!teamId) {
+                heading.textContent = 'Error';
+                message.textContent = 'Could not find your Team ID. Please log in again.';
+                container.classList.add('not-selected');
+                return;
+            }
+
+            teamIdDisplay.textContent = `Team ID: ${teamId}`;
+
+            // Fetch the list of disqualified teams from the specified URL.
+            fetch('https://mechatron.onrender.com/admin.html')
+                .then(response => {
+                    if (response.status === 404) {
+                        // If the file doesn't exist, no teams have login data, so this team is selected.
+                        displayResult(true);
+                        return null; // Stop the promise chain
+                    }
+                    if (!response.ok) {
+                        // For other server errors (like 500), throw an error.
+                        throw new Error('Server error while checking status.');
+                    }
+                    return response.json(); // If response is OK, parse it as JSON.
+                })
+                .then(loginData => {
+                    if (loginData === null) {
+                        return; // This case was handled by the 404 check.
+                    }
+
+                    // Assuming loginData is an array of objects like [{ teamId: "Team_A" }, ...]
+                    const isDisqualified = loginData.some(team => team.teamId === teamId);
+                    
+                    // If the team is disqualified, they are not selected.
+                    displayResult(!isDisqualified);
+                })
+                .catch(error => {
+                    // This catches network errors or the error thrown above.
+                    console.error('Error checking selection status:', error);
+                    heading.textContent = 'Error';
+                    message.textContent = 'Could not determine your status at this time. Please check your connection or contact support.';
+                    container.classList.add('not-selected');
+                });
+
+            function displayResult(isSelected) {
+                if (isSelected) {
+                    container.classList.add('selected');
+                    heading.textContent = 'Congratulations!';
+                    message.innerHTML = 'You have been <strong>selected</strong> for the next round.';
+                } else {
+                    container.classList.add('not-selected');
+                    heading.textContent = 'Thank You For Your Participation';
+                    message.innerHTML = 'You have <strong>not been selected</strong> for the next round. We wish you the best in your future endeavors.';
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>
+
