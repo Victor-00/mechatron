@@ -258,10 +258,30 @@
 
         function loadData() {
             fetch('/api/logged-teams')
-            .then(response => response.json())
-            .then(data => {
+            .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers.get('content-type'));
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                return response.text();
+            })
+            .then(text => {
+                console.log('Response text:', text);
+                
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    console.error('Failed to parse JSON:', e);
+                    console.error('Response was:', text);
+                    throw new Error('Invalid JSON response from server');
+                }
+                
                 if (!data.success) {
-                    showMessage('Failed to load data', 'error');
+                    showMessage('Failed to load data: ' + (data.message || 'Unknown error'), 'error');
                     return;
                 }
 
@@ -287,7 +307,7 @@
             })
             .catch(error => {
                 console.error('Error loading data:', error);
-                showMessage('Error loading data', 'error');
+                showMessage('Error loading data: ' + error.message, 'error');
             });
         }
 
@@ -308,8 +328,8 @@
             
             document.getElementById('selected-count').textContent = count;
             
-            const removeBtn = document.getElementById('remove-selected-btn');
-            removeBtn.disabled = count === 0;
+            const keepBtn = document.getElementById('keep-selected-btn');
+            keepBtn.disabled = count === 0;
             
             // Update select-all checkbox state
             const allCheckboxes = document.querySelectorAll('.team-checkbox');
@@ -324,27 +344,39 @@
             return Array.from(selectedCheckboxes).map(cb => cb.value);
         }
 
-        function removeSelectedTeams() {
+        function keepSelectedTeams() {
             const selectedTeamIds = getSelectedTeamIds();
             
             if (selectedTeamIds.length === 0) {
-                showMessage('No teams selected', 'error');
+                showMessage('No teams selected to keep', 'error');
+                return;
+            }
+
+            // Get all team IDs from checkboxes
+            const allCheckboxes = document.querySelectorAll('.team-checkbox');
+            const allTeamIds = Array.from(allCheckboxes).map(cb => cb.value);
+            
+            // Get teams to remove (all teams NOT selected)
+            const teamsToRemove = allTeamIds.filter(teamId => !selectedTeamIds.includes(teamId));
+
+            if (teamsToRemove.length === 0) {
+                showMessage('All teams are selected. Nothing to remove.', 'error');
                 return;
             }
 
             const confirmMsg = selectedTeamIds.length === 1 
-                ? `Remove team ${selectedTeamIds[0]}? They will be able to login again.`
-                : `Remove ${selectedTeamIds.length} selected teams? They will be able to login again.`;
+                ? `Keep only team ${selectedTeamIds[0]} and remove ${teamsToRemove.length} other team(s)?`
+                : `Keep ${selectedTeamIds.length} selected teams and remove ${teamsToRemove.length} other team(s)?`;
 
             if (!confirm(confirmMsg)) {
                 return;
             }
 
-            // Remove teams one by one
+            // Remove unselected teams
             let successCount = 0;
             let failCount = 0;
 
-            const removePromises = selectedTeamIds.map(teamId => 
+            const removePromises = teamsToRemove.map(teamId => 
                 fetch('/admin/remove-team', {
                     method: 'POST',
                     headers: {
@@ -367,7 +399,7 @@
 
             Promise.all(removePromises).then(() => {
                 if (successCount > 0) {
-                    showMessage(`Successfully removed ${successCount} team(s)`, 'success');
+                    showMessage(`Successfully kept ${selectedTeamIds.length} team(s) and removed ${successCount} team(s)`, 'success');
                 }
                 if (failCount > 0) {
                     showMessage(`Failed to remove ${failCount} team(s)`, 'error');

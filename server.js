@@ -119,15 +119,18 @@ function markTeamAsLoggedIn(teamId) {
 app.get('/api/logged-teams', (req, res) => {
   try {
     const tracker = readLoginTracker();
+    res.setHeader('Content-Type', 'application/json');
     res.json({
       success: true,
       loggedInTeams: tracker.loggedInTeams || []
     });
   } catch (error) {
     console.error('Error fetching logged teams:', error);
+    res.setHeader('Content-Type', 'application/json');
     res.status(500).json({
       success: false,
-      message: 'Error fetching logged in teams'
+      message: 'Error fetching logged in teams',
+      error: error.message
     });
   }
 });
