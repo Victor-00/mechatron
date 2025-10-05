@@ -558,6 +558,7 @@
             loginMessage.classList.add('success');
             loginMessage.classList.remove('error');
             localStorage.setItem('currentTeamId', teamId);
+            localStorage.setItem('currentQuestionSet', data.questionSet);
             window.location.href = 'quiz.html';
           } else {
             loginMessage.textContent = 'Login failed: ' + data.message;

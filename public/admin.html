@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -72,7 +73,7 @@
             background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
             color: #333;
         }
-        
+
         button.publish {
             background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
         }
@@ -114,7 +115,8 @@
             border-collapse: collapse;
         }
 
-        th, td {
+        th,
+        td {
             padding: 15px;
             text-align: left;
             border-bottom: 1px solid #e0e0e0;
@@ -222,7 +224,8 @@
                 font-size: 14px;
             }
 
-            th, td {
+            th,
+            td {
                 padding: 10px;
             }
 
@@ -241,10 +244,11 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>📊 Login Management Dashboard</h1>
-        
+
         <div class="stats">
             <div class="stat-card">
                 <div class="stat-number" id="total-teams">0</div>
@@ -255,15 +259,41 @@
                 <div class="stat-label">Selected Teams</div>
             </div>
         </div>
+        <!-- Add this after the stats section and before the teams-table div -->
+        <div class="teams-table" style="margin-bottom: 20px;">
+            <h2>🎮 Quiz Level Control</h2>
+            <div id="level-message"></div>
 
+            <div class="controls" style="align-items: center;">
+                <label style="font-weight: 600; margin-right: 10px;">Current Level:</label>
+                <select id="level-selector"
+                    style="padding: 12px; border: 2px solid #667eea; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 16px; min-width: 150px;">
+                    <option value="1">Level 1 (Sets 1A/1B)</option>
+                    <option value="2">Level 2 (Sets 2A/2B)</option>
+                    <option value="3">Level 3 (Sets 3A/3B)</option>
+                    <option value="4">Level 4 (Sets 4A/4B)</option>
+                    <option value="5">Level 5 (Sets 5A/5B)</option>
+                    <option value="6">Level 6 (Sets 6A/6B)</option>
+                </select>
+                <button class="primary" onclick="updateLevel()">✅ Update Level</button>
+            </div>
+
+            <div style="margin-top: 15px; padding: 15px; background: #f0f0f0; border-radius: 10px;">
+                <strong>📝 Note:</strong> Teams with <strong>even</strong> last digit in registration number get Set
+                <strong>A</strong>,
+                teams with <strong>odd</strong> last digit get Set <strong>B</strong>.
+            </div>
+        </div>
         <div class="teams-table">
             <h2>Logged In Teams</h2>
             <div id="message"></div>
-            
+
             <div class="controls">
                 <button class="success" onclick="refreshData()">🔄 Refresh</button>
-                <button class="success" id="keep-selected-btn" onclick="keepSelectedTeams()" disabled>✅ Keep Selected Only</button>
-                <button class="danger" id="delete-selected-btn" onclick="deleteSelectedTeams()" disabled>🗑️ Delete Selected</button>
+                <button class="success" id="keep-selected-btn" onclick="keepSelectedTeams()" disabled>✅ Keep Selected
+                    Only</button>
+                <button class="danger" id="delete-selected-btn" onclick="deleteSelectedTeams()" disabled>🗑️ Delete
+                    Selected</button>
                 <button class="danger" onclick="resetAllLogins()">🗑️ Reset All Logins</button>
                 <button class="publish" onclick="publishResults()">🚀 Publish Results & Redirect Users</button>
             </div>
@@ -304,7 +334,60 @@
     <script>
         let allTeams = [];
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
+            loadData();
+        });
+        // Add to the script section in admin.html
+
+        function loadCurrentLevel() {
+            fetch('/api/quiz-config')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('level-selector').value = data.currentLevel || 1;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading level:', error);
+                });
+        }
+
+        function updateLevel() {
+            const level = parseInt(document.getElementById('level-selector').value);
+
+            if (!confirm(`Set quiz to Level ${level}? New logins will receive sets ${level}A or ${level}B based on their registration number.`)) {
+                return;
+            }
+
+            fetch('/admin/set-level', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ level })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const levelMessage = document.getElementById('level-message');
+                    if (data.success) {
+                        levelMessage.innerHTML = `<div class="message success">Level updated to ${level} successfully!</div>`;
+                        setTimeout(() => {
+                            levelMessage.innerHTML = '';
+                        }, 3000);
+                    } else {
+                        levelMessage.innerHTML = `<div class="message error">Failed to update level: ${data.message}</div>`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating level:', error);
+                    const levelMessage = document.getElementById('level-message');
+                    levelMessage.innerHTML = '<div class="message error">Error updating level</div>';
+                });
+        }
+
+        // Call this when page loads
+        document.addEventListener('DOMContentLoaded', function () {
+            loadCurrentLevel();
             loadData();
         });
 
@@ -318,57 +401,57 @@
 
         function loadData() {
             fetch('/api/logged-teams')
-            .then(response => {
-                console.log('Response status:', response.status);
-                console.log('Response headers:', response.headers.get('content-type'));
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                return response.text();
-            })
-            .then(text => {
-                console.log('Response text:', text);
-                
-                let data;
-                try {
-                    data = JSON.parse(text);
-                } catch (e) {
-                    console.error('Failed to parse JSON:', e);
-                    console.error('Response was:', text);
-                    throw new Error('Invalid JSON response from server');
-                }
-                
-                if (!data.success) {
-                    showMessage('Failed to load data: ' + (data.message || 'Unknown error'), 'error');
-                    return;
-                }
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    console.log('Response headers:', response.headers.get('content-type'));
 
-                allTeams = data.loggedInTeams || [];
-                
-                allTeams.sort((a, b) => {
-                    if (b.marks !== a.marks) {
-                        return b.marks - a.marks;
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
                     }
-                    const aTime = a.endTime ? new Date(a.endTime).getTime() : Infinity;
-                    const bTime = b.endTime ? new Date(b.endTime).getTime() : Infinity;
-                    return aTime - bTime;
-                });
-                
-                document.getElementById('total-teams').textContent = allTeams.length;
-                updateSelectedCount();
 
-                const tbody = document.getElementById('teams-tbody');
-                if (allTeams.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No teams have logged in yet</td></tr>';
-                    return;
-                }
+                    return response.text();
+                })
+                .then(text => {
+                    console.log('Response text:', text);
 
-                tbody.innerHTML = allTeams.map((team, index) => {
-                    const endTime = team.endTime ? new Date(team.endTime).toLocaleString() : 'Not completed';
-                    const marks = team.marks !== undefined ? team.marks : 'N/A';
-                    return `
+                    let data;
+                    try {
+                        data = JSON.parse(text);
+                    } catch (e) {
+                        console.error('Failed to parse JSON:', e);
+                        console.error('Response was:', text);
+                        throw new Error('Invalid JSON response from server');
+                    }
+
+                    if (!data.success) {
+                        showMessage('Failed to load data: ' + (data.message || 'Unknown error'), 'error');
+                        return;
+                    }
+
+                    allTeams = data.loggedInTeams || [];
+
+                    allTeams.sort((a, b) => {
+                        if (b.marks !== a.marks) {
+                            return b.marks - a.marks;
+                        }
+                        const aTime = a.endTime ? new Date(a.endTime).getTime() : Infinity;
+                        const bTime = b.endTime ? new Date(b.endTime).getTime() : Infinity;
+                        return aTime - bTime;
+                    });
+
+                    document.getElementById('total-teams').textContent = allTeams.length;
+                    updateSelectedCount();
+
+                    const tbody = document.getElementById('teams-tbody');
+                    if (allTeams.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No teams have logged in yet</td></tr>';
+                        return;
+                    }
+
+                    tbody.innerHTML = allTeams.map((team, index) => {
+                        const endTime = team.endTime ? new Date(team.endTime).toLocaleString() : 'Not completed';
+                        const marks = team.marks !== undefined ? team.marks : 'N/A';
+                        return `
                     <tr>
                         <td class="checkbox-cell">
                             <input type="checkbox" class="team-checkbox" value="${team.teamId}" data-rank="${index + 1}" onchange="updateSelectedCount()">
@@ -380,36 +463,36 @@
                         <td>${endTime}</td>
                     </tr>
                     `;
-                }).join('');
-            })
-            .catch(error => {
-                console.error('Error loading data:', error);
-                showMessage('Error loading data: ' + error.message, 'error');
-            });
+                    }).join('');
+                })
+                .catch(error => {
+                    console.error('Error loading data:', error);
+                    showMessage('Error loading data: ' + error.message, 'error');
+                });
         }
 
         function toggleSelectAll() {
             const selectAllCheckbox = document.getElementById('select-all');
             const teamCheckboxes = document.querySelectorAll('.team-checkbox');
-            
+
             teamCheckboxes.forEach(checkbox => {
                 checkbox.checked = selectAllCheckbox.checked;
             });
-            
+
             updateSelectedCount();
         }
 
         function updateSelectedCount() {
             const selectedCheckboxes = document.querySelectorAll('.team-checkbox:checked');
             const count = selectedCheckboxes.length;
-            
+
             document.getElementById('selected-count').textContent = count;
-            
+
             const keepBtn = document.getElementById('keep-selected-btn');
             const deleteBtn = document.getElementById('delete-selected-btn');
             keepBtn.disabled = count === 0;
             deleteBtn.disabled = count === 0;
-            
+
             const allCheckboxes = document.querySelectorAll('.team-checkbox');
             const selectAllCheckbox = document.getElementById('select-all');
             if (allCheckboxes.length > 0) {
@@ -424,7 +507,7 @@
 
         function keepSelectedTeams() {
             const selectedTeamIds = getSelectedTeamIds();
-            
+
             if (selectedTeamIds.length === 0) {
                 showMessage('No teams selected to keep', 'error');
                 return;
@@ -432,7 +515,7 @@
 
             const allCheckboxes = document.querySelectorAll('.team-checkbox');
             const allTeamIds = Array.from(allCheckboxes).map(cb => cb.value);
-            
+
             const teamsToRemove = allTeamIds.filter(teamId => !selectedTeamIds.includes(teamId));
 
             if (teamsToRemove.length === 0) {
@@ -440,7 +523,7 @@
                 return;
             }
 
-            const confirmMsg = selectedTeamIds.length === 1 
+            const confirmMsg = selectedTeamIds.length === 1
                 ? `Keep only team ${selectedTeamIds[0]} and remove ${teamsToRemove.length} other team(s)?`
                 : `Keep ${selectedTeamIds.length} selected teams and remove ${teamsToRemove.length} other team(s)?`;
 
@@ -451,7 +534,7 @@
             let successCount = 0;
             let failCount = 0;
 
-            const removePromises = teamsToRemove.map(teamId => 
+            const removePromises = teamsToRemove.map(teamId =>
                 fetch('/admin/remove-team', {
                     method: 'POST',
                     headers: {
@@ -459,17 +542,17 @@
                     },
                     body: JSON.stringify({ teamId })
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        successCount++;
-                    } else {
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            successCount++;
+                        } else {
+                            failCount++;
+                        }
+                    })
+                    .catch(() => {
                         failCount++;
-                    }
-                })
-                .catch(() => {
-                    failCount++;
-                })
+                    })
             );
 
             Promise.all(removePromises).then(() => {
@@ -487,7 +570,7 @@
             showMessage('Refreshing data...');
             loadData();
         }
-        
+
         function publishResults() {
             if (!confirm('Are you sure you want to publish the results? This will redirect all users from the results page to the selection status page.')) {
                 return;
@@ -499,18 +582,18 @@
                     'Content-Type': 'application/json'
                 }
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showMessage('Results published successfully! Users will be redirected.', 'success');
-                } else {
-                    showMessage('Failed to publish results: ' + (data.message || 'Unknown error'), 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error publishing results:', error);
-                showMessage('Error publishing results: ' + error.message, 'error');
-            });
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage('Results published successfully! Users will be redirected.', 'success');
+                    } else {
+                        showMessage('Failed to publish results: ' + (data.message || 'Unknown error'), 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error publishing results:', error);
+                    showMessage('Error publishing results: ' + error.message, 'error');
+                });
         }
 
         function resetAllLogins() {
@@ -524,30 +607,30 @@
                     'Content-Type': 'application/json'
                 }
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showMessage('All logins reset successfully');
-                    loadData();
-                } else {
-                    showMessage('Failed to reset logins', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error resetting logins:', error);
-                showMessage('Error resetting logins', 'error');
-            });
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage('All logins reset successfully');
+                        loadData();
+                    } else {
+                        showMessage('Failed to reset logins', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error resetting logins:', error);
+                    showMessage('Error resetting logins', 'error');
+                });
         }
 
         function deleteSelectedTeams() {
             const selectedTeamIds = getSelectedTeamIds();
-            
+
             if (selectedTeamIds.length === 0) {
                 showMessage('No teams selected to delete', 'error');
                 return;
             }
 
-            const confirmMsg = selectedTeamIds.length === 1 
+            const confirmMsg = selectedTeamIds.length === 1
                 ? `Delete team ${selectedTeamIds[0]}?`
                 : `Delete ${selectedTeamIds.length} selected team(s)?`;
 
@@ -558,7 +641,7 @@
             let successCount = 0;
             let failCount = 0;
 
-            const deletePromises = selectedTeamIds.map(teamId => 
+            const deletePromises = selectedTeamIds.map(teamId =>
                 fetch('/admin/remove-team', {
                     method: 'POST',
                     headers: {
@@ -566,17 +649,17 @@
                     },
                     body: JSON.stringify({ teamId })
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        successCount++;
-                    } else {
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            successCount++;
+                        } else {
+                            failCount++;
+                        }
+                    })
+                    .catch(() => {
                         failCount++;
-                    }
-                })
-                .catch(() => {
-                    failCount++;
-                })
+                    })
             );
 
             Promise.all(deletePromises).then(() => {
@@ -593,48 +676,48 @@
         function selectSpecificTeams() {
             const numTeamsInput = document.getElementById('num-teams');
             const teamIdsInput = document.getElementById('team-ids');
-            
+
             const numTeams = parseInt(numTeamsInput.value);
             const teamIdsStr = teamIdsInput.value.trim();
-            
+
             if (!numTeams || numTeams < 1) {
                 showMessage('Please enter a valid number of teams', 'error');
                 return;
             }
-            
+
             if (!teamIdsStr) {
                 showMessage('Please enter team ID numbers', 'error');
                 return;
             }
-            
+
             const teamIdNumbers = teamIdsStr.split(',').map(id => id.trim()).filter(id => id.length > 0);
-            
+
             if (teamIdNumbers.length === 0) {
                 showMessage('Please enter valid team ID numbers', 'error');
                 return;
             }
-            
+
             if (teamIdNumbers.length !== numTeams) {
                 showMessage(`Number of teams (${numTeams}) doesn't match number of IDs entered (${teamIdNumbers.length})`, 'error');
                 return;
             }
-            
+
             const teamIds = teamIdNumbers;
-            
+
             console.log('Looking for team IDs:', teamIds);
-            
+
             const allCheckboxes = document.querySelectorAll('.team-checkbox');
             console.log('Available team checkboxes:');
             allCheckboxes.forEach(cb => {
                 console.log('  - Checkbox value:', cb.value);
             });
-            
+
             allCheckboxes.forEach(cb => cb.checked = false);
             document.getElementById('select-all').checked = false;
-            
+
             let foundCount = 0;
             let notFoundTeams = [];
-            
+
             teamIds.forEach((teamId, index) => {
                 console.log(`Searching for: "${teamId}"`);
                 const checkbox = document.querySelector(`.team-checkbox[value="${teamId}"]`);
@@ -646,9 +729,9 @@
                     notFoundTeams.push(teamIdNumbers[index]);
                 }
             });
-            
+
             updateSelectedCount();
-            
+
             if (foundCount === teamIds.length) {
                 showMessage(`Successfully selected ${foundCount} team(s)`, 'success');
             } else if (foundCount > 0) {
@@ -656,7 +739,7 @@
             } else {
                 showMessage(`None of the specified teams were found in the logged-in teams list`, 'error');
             }
-            
+
             numTeamsInput.value = '';
             teamIdsInput.value = '';
         }
@@ -664,21 +747,21 @@
         function selectTopN() {
             const topNInput = document.getElementById('top-n');
             const n = parseInt(topNInput.value);
-            
+
             if (!n || n < 1) {
                 showMessage('Please enter a valid number', 'error');
                 return;
             }
-            
+
             const allCheckboxes = document.querySelectorAll('.team-checkbox');
-            
+
             if (n > allCheckboxes.length) {
                 showMessage(`Only ${allCheckboxes.length} teams available. Selecting all.`, 'error');
             }
-            
+
             allCheckboxes.forEach(cb => cb.checked = false);
             document.getElementById('select-all').checked = false;
-            
+
             let selectedCount = 0;
             allCheckboxes.forEach((checkbox, index) => {
                 if (index < n) {
@@ -686,12 +769,13 @@
                     selectedCount++;
                 }
             });
-            
+
             updateSelectedCount();
             showMessage(`Selected top ${selectedCount} candidate(s)`, 'success');
-            
+
             topNInput.value = '';
         }
     </script>
 </body>
+
 </html>
