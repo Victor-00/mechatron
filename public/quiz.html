@@ -356,6 +356,8 @@
       function nextQuestion() { const next = questions.findIndex((q, i) => !q.answered && !q.skipped && i > currentQuestionIndex); if (next !== -1) { currentQuestionIndex = next; renderQuestion(); } else { endQuiz(); } }
       function renderDiceMenu() { diceMenu.innerHTML = ''; questions.forEach((q, i) => { const dice = document.createElement('div'); dice.classList.add('menu-dice'); dice.id = `dice-${i}`; dice.textContent = i + 1; dice.addEventListener('click', () => { currentQuestionIndex = i; renderQuestion(); }); diceMenu.appendChild(dice); }); }
       function updateDiceStatus() { questions.forEach((q, i) => { const dice = document.getElementById(`dice-${i}`); dice.classList.remove('answered', 'skipped'); if (q.answered) dice.classList.add('answered'); else if (q.skipped) dice.classList.add('skipped'); }); }
+      
+      // FIXED: Correctly calculates score based on 'correctAnswerIndex' and 'marks'
       function calculateScore() {
         score = questions.reduce((acc, q) => {
             if (q.selected === q.correctAnswerIndex) {
@@ -364,6 +366,7 @@
             return acc;
         }, 0);
       }
+      
       skipButton.addEventListener('click', skipQuestion); nextButton.addEventListener('click', nextQuestion); clearButton.addEventListener('click', clearChoice);
     });
   </script>
