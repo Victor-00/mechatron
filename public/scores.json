@@ -182,5 +182,21 @@
     "answeredQuestions": 1,
     "totalQuestions": 5,
     "status": "Terminated - Cheating Detected"
+  },
+  {
+    "teamId": "3456",
+    "score": 0,
+    "timeTaken": 0,
+    "answeredQuestions": 0,
+    "totalQuestions": 5,
+    "status": "Terminated - Cheating Detected"
+  },
+  {
+    "teamId": "3",
+    "score": 0,
+    "timeTaken": 0,
+    "answeredQuestions": 0,
+    "totalQuestions": 5,
+    "status": "Terminated - Cheating Detected"
   }
 ]

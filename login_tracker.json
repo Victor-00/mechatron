@@ -1,6 +1,9 @@
 {
   "loggedInTeams": [
-    
-  ],
-  
+    {
+      "teamId": "3",
+      "loginTime": "2025-10-05T14:05:53.300Z",
+      "timestamp": 1759673153300
+    }
+  ]
 }
