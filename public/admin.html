@@ -163,6 +163,33 @@
             cursor: pointer;
         }
 
+        input[type="number"],
+        input[type="text"] {
+            padding: 12px;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        input[type="number"] {
+            width: 180px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .selection-info {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            font-weight: 600;
+            color: #667eea;
+            margin-right: 10px;
+        }
+
         @media (max-width: 768px) {
             .teams-table {
                 padding: 20px;
@@ -181,6 +208,11 @@
             }
 
             button {
+                width: 100%;
+            }
+
+            input[type="number"],
+            input[type="text"] {
                 width: 100%;
             }
         }
@@ -211,6 +243,12 @@
                 <button class="danger" onclick="resetAllLogins()">🗑️ Reset All Logins</button>
             </div>
 
+            <div class="controls" style="align-items: center;">
+                <input type="number" id="num-teams" placeholder="Number of teams" min="1">
+                <input type="text" id="team-ids" placeholder="Team ID numbers (e.g., 3456,3457,3458)">
+                <button class="warning action-btn" onclick="selectSpecificTeams()">🎯 Select Teams</button>
+            </div>
+
             <table>
                 <thead>
                     <tr>
@@ -233,6 +271,7 @@
     <script>
         let allTeams = [];
 
+        // Load data on page load
         document.addEventListener('DOMContentLoaded', function() {
             loadData();
         });
@@ -245,32 +284,36 @@
             }, 3000);
         }
 
-        async function loadData() {
-            try {
-                const response = await fetch('/admin/logged-teams', {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
+        function loadData() {
+            fetch('/api/logged-teams')
+            .then(response => {
                 console.log('Response status:', response.status);
-                console.log('Response type:', response.headers.get('content-type'));
+                console.log('Response headers:', response.headers.get('content-type'));
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
-                const data = await response.json();
-                console.log('Received data:', data);
+                return response.text();
+            })
+            .then(text => {
+                console.log('Response text:', text);
+                
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    console.error('Failed to parse JSON:', e);
+                    console.error('Response was:', text);
+                    throw new Error('Invalid JSON response from server');
+                }
                 
                 if (!data.success) {
                     showMessage('Failed to load data: ' + (data.message || 'Unknown error'), 'error');
                     return;
                 }
 
-                allTeams = data.teams || [];
+                allTeams = data.loggedInTeams || [];
                 document.getElementById('total-teams').textContent = allTeams.length;
                 updateSelectedCount();
 
@@ -289,11 +332,11 @@
                         <td>${new Date(team.loginTime).toLocaleString()}</td>
                     </tr>
                 `).join('');
-            } catch (error) {
+            })
+            .catch(error => {
                 console.error('Error loading data:', error);
                 showMessage('Error loading data: ' + error.message, 'error');
-                document.getElementById('teams-tbody').innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">Error loading teams. Check console for details.</td></tr>';
-            }
+            });
         }
 
         function toggleSelectAll() {
@@ -316,6 +359,7 @@
             const keepBtn = document.getElementById('keep-selected-btn');
             keepBtn.disabled = count === 0;
             
+            // Update select-all checkbox state
             const allCheckboxes = document.querySelectorAll('.team-checkbox');
             const selectAllCheckbox = document.getElementById('select-all');
             if (allCheckboxes.length > 0) {
@@ -328,7 +372,7 @@
             return Array.from(selectedCheckboxes).map(cb => cb.value);
         }
 
-        async function keepSelectedTeams() {
+        function keepSelectedTeams() {
             const selectedTeamIds = getSelectedTeamIds();
             
             if (selectedTeamIds.length === 0) {
@@ -336,8 +380,11 @@
                 return;
             }
 
+            // Get all team IDs from checkboxes
             const allCheckboxes = document.querySelectorAll('.team-checkbox');
             const allTeamIds = Array.from(allCheckboxes).map(cb => cb.value);
+            
+            // Get teams to remove (all teams NOT selected)
             const teamsToRemove = allTeamIds.filter(teamId => !selectedTeamIds.includes(teamId));
 
             if (teamsToRemove.length === 0) {
@@ -353,39 +400,40 @@
                 return;
             }
 
+            // Remove unselected teams
             let successCount = 0;
             let failCount = 0;
 
-            for (const teamId of teamsToRemove) {
-                try {
-                    const response = await fetch('/admin/remove-team', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ teamId })
-                    });
-                    
-                    const data = await response.json();
+            const removePromises = teamsToRemove.map(teamId => 
+                fetch('/admin/remove-team', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ teamId })
+                })
+                .then(response => response.json())
+                .then(data => {
                     if (data.success) {
                         successCount++;
                     } else {
                         failCount++;
                     }
-                } catch (error) {
-                    console.error(`Failed to remove team ${teamId}:`, error);
+                })
+                .catch(() => {
                     failCount++;
-                }
-            }
+                })
+            );
 
-            if (successCount > 0) {
-                showMessage(`Successfully kept ${selectedTeamIds.length} team(s) and removed ${successCount} team(s)`, 'success');
-            }
-            if (failCount > 0) {
-                showMessage(`Failed to remove ${failCount} team(s)`, 'error');
-            }
-            
-            await loadData();
+            Promise.all(removePromises).then(() => {
+                if (successCount > 0) {
+                    showMessage(`Successfully kept ${selectedTeamIds.length} team(s) and removed ${successCount} team(s)`, 'success');
+                }
+                if (failCount > 0) {
+                    showMessage(`Failed to remove ${failCount} team(s)`, 'error');
+                }
+                loadData();
+            });
         }
 
         function refreshData() {
@@ -393,31 +441,97 @@
             loadData();
         }
 
-        async function resetAllLogins() {
+        function resetAllLogins() {
             if (!confirm('Are you sure you want to reset ALL logins? This cannot be undone!')) {
                 return;
             }
 
-            try {
-                const response = await fetch('/admin/reset-logins', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                const data = await response.json();
-                
+            fetch('/admin/reset-logins', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
                 if (data.success) {
                     showMessage('All logins reset successfully');
-                    await loadData();
+                    loadData();
                 } else {
                     showMessage('Failed to reset logins', 'error');
                 }
-            } catch (error) {
+            })
+            .catch(error => {
                 console.error('Error resetting logins:', error);
                 showMessage('Error resetting logins', 'error');
+            });
+        }
+
+        function selectSpecificTeams() {
+            const numTeamsInput = document.getElementById('num-teams');
+            const teamIdsInput = document.getElementById('team-ids');
+            
+            const numTeams = parseInt(numTeamsInput.value);
+            const teamIdsStr = teamIdsInput.value.trim();
+            
+            if (!numTeams || numTeams < 1) {
+                showMessage('Please enter a valid number of teams', 'error');
+                return;
             }
+            
+            if (!teamIdsStr) {
+                showMessage('Please enter team ID numbers', 'error');
+                return;
+            }
+            
+            // Parse team ID numbers (comma-separated)
+            const teamIdNumbers = teamIdsStr.split(',').map(id => id.trim()).filter(id => id.length > 0);
+            
+            if (teamIdNumbers.length === 0) {
+                showMessage('Please enter valid team ID numbers', 'error');
+                return;
+            }
+            
+            if (teamIdNumbers.length !== numTeams) {
+                showMessage(`Number of teams (${numTeams}) doesn't match number of IDs entered (${teamIdNumbers.length})`, 'error');
+                return;
+            }
+            
+            // Convert numbers to full team IDs (e.g., "3456" -> "TEAM_ID_3456")
+            const teamIds = teamIdNumbers.map(num => `TEAM_ID_${num}`);
+            
+            // First, uncheck all checkboxes
+            const allCheckboxes = document.querySelectorAll('.team-checkbox');
+            allCheckboxes.forEach(cb => cb.checked = false);
+            document.getElementById('select-all').checked = false;
+            
+            // Select the specified teams
+            let foundCount = 0;
+            let notFoundTeams = [];
+            
+            teamIds.forEach((teamId, index) => {
+                const checkbox = document.querySelector(`.team-checkbox[value="${teamId}"]`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                    foundCount++;
+                } else {
+                    notFoundTeams.push(teamIdNumbers[index]);
+                }
+            });
+            
+            updateSelectedCount();
+            
+            if (foundCount === teamIds.length) {
+                showMessage(`Successfully selected ${foundCount} team(s)`, 'success');
+            } else if (foundCount > 0) {
+                showMessage(`Selected ${foundCount} team(s). Not found: ${notFoundTeams.join(', ')}`, 'error');
+            } else {
+                showMessage(`None of the specified teams were found in the logged-in teams list`, 'error');
+            }
+            
+            // Clear inputs
+            numTeamsInput.value = '';
+            teamIdsInput.value = '';
         }
     </script>
 </body>
