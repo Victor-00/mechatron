@@ -259,7 +259,6 @@
                 <div class="stat-label">Selected Teams</div>
             </div>
         </div>
-        <!-- Add this after the stats section and before the teams-table div -->
         <div class="teams-table" style="margin-bottom: 20px;">
             <h2>🎮 Quiz Level Control</h2>
             <div id="level-message"></div>
@@ -318,13 +317,14 @@
                         <th class="rank-cell">Rank</th>
                         <th>Team ID</th>
                         <th class="marks-cell">Marks</th>
+                        <th>Question Set</th>
                         <th>Login Time</th>
                         <th>End Time</th>
                     </tr>
                 </thead>
                 <tbody id="teams-tbody">
                     <tr>
-                        <td colspan="6" style="text-align: center;">Loading...</td>
+                        <td colspan="7" style="text-align: center;">Loading...</td>
                     </tr>
                 </tbody>
             </table>
@@ -334,9 +334,6 @@
     <script>
         let allTeams = [];
 
-        document.addEventListener('DOMContentLoaded', function () {
-            loadData();
-        });
         // Add to the script section in admin.html
 
         function loadCurrentLevel() {
@@ -444,7 +441,7 @@
 
                     const tbody = document.getElementById('teams-tbody');
                     if (allTeams.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No teams have logged in yet</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No teams have logged in yet</td></tr>';
                         return;
                     }
 
@@ -459,6 +456,7 @@
                         <td class="rank-cell">#${index + 1}</td>
                         <td>${team.teamId}</td>
                         <td class="marks-cell">${marks}</td>
+                        <td>${team.questionSet || 'N/A'}</td>
                         <td>${new Date(team.loginTime).toLocaleString()}</td>
                         <td>${endTime}</td>
                     </tr>
