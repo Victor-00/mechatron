@@ -106,10 +106,15 @@
 
             teamIdDisplay.textContent = `Team ID: ${teamId}`;
 
-            // The URL of your API endpoint that returns the list of logged-in teams
             const apiUrl = '/api/logged-teams';
 
-            fetch(apiUrl)
+            // Fetch with caching disabled to ensure fresh data
+            fetch(apiUrl, {
+                cache: 'no-cache',
+                headers: {
+                    'Cache-Control': 'no-cache'
+                }
+            })
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Could not connect to the server.');
@@ -123,10 +128,8 @@
                     
                     const loggedInTeams = data.loggedInTeams || [];
                     
-                    // Check if the current team's ID is in the list from the server
                     const isTeamInList = loggedInTeams.some(team => team.teamId === teamId);
 
-                    // According to your logic: if the team is in the list, they ARE selected.
                     displayResult(isTeamInList);
                 })
                 .catch(error => {
