@@ -74,9 +74,14 @@
 
         .question-text { font-size: 1.4rem; font-weight: 600; margin-bottom: 25px; flex-grow: 1; }
         .options-list { list-style: none; padding: 0; margin: 0 0 25px 0; }
-        .option-item { background: var(--light-grey); padding: 15px; margin-bottom: 12px; border-radius: 12px; border: 2px solid transparent; cursor: pointer; transition: all 0.2s ease-in-out; }
+        .option-item { background: var(--light-grey); padding: 15px; margin-bottom: 12px; border-radius: 12px; border: 2px solid transparent; cursor: pointer; transition: all 0.2s ease-in-out; display: flex; align-items: center; justify-content: center; }
         .option-item:hover { border-color: var(--primary-color); transform: translateY(-2px); }
         .option-item.selected { background-color: var(--primary-color); color: var(--text-light); border-color: var(--primary-color); font-weight: 600; }
+        .option-item img { max-width: 100%; max-height: 80px; border-radius: 8px; }
+        
+        #riddle-answer-container { margin-bottom: 25px; }
+        #riddle-answer { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid var(--primary-color); font-family: 'Poppins', sans-serif; font-size: 1rem; }
+
         .control-buttons { display: flex; gap: 15px; margin-top: auto; }
         .control-button { padding: 12px 24px; border-radius: 12px; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; transition: all 0.2s ease; flex-grow: 1; }
         .control-button:hover { transform: scale(1.05); }
@@ -124,10 +129,13 @@
             <div id="question-image-container"></div>
             <h3 class="question-text" id="question-text">Loading question...</h3>
             <ul id="options-list" class="options-list"></ul>
+            <div id="riddle-answer-container" style="display: none;">
+                <input type="text" id="riddle-answer" placeholder="Type your answer here...">
+            </div>
             <div class="control-buttons">
                 <button id="skip-button" class="control-button">Skip</button>
                 <button id="clear-button" class="control-button" style="display:none;">Clear Choice</button>
-                <button id="next-button" class="control-button" style="display:none;">Next</button>
+                <button id="next-button" class="control-button">Next</button>
             </div>
         </div>
         <div class="menu-container"><h4 class="menu-title">Question Menu</h4><div id="dice-menu" class="dice-menu"></div></div>
@@ -159,6 +167,8 @@
       const nextButton = document.getElementById('next-button');
       const clearButton = document.getElementById('clear-button');
       const imageContainer = document.getElementById('question-image-container');
+      const riddleContainer = document.getElementById('riddle-answer-container');
+      const riddleInput = document.getElementById('riddle-answer');
 
       let questions = [];
       let currentQuestionIndex = 0;
@@ -273,7 +283,7 @@
 
         calculateScore();
         const finalTimeInSeconds = 300 - timeLeft;
-        const totalPossibleMarks = questions.reduce((acc, q) => acc + (q.marks || 1), 0);
+        const totalPossibleMarks = questions.reduce((acc, q) => acc + (q.positive_mark || 1), 0);
         
         const submissionData = {
           teamId: teamId, score: score, timeTaken: finalTimeInSeconds,
@@ -307,13 +317,13 @@
             const errorData = await response.json();
             throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
           }
-          questions = await response.json(); 
+          const data = await response.json(); 
 
-          // FIXED: Check if the response is actually an array before proceeding
-          if (!Array.isArray(questions)) {
+          if (!data || !Array.isArray(data.questions)) {
             throw new Error("The question data received from the server is not a valid list.");
           }
-
+          
+          questions = data.questions;
           questions.forEach(q => { q.answered = false; q.skipped = false; q.selected = null; }); 
           startQuiz(); 
         } catch (error) { 
@@ -334,7 +344,7 @@
           imageContainer.innerHTML = '';
           if (currentQuestion.image) {
               const img = document.createElement('img');
-              img.src = currentQuestion.image;
+              img.src = `images/${currentQuestion.image}`;
               img.alt = `Question ${currentQuestionIndex + 1} Image`;
               imageContainer.appendChild(img);
               imageContainer.style.display = 'flex';
@@ -342,37 +352,161 @@
               imageContainer.style.display = 'none';
           }
 
-          questionText.textContent = currentQuestion.questionText; 
-          optionsList.innerHTML = ''; 
-          currentQuestion.options.forEach((option, index) => { 
-              const li = document.createElement('li'); 
-              li.classList.add('option-item'); 
-              li.textContent = option; 
-              li.onclick = () => selectOption(index); 
-              optionsList.appendChild(li); 
-          }); 
-          clearButton.style.display = 'none'; 
-          nextButton.style.display = 'none'; 
-          skipButton.style.display = currentQuestion.skipped ? 'none' : 'block'; 
+          questionText.textContent = currentQuestion.question; 
+          
+          // Show/hide elements based on question type
+          if (currentQuestion.type === 'MCQ') {
+              optionsList.style.display = 'block';
+              riddleContainer.style.display = 'none';
+              optionsList.innerHTML = '';
+              
+              const options = [];
+              for (let i = 1; i <= 4; i++) {
+                  if (currentQuestion[`option${i}`]) {
+                      options.push({ key: `option${i}`, value: currentQuestion[`option${i}`] });
+                  }
+              }
+
+              options.forEach(opt => { 
+                  const li = document.createElement('li'); 
+                  li.classList.add('option-item'); 
+                  li.dataset.key = opt.key;
+
+                  if (opt.value.toLowerCase().endsWith('.png')) {
+                      const img = document.createElement('img');
+                      img.src = `images/${opt.value}`;
+                      li.appendChild(img);
+                  } else {
+                      li.textContent = opt.value; 
+                  }
+                  
+                  li.onclick = () => selectOption(opt.key); 
+                  optionsList.appendChild(li); 
+              });
+
+          } else if (currentQuestion.type === 'Riddle') {
+              optionsList.style.display = 'none';
+              riddleContainer.style.display = 'block';
+              riddleInput.value = currentQuestion.selected || ''; // Show previous answer if exists
+          }
+          
+          updateButtonStates();
       }
 
-      function selectOption(index) { const currentQuestion = questions[currentQuestionIndex]; currentQuestion.selected = index; currentQuestion.answered = true; Array.from(optionsList.children).forEach((li, i) => { li.classList.toggle('selected', i === index); }); clearButton.style.display = 'block'; nextButton.style.display = 'block'; skipButton.style.display = 'none'; updateDiceStatus(); }
-      function clearChoice() { const currentQuestion = questions[currentQuestionIndex]; currentQuestion.selected = null; currentQuestion.answered = false; Array.from(optionsList.children).forEach(li => li.classList.remove('selected')); clearButton.style.display = 'none'; nextButton.style.display = 'none'; skipButton.style.display = 'block'; updateDiceStatus(); }
-      function skipQuestion() { questions[currentQuestionIndex].skipped = true; updateDiceStatus(); nextQuestion(); }
-      function nextQuestion() { const next = questions.findIndex((q, i) => !q.answered && !q.skipped && i > currentQuestionIndex); if (next !== -1) { currentQuestionIndex = next; renderQuestion(); } else { endQuiz(); } }
-      function renderDiceMenu() { diceMenu.innerHTML = ''; questions.forEach((q, i) => { const dice = document.createElement('div'); dice.classList.add('menu-dice'); dice.id = `dice-${i}`; dice.textContent = i + 1; dice.addEventListener('click', () => { currentQuestionIndex = i; renderQuestion(); }); diceMenu.appendChild(dice); }); }
-      function updateDiceStatus() { questions.forEach((q, i) => { const dice = document.getElementById(`dice-${i}`); dice.classList.remove('answered', 'skipped'); if (q.answered) dice.classList.add('answered'); else if (q.skipped) dice.classList.add('skipped'); }); }
+      function selectOption(key) { 
+          const currentQuestion = questions[currentQuestionIndex];
+          currentQuestion.selected = key; 
+          currentQuestion.answered = true; 
+          
+          Array.from(optionsList.children).forEach(li => { 
+              li.classList.toggle('selected', li.dataset.key === key); 
+          }); 
+          
+          updateButtonStates();
+          updateDiceStatus(); 
+      }
+      
+      function clearChoice() { 
+          const currentQuestion = questions[currentQuestionIndex]; 
+          currentQuestion.selected = null; 
+          currentQuestion.answered = false; 
+          Array.from(optionsList.children).forEach(li => li.classList.remove('selected')); 
+          riddleInput.value = '';
+          updateButtonStates(); 
+          updateDiceStatus(); 
+      }
+      
+      function skipQuestion() { 
+          questions[currentQuestionIndex].skipped = true; 
+          questions[currentQuestionIndex].answered = false; // A skipped question is not an answered one
+          questions[currentQuestionIndex].selected = null;
+          updateDiceStatus(); 
+          goToNextQuestion(); 
+      }
+
+      function handleNextClick() {
+          const currentQuestion = questions[currentQuestionIndex];
+          if(currentQuestion.type === 'Riddle' && riddleInput.value.trim() !== '') {
+              currentQuestion.selected = riddleInput.value.trim();
+              currentQuestion.answered = true;
+          } else if (currentQuestion.type === 'Riddle' && riddleInput.value.trim() === '') {
+              // Don't mark as answered if input is empty
+              currentQuestion.answered = false;
+          }
+          
+          updateDiceStatus();
+          goToNextQuestion();
+      }
+      
+      function goToNextQuestion() {
+          const next = questions.findIndex((q, i) => !q.answered && !q.skipped && i > currentQuestionIndex); 
+          if (next !== -1) { 
+              currentQuestionIndex = next; 
+              renderQuestion(); 
+          } else { 
+              const firstUnanswered = questions.findIndex((q, i) => !q.answered && !q.skipped);
+              if (firstUnanswered !== -1) {
+                  currentQuestionIndex = firstUnanswered;
+                  renderQuestion();
+              } else {
+                 endQuiz(); 
+              }
+          }
+      }
+
+      function updateButtonStates() {
+          const currentQuestion = questions[currentQuestionIndex];
+          const isAnswered = currentQuestion.answered || (currentQuestion.type === 'Riddle' && riddleInput.value.trim());
+
+          clearButton.style.display = isAnswered ? 'block' : 'none';
+          skipButton.style.display = !isAnswered ? 'block' : 'none';
+          nextButton.style.display = 'block'; // Always show next button
+      }
+
+      function renderDiceMenu() { 
+          diceMenu.innerHTML = ''; 
+          questions.forEach((q, i) => { 
+              const dice = document.createElement('div'); 
+              dice.classList.add('menu-dice'); 
+              dice.id = `dice-${i}`; 
+              dice.textContent = i + 1; 
+              dice.addEventListener('click', () => { 
+                  currentQuestionIndex = i; 
+                  renderQuestion(); 
+              }); 
+              diceMenu.appendChild(dice); 
+          }); 
+      }
+      
+      function updateDiceStatus() { 
+          questions.forEach((q, i) => { 
+              const dice = document.getElementById(`dice-${i}`); 
+              dice.classList.remove('answered', 'skipped'); 
+              if (q.answered) dice.classList.add('answered'); 
+              else if (q.skipped) dice.classList.add('skipped'); 
+          }); 
+      }
       
       function calculateScore() {
         score = questions.reduce((acc, q) => {
-            if (q.selected === q.correctAnswerIndex) {
-                return acc + (q.marks || 1);
+            if (q.answered && q.selected) {
+                if (q.type === 'MCQ' && q.selected === q.correct_answer) {
+                    return acc + (q.positive_mark || 1);
+                }
+                if (q.type === 'Riddle' && Array.isArray(q.correct_answer)) {
+                    const correctAnswers = q.correct_answer.map(ans => ans.toLowerCase());
+                    if (correctAnswers.includes(q.selected.toLowerCase())) {
+                       return acc + (q.positive_mark || 1);
+                    }
+                }
             }
             return acc;
         }, 0);
       }
       
-      skipButton.addEventListener('click', skipQuestion); nextButton.addEventListener('click', nextQuestion); clearButton.addEventListener('click', clearChoice);
+      skipButton.addEventListener('click', skipQuestion); 
+      nextButton.addEventListener('click', handleNextClick); 
+      clearButton.addEventListener('click', clearChoice);
     });
   </script>
 </body>
