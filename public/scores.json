@@ -174,5 +174,13 @@
     "answeredQuestions": 0,
     "totalQuestions": 5,
     "status": "Terminated - Cheating Detected"
+  },
+  {
+    "teamId": "3",
+    "score": 0,
+    "timeTaken": 10,
+    "answeredQuestions": 1,
+    "totalQuestions": 5,
+    "status": "Terminated - Cheating Detected"
   }
 ]

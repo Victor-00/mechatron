@@ -139,12 +139,14 @@
       let score = 0;
       let quizTimer;
       let quizHasEnded = false;
-      let teamId = localStorage.getItem('currentTeamId');
+      let teamId = '';
       let escWarningCount = 0;
       let tabSwitchCount = 0;
       let timeLeft = 300;
       let initialWidth, initialHeight;
 
+      // Get team ID from localStorage
+      teamId = localStorage.getItem('currentTeamId');
       if (!teamId) {
         window.location.href = 'login.html';
         return;
@@ -159,8 +161,8 @@
           }
           entryGate.style.display = 'none';
           quizWrapper.style.display = 'grid';
-        initialWidth = window.screen.width;
-        initialHeight = window.screen.height;
+          initialWidth = window.screen.width;
+          initialHeight = window.screen.height;
           activateSecurityListeners();
           fetchQuestions();
       }
@@ -275,13 +277,17 @@
       
       async function fetchQuestions() { 
         try { 
-          const response = await fetch('/questions'); 
+          const response = await fetch('questions.json'); 
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
           questions = await response.json(); 
           questions.forEach(q => { q.answered = false; q.skipped = false; q.selected = null; }); 
           startQuiz(); 
         } catch (error) { 
           console.error('Failed to fetch questions:', error); 
-          questionText.textContent = 'Error: Could not load quiz questions.'; 
+          questionText.textContent = 'Error: Could not load quiz questions. Please refresh the page.'; 
+          alert('Failed to load questions. Please ensure questions.json exists in the same directory.');
         } 
       }
 
@@ -299,4 +305,3 @@
   </script>
 </body>
 </html>
-
