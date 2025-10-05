@@ -325,14 +325,12 @@
                 }
 
                 tbody.innerHTML = allTeams.map(team => {
-                    // Extract just the number from TEAM_ID_X for display, but keep full ID in value
-                    const displayId = team.teamId.replace('TEAM_ID_', '');
                     return `
                     <tr>
                         <td class="checkbox-cell">
                             <input type="checkbox" class="team-checkbox" value="${team.teamId}" onchange="updateSelectedCount()">
                         </td>
-                        <td>${displayId}</td>
+                        <td>${team.teamId}</td>
                         <td>${new Date(team.loginTime).toLocaleString()}</td>
                     </tr>
                     `;
@@ -556,8 +554,8 @@
                 return;
             }
             
-            // Convert numbers to full team IDs (e.g., "3456" -> "TEAM_ID_3456")
-            const teamIds = teamIdNumbers.map(num => `TEAM_ID_${num}`);
+            // Use the team IDs as entered (just the numbers)
+            const teamIds = teamIdNumbers;
             
             console.log('Looking for team IDs:', teamIds);
             
