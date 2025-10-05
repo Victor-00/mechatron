@@ -177,7 +177,6 @@
 
       function activateSecurityListeners() {
 
-          // === Cross-platform tab/window switch detection ===
           const isLinux = navigator.userAgent.toLowerCase().includes('linux');
 
           function handleTabSwitch() {
@@ -201,7 +200,6 @@
               if (isLinux) handleTabSwitch();
           });
 
-          // === Existing security events ===
           window.addEventListener('resize', () => {
             if (quizHasEnded || !initialWidth || !initialHeight) return;
             const widthThreshold = initialWidth * 0.6;
@@ -251,6 +249,7 @@
 
         calculateScore();
         const finalTimeInSeconds = 300 - timeLeft;
+        const totalPossibleMarks = questions.reduce((acc, q) => acc + (q.marks || 1), 0);
         
         const submissionData = {
           teamId: teamId, score: score, timeTaken: finalTimeInSeconds,
@@ -262,7 +261,8 @@
         }
 
         localStorage.setItem('quizResults', JSON.stringify({
-          teamId: teamId, score: score, totalQuestions: questions.length, timeTaken: finalTimeInSeconds
+          teamId: teamId, score: score, totalQuestions: questions.length, timeTaken: finalTimeInSeconds,
+          totalMarks: totalPossibleMarks
         }));
         
         try {
@@ -292,14 +292,21 @@
       }
 
       function startQuiz() { renderDiceMenu(); renderQuestion(); startTimer(); }
-      function renderQuestion() { document.querySelectorAll('.menu-dice').forEach(dice => dice.classList.remove('active')); document.getElementById(`dice-${currentQuestionIndex}`).classList.add('active'); const currentQuestion = questions[currentQuestionIndex]; questionCounter.textContent = `Question ${currentQuestionIndex + 1} / ${questions.length}`; questionText.textContent = currentQuestion.question; optionsList.innerHTML = ''; currentQuestion.options.forEach((option, index) => { const li = document.createElement('li'); li.classList.add('option-item'); li.textContent = option; li.onclick = () => selectOption(index); optionsList.appendChild(li); }); clearButton.style.display = 'none'; nextButton.style.display = 'none'; skipButton.style.display = currentQuestion.skipped ? 'none' : 'block'; }
+      function renderQuestion() { document.querySelectorAll('.menu-dice').forEach(dice => dice.classList.remove('active')); document.getElementById(`dice-${currentQuestionIndex}`).classList.add('active'); const currentQuestion = questions[currentQuestionIndex]; questionCounter.textContent = `Question ${currentQuestionIndex + 1} / ${questions.length}`; questionText.textContent = currentQuestion.questionText; optionsList.innerHTML = ''; currentQuestion.options.forEach((option, index) => { const li = document.createElement('li'); li.classList.add('option-item'); li.textContent = option; li.onclick = () => selectOption(index); optionsList.appendChild(li); }); clearButton.style.display = 'none'; nextButton.style.display = 'none'; skipButton.style.display = currentQuestion.skipped ? 'none' : 'block'; }
       function selectOption(index) { const currentQuestion = questions[currentQuestionIndex]; currentQuestion.selected = index; currentQuestion.answered = true; Array.from(optionsList.children).forEach((li, i) => { li.classList.toggle('selected', i === index); }); clearButton.style.display = 'block'; nextButton.style.display = 'block'; skipButton.style.display = 'none'; updateDiceStatus(); }
       function clearChoice() { const currentQuestion = questions[currentQuestionIndex]; currentQuestion.selected = null; currentQuestion.answered = false; Array.from(optionsList.children).forEach(li => li.classList.remove('selected')); clearButton.style.display = 'none'; nextButton.style.display = 'none'; skipButton.style.display = 'block'; updateDiceStatus(); }
       function skipQuestion() { questions[currentQuestionIndex].skipped = true; updateDiceStatus(); nextQuestion(); }
       function nextQuestion() { const next = questions.findIndex((q, i) => !q.answered && !q.skipped && i > currentQuestionIndex); if (next !== -1) { currentQuestionIndex = next; renderQuestion(); } else { endQuiz(); } }
       function renderDiceMenu() { diceMenu.innerHTML = ''; questions.forEach((q, i) => { const dice = document.createElement('div'); dice.classList.add('menu-dice'); dice.id = `dice-${i}`; dice.textContent = i + 1; dice.addEventListener('click', () => { currentQuestionIndex = i; renderQuestion(); }); diceMenu.appendChild(dice); }); }
       function updateDiceStatus() { questions.forEach((q, i) => { const dice = document.getElementById(`dice-${i}`); dice.classList.remove('answered', 'skipped'); if (q.answered) dice.classList.add('answered'); else if (q.skipped) dice.classList.add('skipped'); }); }
-      function calculateScore() { score = questions.reduce((acc, q) => acc + (q.selected === q.correct ? 1 : 0), 0); }
+      function calculateScore() {
+        score = questions.reduce((acc, q) => {
+            if (q.selected === q.correctAnswerIndex) {
+                return acc + (q.marks || 1);
+            }
+            return acc;
+        }, 0);
+      }
       skipButton.addEventListener('click', skipQuestion); nextButton.addEventListener('click', nextQuestion); clearButton.addEventListener('click', clearChoice);
     });
   </script>
