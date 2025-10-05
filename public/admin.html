@@ -240,6 +240,7 @@
             <div class="controls">
                 <button class="success" onclick="refreshData()">🔄 Refresh</button>
                 <button class="success" id="keep-selected-btn" onclick="keepSelectedTeams()" disabled>✅ Keep Selected Only</button>
+                <button class="danger" id="delete-selected-btn" onclick="deleteSelectedTeams()" disabled>🗑️ Delete Selected</button>
                 <button class="danger" onclick="resetAllLogins()">🗑️ Reset All Logins</button>
             </div>
 
@@ -357,7 +358,9 @@
             document.getElementById('selected-count').textContent = count;
             
             const keepBtn = document.getElementById('keep-selected-btn');
+            const deleteBtn = document.getElementById('delete-selected-btn');
             keepBtn.disabled = count === 0;
+            deleteBtn.disabled = count === 0;
             
             // Update select-all checkbox state
             const allCheckboxes = document.querySelectorAll('.team-checkbox');
@@ -464,6 +467,58 @@
             .catch(error => {
                 console.error('Error resetting logins:', error);
                 showMessage('Error resetting logins', 'error');
+            });
+        }
+
+        function deleteSelectedTeams() {
+            const selectedTeamIds = getSelectedTeamIds();
+            
+            if (selectedTeamIds.length === 0) {
+                showMessage('No teams selected to delete', 'error');
+                return;
+            }
+
+            const confirmMsg = selectedTeamIds.length === 1 
+                ? `Delete team ${selectedTeamIds[0]}?`
+                : `Delete ${selectedTeamIds.length} selected team(s)?`;
+
+            if (!confirm(confirmMsg)) {
+                return;
+            }
+
+            // Delete selected teams
+            let successCount = 0;
+            let failCount = 0;
+
+            const deletePromises = selectedTeamIds.map(teamId => 
+                fetch('/admin/remove-team', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ teamId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        successCount++;
+                    } else {
+                        failCount++;
+                    }
+                })
+                .catch(() => {
+                    failCount++;
+                })
+            );
+
+            Promise.all(deletePromises).then(() => {
+                if (successCount > 0) {
+                    showMessage(`Successfully deleted ${successCount} team(s)`, 'success');
+                }
+                if (failCount > 0) {
+                    showMessage(`Failed to delete ${failCount} team(s)`, 'error');
+                }
+                loadData();
             });
         }
 
