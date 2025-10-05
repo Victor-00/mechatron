@@ -1,0 +1,49 @@
+{
+  "paper": "3A",
+  "questions": [
+    {
+      "question": "Three farmers paid Rs. 1,000 for a small pasture. One farmer grazed his 9 mules, another his 12 cows for twice the time and last man put in some goats for 2½ times as the second man's cows and paid half the cost of the pasture. Can you find out how many goats did the last man have, if 6 cows eat as much as 4 mules, and 10 goats as much as 3 cows? And how much did the first and second man each pay?",
+      "option1": " Last man had 13 goats. First man paid Rs. 180, Second man Rs. 320.",
+      "option2": " Last man had 20 goats. First man paid Rs. 250, Second man Rs. 250.",
+      "option3": "Last man had 15 goats. First man paid Rs. 200, Second man Rs. 300",
+      "option4": "Last man had 10 goats. First man paid Rs. 150, Second man Rs. 350.",
+      "correct_answer": "option1",
+      "positive_mark": 5,
+      "negative_mark": -2,
+      "type": "MCQ"
+    },
+    {
+      "question": "Find out:",
+      "image": "3A_1.png",
+      "option1": "21,7",
+      "option2": "12,4",
+      "option3": "24,8",
+      "option4": "35,5",
+      "correct_answer": "option1",
+      "positive_mark": 4,
+      "negative_mark": -2,
+      "type": "MCQ"
+    },
+    {
+      "question": "A little girl trying to play the see-saw by herself finds she just balances against sixteen bricks when they are fixed to the short end of the plank. If she fixes them to the long end, she only needs eleven bricks as a balance. The brick weighs as much as three-quarters of a brick and three-quarters of a pound. What is the girl's weight?(TO THE NEAREST INTEGER)",
+      "correct_answer": "40",
+      "positive_mark": 3,
+      "negative_mark": 0,
+      "type": "Integer"
+    },
+    {
+      "question": " In a shower, 5 cm of rain falls. The volume of water that falls on 1.5 hectares of ground is:(in cu. m",
+      "correct_answer": "750",
+      "positive_mark": 2,
+      "negative_mark": 0,
+      "type": "Integer"
+    },
+    {
+    "question": "What kind of coat is best put on wet?(give one word answer)",
+      "correct_answer": ["Paint","paint","PAINT","varnish","Varnish","VARNISH"],
+      "positive_mark": 1,
+      "negative_mark": 0,
+      "type": "Riddle"
+    }
+  ]
+}

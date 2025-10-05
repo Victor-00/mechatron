@@ -1,0 +1,52 @@
+{
+  "paper": "5B",
+  "questions": [
+    {
+      "question": "Solve",
+      "image": "5B_1.png",
+      "option1": "2 and 51",
+      "option2": "4 and 40",
+      "option3": "2.5 and 24",
+      "option4": "2.5 and 32",
+      "correct_answer": "option1",
+      "positive_mark": 4,
+      "negative_mark": -2,
+      "type": "MCQ"
+    },
+    {
+      "question": "Find the next number in the series 1,5,19,81,?",
+      
+      "option1": "411",
+      "option2": "423",
+      "option3": "400",
+      "option4": "450 ",
+      "correct_answer": "option1",
+      "positive_mark": 5,
+      "negative_mark": -4,
+      "type": "MCQ"
+    },
+    {
+      "question": "If 3 × 4 = 25, 5 × 2 = 27, 6 × 3 = 39, then what is 7 × 5 =? ",
+      
+      "correct_answer": "61",
+      "positive_mark": 2,
+      "negative_mark": 0,
+      "type": "Integer"
+    },
+    {
+      "question": "Find the missing values- (answer in : 'ans1,ans2' format)",
+      "image": "5B_2.png",
+      "correct_answer": "40,N",
+      "positive_mark": 1,
+      "negative_mark": 0,
+      "type": "Integer"
+    },
+    {
+      "question": "The reflex angle between the hands of a clock at 10.25 is:",
+      "correct_answer": "197.5",
+      "positive_mark": 3,
+      "negative_mark": 0,
+      "type": "Integer"
+    }
+  ]
+}

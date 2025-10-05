@@ -1,0 +1,105 @@
+{
+  "paper": "1A",
+  "questions": [
+    {
+      "question": "What comes next: 3, 7, 15, 31, 63, ?",
+      "option1": "127",
+      "option2": "125",
+      "option3": "129",
+      "option4": "131",
+      "correct_answer": "option1",
+      "positive_mark": 1,
+      "negative_mark": 0,
+      "type": "MCQ"
+    },
+    {
+      "question": "I have cities, but no houses. I have mountains, but no trees. I have water, but no fish. What am I?",
+      "correct_answer": ["Map","map","MAP"],
+      "positive_mark": 1,
+      "negative_mark": 0,
+      "type": "Riddle"
+    },
+    {
+      "question": "Fill in the space",
+      "image": "1A_1.png",
+      "option1": "1A_1_1.png",
+      "option2": "1A_1_2.png",
+      "option3": "1A_1_3.png",
+      "option4": "1A_1_4.png",
+      "correct_answer": "option3",
+      "positive_mark": 1,
+      "negative_mark": 0,
+      "type": "MCQ"
+    },
+    {
+      "question": "A solid cube measuring 3 inches on each side is painted blue on all its faces. The cube is then cut into 27 smaller cubes, each measuring 1 inch on a side. How many of these smaller cubes have at least one painted face?",
+      "option1": "8",
+      "option2": "12",
+      "option3": "26",
+      "option4": "27",
+      "correct_answer": "option3",
+      "positive_mark": 1,
+      "negative_mark": 0,
+      "type": "MCQ"
+    },
+    {
+"question": "A shopkeeper sells a bicycle for Rs. 350. The bicycle cost him Rs. 300. A tourist pays with four Rs. 100 traveler's cheques. The shopkeeper, having no change, gets cash for the cheques from his neighbor. He gives the tourist Rs. 50 change. Later, the neighbor discovers the cheques are counterfeit and demands his Rs. 400 back. The shopkeeper refunds him. How much money did the shopkeeper lose in total?",
+      "option1": "200",
+      "option2": "300",
+      "option3": "350",
+      "option4": "400",
+      "correct_answer": "option3",
+      "positive_mark": 1,
+      "negative_mark": 0,
+      "type": "MCQ"
+    },
+    {
+      "question": "What goes up but never comes down?",
+      "correct_answer": ["Age","age","AGE"],
+      "positive_mark": 1,
+      "negative_mark": 0    ,
+      "type": "Riddle"
+    },
+    {
+      "question": "Find the missing",
+      "image": "1A_2.png",
+      "option1": "1A_2_1.png",
+      "option2": "1A_2_2.png",
+      "option3": "1A_2_3.png",
+      "option4": "1A_2_4.png",
+      "correct_answer": "option4",
+      "positive_mark": 1,
+      "negative_mark": 0,
+      "type": "MCQ"
+    },
+    {
+      "question": "Next term: 0, 3, 8, 15, 24, 35, ?",
+      "option1": "48",
+      "option2": "47",
+      "option3": "49",
+      "option4": "46",
+      "correct_answer": "option1",
+      "positive_mark": 1,
+      "negative_mark": 0,
+      "type": "MCQ"
+    },
+    {
+      "question": "Complete: 13, 21, 34, 55, 89, ?",
+      "option1": "144",
+      "option2": "142",
+      "option3": "146",
+      "option4": "140",
+      "correct_answer": "option1",
+      "positive_mark": 1,
+      "negative_mark": 0,
+      "type": "MCQ"
+    },
+    {
+      "question": "What is full of holes but still holds water?",
+      "correct_answer": ["Sponge","sponge","SPONGE"],
+      "positive_mark": 1,
+      "negative_mark": 0,
+      "type": "Riddle"
+    }
+  ]
+}

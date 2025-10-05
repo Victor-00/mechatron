@@ -1,0 +1,49 @@
+{
+  "paper": "4A",
+  "questions": [
+    {
+      "question": "A series with one wrong term is given. Below it, a new series follows the same corrected logic. Find the value of (f)\nSeries to Fix: 882, 700, 568, 512, 490, 470, 464\nNew Series: 642, (a), (b), (c), (d), (e), (f)",
+      "option1": "230",
+      "option2": "242",
+      "option3": "224",
+      "option4": "272",
+      "correct_answer": "option3",
+      "positive_mark": 5,
+      "negative_mark": -2,
+      "type": "MCQ"
+    },
+    {
+      "question": "What Were You Doing When the Lights Went Out? (Logic/Math) Last time there was load shedding in Calcutta. I was reading a very interesting book and I could not stop. My neighbour Parveen gave me two candles and assured me that I could manage with them. Though the candles were of the same length, Parveen told me that one candle would burn for four hours and the other for five hours. After I had been reading for some time I put the candles out as the lights came on again. And I noticed that what remained of one candle was exactly four times the length of what was left of other. Can you find out just how long those two candles were burning?",
+      "option1": "2 hours and 30 minutes",
+      "option2": "3 hours",
+      "option3": "3 hours and 20 minutes",
+      "option4": "3 hours and 45 minutes",
+      "correct_answer": "option3",
+      "positive_mark": 4,
+      "negative_mark": -2,
+      "type": "MCQ"
+    },
+    {
+      "question": "What should come in place of the question mark (?)?\nSeries: 13, 16, 22, 24, 28, ?",
+      "correct_answer": "36",
+      "positive_mark": 3,
+      "negative_mark": 0,
+      "type": "Integer"
+    },
+    {
+      "question": "Find the wrong term in the series.\nSeries: 6, 3.5, 4.5, 11, 50, 392",
+      
+      "correct_answer": "50",
+      "positive_mark": 2,
+      "negative_mark": 0,
+      "type": "Integer"
+    },
+    {
+      "question": "Paul's height is six feet, he's an assistant at a butcher's shop, and wears size 9 shoes. What does he weigh?Give one word answer",
+      "correct_answer": ["Meat","meat","MEAT","Flesh","flesh","FLESH"],
+      "positive_mark": 1,
+      "negative_mark": 0,
+      "type": "Riddle"
+    }
+  ]
+}

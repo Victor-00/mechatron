@@ -1,0 +1,101 @@
+{
+  "paper": "1B",
+  "questions": [
+    {
+      "question": "Find the missing figure:",
+      "image": "1B_1.png",
+      "option1": "1B_1_1.png",
+      "option2": "1B_1_2.png",
+      "option3": "1B_1_3.png",
+      "option4": "1B_1_4.png",
+      "correct_answer": "option1",
+      "positive_mark": 1,
+      "negative_mark": 0,
+      "type": "MCQ"
+    },
+    {
+      "question": "What loses its head in the morning but gets it back at night?",
+      "correct_answer": ["Pillow","pillow","PILLOW"],
+      "positive_mark": 1,
+      "negative_mark": 0,
+      "type": "Riddle"
+    },
+    {
+      "question": "A taxi driver's number plate has a number such that when divided by 2, 3, 4, 5, or 6, there is always a remainder of 1. But when divided by 11, there is no remainder. What is the lowest such number?",
+      "option1": "121",
+      "option2": "241",
+      "option3": "361",
+      "option4": "61",
+      "correct_answer": "option1",
+      "positive_mark": 1,
+      "negative_mark": 0,
+      "type": "MCQ"
+    },
+    {
+      "question": "What is the longest word in the dictionary? ",
+      "correct_answer": ["pneumonoultramicroscopicsilicovolcanoconiosis","Pneumonoultramicroscopicsilicovolcanoconiosis","PNEUMONOULTRAMICROSCOPICSILICOVOLCANOCONIOSIS"],
+      "positive_mark": 1,
+      "negative_mark": 0,
+      "type": "Riddle"
+    },
+    {
+      "question": " I love to dance and twist. I shake my tail as I sail away. When I fly wingless into the sky. What am I?",
+      "correct_answer": ["Kite","kite","KITE"],
+      "positive_mark": 1,
+      "negative_mark": 0,
+      "type": "Riddle"
+    },
+    {
+      "question": "A standard-sized cigarette can be rolled out of 6 standard-sized cigarette butts. How many cigarettes can be made and smoked from 36 butts?",
+      "option1": "7",
+      "option2": "8",
+      "option3": "9",
+      "option4": "6",
+      "correct_answer": "option1",
+      "positive_mark": 1,
+      "negative_mark": 0,
+      "type": "MCQ"
+    },
+    {
+      "question": "What kind of tree can you carry in your hand? ",
+      "correct_answer": ["palm tree","Palm tree","PALM TREE"],
+      "positive_mark": 1,
+      "negative_mark": 0,
+      "type": " Riddle"
+    },
+    {
+      "question": "Series: 655, 439, 314, 250, 223, ? ",
+      "option1": "215",
+      "option2": "217",
+      "option3": "205",
+      "option4": "213",
+      "correct_answer": "option1",
+      "positive_mark": 1,
+      "negative_mark": 0,
+      "type": "MCQ"
+    },
+    {
+      "question": "Find out:",
+      "image": "1B_2.png",
+      "option1": "1B_2_1.png",
+      "option2": "1B_2_2.png",
+      "option3": "1B_2_3.png",
+      "option4": "1B_2_4.png",
+      "correct_answer": "option4",
+      "positive_mark": 1,
+      "negative_mark": 0,
+      "type": "MCQ"
+    },
+    {
+      "question": " I have a money pouch containing Rs. 700. There are equal number of 25 paise coins, 50 paise coins and one rupee coins. How many of each are there? ",
+      "option1": "100 of each",
+      "option2": "200 of each",
+      "option3": "400 of each",
+      "option4": "500 of each",
+      "correct_answer": "option3",
+      "positive_mark": 1,
+      "negative_mark": 0,
+      "type": "MCQ"
+    }
+  ]
+}
