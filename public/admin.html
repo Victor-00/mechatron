@@ -24,37 +24,15 @@
             margin: 0 auto;
         }
 
-        .auth-section {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            margin-bottom: 30px;
-        }
-
         h1 {
-            color: #667eea;
-            margin-bottom: 20px;
+            color: white;
+            margin-bottom: 30px;
             text-align: center;
         }
 
         h2 {
             color: #667eea;
             margin-bottom: 20px;
-        }
-
-        .password-form {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        input[type="password"] {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 16px;
         }
 
         button {
@@ -78,10 +56,6 @@
 
         button.success {
             background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        }
-
-        .hidden {
-            display: none;
         }
 
         .stats {
@@ -168,15 +142,8 @@
             flex-wrap: wrap;
         }
 
-        .logout-btn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #f5576c;
-        }
-
         @media (max-width: 768px) {
-            .auth-section, .teams-table {
+            .teams-table {
                 padding: 20px;
             }
 
@@ -191,62 +158,147 @@
     </style>
 </head>
 <body>
-    <!-- Authentication Section -->
-    <div id="auth-section" class="auth-section">
-        <h1>🔐 Admin Login</h1>
-        <div class="password-form">
-            <input type="password" id="admin-password" placeholder="Enter Admin Password">
-            <button onclick="authenticate()">Login</button>
-        </div>
-        <div id="auth-message"></div>
-    </div>
-
-    <!-- Admin Panel (hidden until authenticated) -->
-    <div id="admin-panel" class="hidden">
-        <button class="logout-btn" onclick="logout()">Logout</button>
+    <div class="container">
+        <h1>📊 Login Management Dashboard</h1>
         
-        <div class="container">
-            <h1>📊 Login Management Dashboard</h1>
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="total-teams">0</div>
+                <div class="stat-label">Logged In Teams</div>
+            </div>
+        </div>
+
+        <div class="teams-table">
+            <h2>Logged In Teams</h2>
+            <div id="message"></div>
             
-            <div class="stats">
-                <div class="stat-card">
-                    <div class="stat-number" id="total-teams">0</div>
-                    <div class="stat-label">Logged In Teams</div>
-                </div>
+            <div class="controls">
+                <button class="success" onclick="refreshData()">🔄 Refresh</button>
+                <button class="danger" onclick="resetAllLogins()">🗑️ Reset All Logins</button>
             </div>
 
-            <div class="teams-table">
-                <h2>Logged In Teams</h2>
-                <div id="message"></div>
-                
-                <div class="controls">
-                    <button class="success" onclick="refreshData()">🔄 Refresh</button>
-                    <button class="danger" onclick="resetAllLogins()">🗑️ Reset All Logins</button>
-                </div>
-
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Team ID</th>
-                            <th>Login Time</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="teams-tbody">
-                        <tr>
-                            <td colspan="3" style="text-align: center;">Loading...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Team ID</th>
+                        <th>Login Time</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="teams-tbody">
+                    <tr>
+                        <td colspan="3" style="text-align: center;">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
     <script>
-        let adminPassword = '';
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+        });
 
-        function authenticate() {
-            const password = document.getElementById('admin-password').value;
-            const messageEl = document.getElementById('auth-message');
+        function showMessage(text, type = 'success') {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `<div class="message ${type}">${text}</div>`;
+            setTimeout(() => {
+                messageDiv.innerHTML = '';
+            }, 3000);
+        }
 
-            if (!
+        function loadData() {
+            fetch('/api/logged-teams')
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    showMessage('Failed to load data', 'error');
+                    return;
+                }
+
+                const teams = data.loggedInTeams || [];
+                document.getElementById('total-teams').textContent = teams.length;
+
+                const tbody = document.getElementById('teams-tbody');
+                if (teams.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">No teams have logged in yet</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = teams.map(team => `
+                    <tr>
+                        <td>${team.teamId}</td>
+                        <td>${new Date(team.loginTime).toLocaleString()}</td>
+                        <td>
+                            <button class="action-btn danger" onclick="removeTeam('${team.teamId}')">Remove</button>
+                        </td>
+                    </tr>
+                `).join('');
+            })
+            .catch(error => {
+                console.error('Error loading data:', error);
+                showMessage('Error loading data', 'error');
+            });
+        }
+
+        function refreshData() {
+            showMessage('Refreshing data...');
+            loadData();
+        }
+
+        function resetAllLogins() {
+            if (!confirm('Are you sure you want to reset ALL logins? This cannot be undone!')) {
+                return;
+            }
+
+            fetch('/admin/reset-logins', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage('All logins reset successfully');
+                    loadData();
+                } else {
+                    showMessage('Failed to reset logins', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error resetting logins:', error);
+                showMessage('Error resetting logins', 'error');
+            });
+        }
+
+        function removeTeam(teamId) {
+            if (!confirm(`Remove team ${teamId}? They will be able to login again.`)) {
+                return;
+            }
+
+            fetch('/admin/remove-team', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ teamId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage(`Team ${teamId} removed successfully`);
+                    loadData();
+                } else {
+                    showMessage('Failed to remove team', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error removing team:', error);
+                showMessage('Error removing team', 'error');
+            });
+        }
+    </script>
+</body>
+</html>
