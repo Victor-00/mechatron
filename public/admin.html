@@ -72,6 +72,10 @@
             background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
             color: #333;
         }
+        
+        button.publish {
+            background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
+        }
 
         .stats {
             display: grid;
@@ -261,6 +265,7 @@
                 <button class="success" id="keep-selected-btn" onclick="keepSelectedTeams()" disabled>✅ Keep Selected Only</button>
                 <button class="danger" id="delete-selected-btn" onclick="deleteSelectedTeams()" disabled>🗑️ Delete Selected</button>
                 <button class="danger" onclick="resetAllLogins()">🗑️ Reset All Logins</button>
+                <button class="publish" onclick="publishResults()">🚀 Publish Results & Redirect Users</button>
             </div>
 
             <div class="controls" style="align-items: center;">
@@ -299,7 +304,6 @@
     <script>
         let allTeams = [];
 
-        // Load data on page load
         document.addEventListener('DOMContentLoaded', function() {
             loadData();
         });
@@ -343,13 +347,10 @@
 
                 allTeams = data.loggedInTeams || [];
                 
-                // Sort teams by marks (descending), then by endTime (ascending - earlier is better)
                 allTeams.sort((a, b) => {
-                    // First compare marks (higher is better)
                     if (b.marks !== a.marks) {
                         return b.marks - a.marks;
                     }
-                    // If marks are equal, compare endTime (earlier is better)
                     const aTime = a.endTime ? new Date(a.endTime).getTime() : Infinity;
                     const bTime = b.endTime ? new Date(b.endTime).getTime() : Infinity;
                     return aTime - bTime;
@@ -409,7 +410,6 @@
             keepBtn.disabled = count === 0;
             deleteBtn.disabled = count === 0;
             
-            // Update select-all checkbox state
             const allCheckboxes = document.querySelectorAll('.team-checkbox');
             const selectAllCheckbox = document.getElementById('select-all');
             if (allCheckboxes.length > 0) {
@@ -430,11 +430,9 @@
                 return;
             }
 
-            // Get all team IDs from checkboxes
             const allCheckboxes = document.querySelectorAll('.team-checkbox');
             const allTeamIds = Array.from(allCheckboxes).map(cb => cb.value);
             
-            // Get teams to remove (all teams NOT selected)
             const teamsToRemove = allTeamIds.filter(teamId => !selectedTeamIds.includes(teamId));
 
             if (teamsToRemove.length === 0) {
@@ -450,7 +448,6 @@
                 return;
             }
 
-            // Remove unselected teams
             let successCount = 0;
             let failCount = 0;
 
@@ -489,6 +486,31 @@
         function refreshData() {
             showMessage('Refreshing data...');
             loadData();
+        }
+        
+        function publishResults() {
+            if (!confirm('Are you sure you want to publish the results? This will redirect all users from the results page to the selection status page.')) {
+                return;
+            }
+
+            fetch('/admin/publish-results', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage('Results published successfully! Users will be redirected.', 'success');
+                } else {
+                    showMessage('Failed to publish results: ' + (data.message || 'Unknown error'), 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error publishing results:', error);
+                showMessage('Error publishing results: ' + error.message, 'error');
+            });
         }
 
         function resetAllLogins() {
@@ -533,7 +555,6 @@
                 return;
             }
 
-            // Delete selected teams
             let successCount = 0;
             let failCount = 0;
 
@@ -586,7 +607,6 @@
                 return;
             }
             
-            // Parse team ID numbers (comma-separated)
             const teamIdNumbers = teamIdsStr.split(',').map(id => id.trim()).filter(id => id.length > 0);
             
             if (teamIdNumbers.length === 0) {
@@ -599,23 +619,19 @@
                 return;
             }
             
-            // Use the team IDs as entered (just the numbers)
             const teamIds = teamIdNumbers;
             
             console.log('Looking for team IDs:', teamIds);
             
-            // Get all available checkboxes and log them
             const allCheckboxes = document.querySelectorAll('.team-checkbox');
             console.log('Available team checkboxes:');
             allCheckboxes.forEach(cb => {
                 console.log('  - Checkbox value:', cb.value);
             });
             
-            // First, uncheck all checkboxes
             allCheckboxes.forEach(cb => cb.checked = false);
             document.getElementById('select-all').checked = false;
             
-            // Select the specified teams
             let foundCount = 0;
             let notFoundTeams = [];
             
@@ -641,7 +657,6 @@
                 showMessage(`None of the specified teams were found in the logged-in teams list`, 'error');
             }
             
-            // Clear inputs
             numTeamsInput.value = '';
             teamIdsInput.value = '';
         }
@@ -661,11 +676,9 @@
                 showMessage(`Only ${allCheckboxes.length} teams available. Selecting all.`, 'error');
             }
             
-            // Uncheck all first
             allCheckboxes.forEach(cb => cb.checked = false);
             document.getElementById('select-all').checked = false;
             
-            // Select top N (they are already sorted by rank)
             let selectedCount = 0;
             allCheckboxes.forEach((checkbox, index) => {
                 if (index < n) {
@@ -677,7 +690,6 @@
             updateSelectedCount();
             showMessage(`Selected top ${selectedCount} candidate(s)`, 'success');
             
-            // Clear input
             topNInput.value = '';
         }
     </script>
