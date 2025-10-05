@@ -115,24 +115,7 @@ function markTeamAsLoggedIn(teamId) {
   }
 }
 
-// Rate limiting
-const loginAttempts = new Map();
-const RATE_LIMIT_WINDOW = 60000; // 1 minute
-const MAX_ATTEMPTS = 5;
-
-function checkRateLimit(ip) {
-  const now = Date.now();
-  const attempts = loginAttempts.get(ip) || [];
-  const recentAttempts = attempts.filter(time => now - time < RATE_LIMIT_WINDOW);
-  
-  if (recentAttempts.length >= MAX_ATTEMPTS) {
-    return false;
-  }
-  
-  recentAttempts.push(now);
-  loginAttempts.set(ip, recentAttempts);
-  return true;
-}
+// Rate limiting removed - users can have infinite login attempts
 
 // Get logged in teams endpoint
 app.get('/api/logged-teams', (req, res) => {
@@ -153,16 +136,6 @@ app.get('/api/logged-teams', (req, res) => {
 
 // Login endpoint
 app.post('/login', (req, res) => {
-  const clientIp = req.ip || req.connection.remoteAddress;
-  
-  // Check rate limit
-  if (!checkRateLimit(clientIp)) {
-    return res.status(429).json({
-      success: false,
-      message: 'Too many login attempts. Please try again later.'
-    });
-  }
-  
   const { teamId, regNum } = req.body;
   
   if (!teamId || !regNum) {
@@ -334,4 +307,3 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`Login tracker file: ${LOGIN_TRACKER_PATH}`);
 });
-
