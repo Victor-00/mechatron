@@ -10,6 +10,9 @@ const LOGIN_TRACKER_PATH = path.join(__dirname, 'login_tracker.json');
 const SCORES_PATH = path.join(__dirname, 'public', 'scores.json');
 const QUESTIONS_PATH = path.join(__dirname, 'public', 'questions.json');
 
+// State variable to track if results have been published
+let resultsPublished = false;
+
 // CORS configuration
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
@@ -263,6 +266,15 @@ app.post('/submit-quiz', (req, res) => {
   }
 });
 
+// Endpoint for the results.html page to check the status of the switch
+app.get('/api/results-status', (req, res) => {
+    res.json({ published: resultsPublished });
+});
+
+// ============================================
+// ADMIN ROUTES
+// ============================================
+
 // Admin endpoint - View logged teams
 app.get('/admin/logged-teams', (req, res) => {
   console.log('Admin API call to /admin/logged-teams');
@@ -278,6 +290,8 @@ app.get('/admin/logged-teams', (req, res) => {
 app.post('/admin/reset-logins', (req, res) => {
   const resetData = { loggedInTeams: [] };
   if (writeLoginTracker(resetData)) {
+    resultsPublished = false; // <-- RESET THE PUBLISH STATUS
+    console.log('All logins and published status have been reset.');
     res.json({
       success: true,
       message: 'Login tracker reset successfully'
@@ -332,6 +346,13 @@ app.post('/admin/remove-team', (req, res) => {
       message: 'Error removing team'
     });
   }
+});
+
+// Endpoint for the admin panel to "flip the switch"
+app.post('/admin/publish-results', (req, res) => {
+    resultsPublished = true;
+    console.log('Results have been published. Users will now be redirected.');
+    res.json({ success: true, message: 'Results published.' });
 });
 
 // ============================================
