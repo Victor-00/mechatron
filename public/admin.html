@@ -163,16 +163,6 @@
             cursor: pointer;
         }
 
-        .selection-info {
-            display: inline-block;
-            padding: 8px 16px;
-            background: #f0f0f0;
-            border-radius: 8px;
-            font-weight: 600;
-            color: #667eea;
-            margin-right: 10px;
-        }
-
         @media (max-width: 768px) {
             .teams-table {
                 padding: 20px;
@@ -243,7 +233,6 @@
     <script>
         let allTeams = [];
 
-        // Load data on page load
         document.addEventListener('DOMContentLoaded', function() {
             loadData();
         });
@@ -256,36 +245,32 @@
             }, 3000);
         }
 
-        function loadData() {
-            fetch('/api/logged-teams')
-            .then(response => {
+        async function loadData() {
+            try {
+                const response = await fetch('/admin/logged-teams', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
                 console.log('Response status:', response.status);
-                console.log('Response headers:', response.headers.get('content-type'));
+                console.log('Response type:', response.headers.get('content-type'));
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
-                return response.text();
-            })
-            .then(text => {
-                console.log('Response text:', text);
-                
-                let data;
-                try {
-                    data = JSON.parse(text);
-                } catch (e) {
-                    console.error('Failed to parse JSON:', e);
-                    console.error('Response was:', text);
-                    throw new Error('Invalid JSON response from server');
-                }
+                const data = await response.json();
+                console.log('Received data:', data);
                 
                 if (!data.success) {
                     showMessage('Failed to load data: ' + (data.message || 'Unknown error'), 'error');
                     return;
                 }
 
-                allTeams = data.loggedInTeams || [];
+                allTeams = data.teams || [];
                 document.getElementById('total-teams').textContent = allTeams.length;
                 updateSelectedCount();
 
@@ -304,11 +289,11 @@
                         <td>${new Date(team.loginTime).toLocaleString()}</td>
                     </tr>
                 `).join('');
-            })
-            .catch(error => {
+            } catch (error) {
                 console.error('Error loading data:', error);
                 showMessage('Error loading data: ' + error.message, 'error');
-            });
+                document.getElementById('teams-tbody').innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">Error loading teams. Check console for details.</td></tr>';
+            }
         }
 
         function toggleSelectAll() {
@@ -331,7 +316,6 @@
             const keepBtn = document.getElementById('keep-selected-btn');
             keepBtn.disabled = count === 0;
             
-            // Update select-all checkbox state
             const allCheckboxes = document.querySelectorAll('.team-checkbox');
             const selectAllCheckbox = document.getElementById('select-all');
             if (allCheckboxes.length > 0) {
@@ -344,7 +328,7 @@
             return Array.from(selectedCheckboxes).map(cb => cb.value);
         }
 
-        function keepSelectedTeams() {
+        async function keepSelectedTeams() {
             const selectedTeamIds = getSelectedTeamIds();
             
             if (selectedTeamIds.length === 0) {
@@ -352,11 +336,8 @@
                 return;
             }
 
-            // Get all team IDs from checkboxes
             const allCheckboxes = document.querySelectorAll('.team-checkbox');
             const allTeamIds = Array.from(allCheckboxes).map(cb => cb.value);
-            
-            // Get teams to remove (all teams NOT selected)
             const teamsToRemove = allTeamIds.filter(teamId => !selectedTeamIds.includes(teamId));
 
             if (teamsToRemove.length === 0) {
@@ -372,40 +353,39 @@
                 return;
             }
 
-            // Remove unselected teams
             let successCount = 0;
             let failCount = 0;
 
-            const removePromises = teamsToRemove.map(teamId => 
-                fetch('/admin/remove-team', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ teamId })
-                })
-                .then(response => response.json())
-                .then(data => {
+            for (const teamId of teamsToRemove) {
+                try {
+                    const response = await fetch('/admin/remove-team', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ teamId })
+                    });
+                    
+                    const data = await response.json();
                     if (data.success) {
                         successCount++;
                     } else {
                         failCount++;
                     }
-                })
-                .catch(() => {
+                } catch (error) {
+                    console.error(`Failed to remove team ${teamId}:`, error);
                     failCount++;
-                })
-            );
+                }
+            }
 
-            Promise.all(removePromises).then(() => {
-                if (successCount > 0) {
-                    showMessage(`Successfully kept ${selectedTeamIds.length} team(s) and removed ${successCount} team(s)`, 'success');
-                }
-                if (failCount > 0) {
-                    showMessage(`Failed to remove ${failCount} team(s)`, 'error');
-                }
-                loadData();
-            });
+            if (successCount > 0) {
+                showMessage(`Successfully kept ${selectedTeamIds.length} team(s) and removed ${successCount} team(s)`, 'success');
+            }
+            if (failCount > 0) {
+                showMessage(`Failed to remove ${failCount} team(s)`, 'error');
+            }
+            
+            await loadData();
         }
 
         function refreshData() {
@@ -413,30 +393,31 @@
             loadData();
         }
 
-        function resetAllLogins() {
+        async function resetAllLogins() {
             if (!confirm('Are you sure you want to reset ALL logins? This cannot be undone!')) {
                 return;
             }
 
-            fetch('/admin/reset-logins', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
+            try {
+                const response = await fetch('/admin/reset-logins', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
                 if (data.success) {
                     showMessage('All logins reset successfully');
-                    loadData();
+                    await loadData();
                 } else {
                     showMessage('Failed to reset logins', 'error');
                 }
-            })
-            .catch(error => {
+            } catch (error) {
                 console.error('Error resetting logins:', error);
                 showMessage('Error resetting logins', 'error');
-            });
+            }
         }
     </script>
 </body>
