@@ -308,6 +308,12 @@
             throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
           }
           questions = await response.json(); 
+
+          // FIXED: Check if the response is actually an array before proceeding
+          if (!Array.isArray(questions)) {
+            throw new Error("The question data received from the server is not a valid list.");
+          }
+
           questions.forEach(q => { q.answered = false; q.skipped = false; q.selected = null; }); 
           startQuiz(); 
         } catch (error) { 
@@ -357,7 +363,6 @@
       function renderDiceMenu() { diceMenu.innerHTML = ''; questions.forEach((q, i) => { const dice = document.createElement('div'); dice.classList.add('menu-dice'); dice.id = `dice-${i}`; dice.textContent = i + 1; dice.addEventListener('click', () => { currentQuestionIndex = i; renderQuestion(); }); diceMenu.appendChild(dice); }); }
       function updateDiceStatus() { questions.forEach((q, i) => { const dice = document.getElementById(`dice-${i}`); dice.classList.remove('answered', 'skipped'); if (q.answered) dice.classList.add('answered'); else if (q.skipped) dice.classList.add('skipped'); }); }
       
-      // FIXED: Correctly calculates score based on 'correctAnswerIndex' and 'marks'
       function calculateScore() {
         score = questions.reduce((acc, q) => {
             if (q.selected === q.correctAnswerIndex) {
@@ -372,5 +377,4 @@
   </script>
 </body>
 </html>
-
 
