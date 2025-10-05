@@ -559,8 +559,16 @@
             // Convert numbers to full team IDs (e.g., "3456" -> "TEAM_ID_3456")
             const teamIds = teamIdNumbers.map(num => `TEAM_ID_${num}`);
             
-            // First, uncheck all checkboxes
+            console.log('Looking for team IDs:', teamIds);
+            
+            // Get all available checkboxes and log them
             const allCheckboxes = document.querySelectorAll('.team-checkbox');
+            console.log('Available team checkboxes:');
+            allCheckboxes.forEach(cb => {
+                console.log('  - Checkbox value:', cb.value);
+            });
+            
+            // First, uncheck all checkboxes
             allCheckboxes.forEach(cb => cb.checked = false);
             document.getElementById('select-all').checked = false;
             
@@ -569,7 +577,9 @@
             let notFoundTeams = [];
             
             teamIds.forEach((teamId, index) => {
+                console.log(`Searching for: "${teamId}"`);
                 const checkbox = document.querySelector(`.team-checkbox[value="${teamId}"]`);
+                console.log(`Found checkbox:`, checkbox);
                 if (checkbox) {
                     checkbox.checked = true;
                     foundCount++;
