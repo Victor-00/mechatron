@@ -324,15 +324,19 @@
                     return;
                 }
 
-                tbody.innerHTML = allTeams.map(team => `
+                tbody.innerHTML = allTeams.map(team => {
+                    // Extract just the number from TEAM_ID_X for display, but keep full ID in value
+                    const displayId = team.teamId.replace('TEAM_ID_', '');
+                    return `
                     <tr>
                         <td class="checkbox-cell">
                             <input type="checkbox" class="team-checkbox" value="${team.teamId}" onchange="updateSelectedCount()">
                         </td>
-                        <td>${team.teamId}</td>
+                        <td>${displayId}</td>
                         <td>${new Date(team.loginTime).toLocaleString()}</td>
                     </tr>
-                `).join('');
+                    `;
+                }).join('');
             })
             .catch(error => {
                 console.error('Error loading data:', error);
