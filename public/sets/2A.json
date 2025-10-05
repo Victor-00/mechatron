@@ -1,0 +1,51 @@
+{
+  "paper": "2A",
+  "questions": [
+    {
+      "question": "When the above is folded to form a cube, which is the only one of the following that can be produced?",
+      "image": "2A_3.png",
+      "option1": "2A_3_1.png",
+      "option2": "2A_3_2.png",
+      "option3": "2A_3_3.png",
+      "option4": "2A_3_4.png",
+      "correct_answer": "option4",
+      "positive_mark": 5,
+      "negative_mark": -3,
+      "type": "MCQ"
+    },
+    {
+      "question": "Find the missing figure:",
+      "image": "2A_2.png",
+      "option1": "2A_2_1.png",
+      "option2": "2A_2_2.png",
+      "option3": "2A_2_3.png",
+      "option4": "2A_2_4.png",
+      "correct_answer": "option4",
+      "positive_mark": 4,
+      "negative_mark": -3,
+      "type": "MCQ"
+    },
+    {
+      "question": "In the below question the problem figures follow a specific series. Find the option which maintains the correct next series.",
+      "image": "2A_1.png",
+      "correct_answer": "2",
+      "positive_mark": 1,
+      "negative_mark": 0,
+      "type": "Integer"
+    },
+    {
+      "question": "What is the missing number in the sequence?\n10,100,20,90,30,80,...?",
+      "correct_answer": "40",
+      "positive_mark": 2,
+      "negative_mark": 0,
+      "type": "Integer"
+    },
+    {
+      "question": "I have many different faces, but I never show one. I am at the center of a puzzle, but I'm not a piece. What am I?",
+      "correct_answer": ["Answer","answer","ANSWER","An answer","an answer","AN ANSWER","The answer","the answer","THE ANSWER"],
+      "positive_mark": 3,
+      "negative_mark": 0,
+      "type": "Riddle"
+    }
+  ]
+}

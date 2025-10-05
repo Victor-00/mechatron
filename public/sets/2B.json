@@ -1,0 +1,49 @@
+{
+  "paper": "2B",
+  "questions": [
+    {
+      "question": "A number of cats killed a total of 999919 mice. Each cat killed an equal number of mice. Each cat killed more mice than there were cats. How many cats were there?",
+      "option1": "991",
+      "option2": "1009",
+      "option3": "999919",
+      "option4": "1",
+      "correct_answer": "option1",
+      "positive_mark": 4,
+      "negative_mark": -3,
+      "type": "MCQ"
+    },
+    {
+      "question": "We have a circular dining table with a diameter 15 times the diameter of some circular saucers. How many saucers can be placed on the table, so they do not overlap each other or the edge of the table?",
+      "option1": "187",
+      "option2": "180",
+      "option3": "196",
+      "option4": "150",
+      "correct_answer": "option2",
+      "positive_mark": 5,
+      "negative_mark": -3,
+      "type": "MCQ"
+    },
+    {
+      "question": "Complete the sequence: 6, 12, 21, 33, 48, ?",
+      "correct_answer": "66",
+      "positive_mark": 3,
+      "negative_mark": 0,
+      "type": "Integer"
+    },
+    {
+      "question": "There is a number whose double is greater than its half by 45, Find the number",
+      
+      "correct_answer": "30",
+      "positive_mark": 1,
+      "negative_mark": 0,
+      "type": "Integer"
+    },
+    {
+      "question": "I am a word. If you remove my first letter, I sound the same. If you remove my second letter, I still sound the same. I am the first human to fly to the moon. What word am I?",
+      "correct_answer": ["Neil Armstrong","neil armstrong","NEIL ARMSTRONG","Neil armstrong","neil Armstrong","NEIL armstrong","Armstrong","armstrong","ARMSTRONG","neil","Neil","NEIL"],
+      "positive_mark": 2,
+      "negative_mark": 0,
+      "type": "Riddle"
+    }
+  ]
+}

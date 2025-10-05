@@ -1,0 +1,51 @@
+{
+  "paper": "6A",
+  "questions": [
+    {
+      "question": "Solve:",
+      "image": "6A_1.png",
+      "option1": "48",
+      "option2": "129",
+      "option3": "84",
+      "option4": "58",
+      "correct_answer": "option1",
+      "positive_mark": 4,
+      "negative_mark": -3,
+      "type": "MCQ"
+    },
+    {
+      "question": "It was at a cocktail party in New York that I met Stephanie. We exchanged our phone numbers and decided to meet each other soon. When she rang up and invited me to her house, this is how she gave me the number of her house. I live in a long street. Numbered on the side of my house are the houses one, two, three and so on. All the numbers on one side of my house add up to exactly the same as all the numbers on the other side of my house. I know there are more than fifty houses on that side of the street, but not so many as five hundred. Can you find Stephanie's house number?",
+      "option1": "288",
+      "option2": "204",
+      "option3": "350",
+      "option4": "140",
+      "correct_answer": "option2",
+      "positive_mark": 5,
+      "negative_mark": -4,
+      "type": "MCQ"
+    },
+    {
+"question": "A series with one wrong term is given. Below it, a new series follows the same corrected logic. Find the value of (e).\nSeries to Fix: 12162.15, 810.81, 62.37, 5.95, .63, .09\nNew Series: 148648.5, (a), (b), (c), (d), (e)",
+      "correct_answer": "1.1",
+      "positive_mark": 3,
+      "negative_mark": 0,
+      "type": "Integer"
+    },
+    {
+      "question": "Solve",
+      "image": "6A_3.png",
+      "correct_answer": "4",
+      "positive_mark": 1,
+      "negative_mark": 0,
+      "type": "Integer"
+    },
+    {
+      "question": "Write the product of both the unknown numbers in the answer ",
+      "image": "6A_2.png",
+      "correct_answer": "792",
+      "positive_mark": 2,
+      "negative_mark": 0,
+      "type": "Integer"
+    }
+  ]
+}

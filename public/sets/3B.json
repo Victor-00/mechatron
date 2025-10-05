@@ -1,0 +1,51 @@
+{
+  "paper": "3B ",
+  "questions": [
+    {
+      "question": "Problem figure:",
+      "image": "3B_2.png",
+      "option1": "3B_2_1.png",
+      "option2": "3B_2_2.png",
+      "option3": "3B_2_3.png",
+      "option4": "3B_2_4.png",
+      "correct_answer": "option1",
+      "positive_mark": 4,
+      "negative_mark": -2,
+      "type": "MCQ"
+    },
+    {
+      "question": "calculate:",
+      "image": "",
+      "option1": "135,6",
+      "option2": "126,4",
+      "option3": "124,8",
+      "option4": "135,5",
+      "correct_answer": "option4",
+      "positive_mark": 5,
+      "negative_mark": -2,
+      "type": "MCQ"
+    },
+    {
+      "question": "find out:",
+      "image": "3B_1.png",
+      "correct_answer": "5",
+      "positive_mark": 1,
+      "negative_mark": 0,
+      "type": "Integer"
+    },
+    {
+      "question": "You have three square boards. The surface of the first containing five square feet more than the second, and the second containing five square feet more than the third. Can you find the exact measurements for the sides of the boards?(answer format- 'ans1,ans2,ans3')",
+      "correct_answer": "31,41,49",
+      "positive_mark": 2,
+      "negative_mark": 0,
+      "type": "Integer"
+    },
+    {
+      "question": "Fifty minutes ago, if it was four times as many minutes past three o'clock, how many minutes is it to six o'clock?",
+      "correct_answer": "26",
+      "positive_mark": 3,
+      "negative_mark": 0,
+      "type": "Integer"
+    }
+  ]
+}

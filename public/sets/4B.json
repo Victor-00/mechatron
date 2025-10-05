@@ -1,0 +1,48 @@
+{
+  "paper": "4B",
+  "questions": [
+    {
+      "question": " A merchant needs to be able to weigh any whole number of pounds from 1 pound to 121 pounds using a balance scale. What is the minimum number of weights he needs, and what should their values be, assuming weights can be placed on either side of the scale?",
+      "option1": "6 weights: 1, 2, 4, 8, 16, 32 lbs",
+      "option2": "5 weights: 1, 3, 9, 27, 81 lbs",
+      "option3": "5 weights: 1, 5, 10, 25, 80 lbs",
+      "option4": "6 weights: 1, 4, 9, 16, 25, 66 lbs",
+      "correct_answer": "option2",
+      "positive_mark": 5,
+      "negative_mark": -2,
+      "type": "MCQ"
+    },
+    {
+      "question": "What should come in place of the question mark (?)?\nSeries: 10, 16.5, 35, 90, 273, ?",
+      "option1": "959",
+      "option2": "965",
+      "option3": "975",
+      "option4": "955.5",
+      "correct_answer": "option1",
+      "positive_mark": 4,
+      "negative_mark": -2,
+      "type": "MCQ"
+    },
+    {
+      "question": "The Mango Thieves: Three boys steal a basket of mangoes containing fewer than 100 fruits. That night, the first boy wakes up, gives one mango to a monkey, and takes exactly 1/3 of the remainder. The second boy does the same, followed by the third. In the morning, they find that the number of remaining mangoes is again one more than a multiple of three. How many mangoes were originally in the basket?",
+      "correct_answer": "79",
+      "positive_mark": 3,
+      "negative_mark": 0,
+      "type": "Integer"
+    },
+    {
+      "question": "Poor people have it. Rich people need it. If you eat it you die. What is it?",
+      "correct_answer": ["Nothing","nothing","NOTHING"],
+      "positive_mark": 2,
+      "negative_mark": 0,
+      "type": "Riddle"
+    },
+    {
+"question": "What should come in place of the question mark (?)?\nSeries: 14, 25, 47, 91, 179, ?",
+      "correct_answer": "355",
+      "positive_mark": 1,
+      "negative_mark": 0,
+      "type": "Integer"
+    }
+  ]
+}

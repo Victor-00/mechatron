@@ -1,0 +1,51 @@
+{
+  "paper": "5A",
+  "questions": [
+    {
+      "question": "8 litres are drawn from a cask full of wine and is then filled with water. This operation is performed three more times. The ratio of the quantity of wine now left in cask to that of water is 16:65. How much wine did the cask hold originally?",
+      
+      "option1": "18 litres",
+      "option2": "24 litres",
+      "option3": "32 litres",
+      "option4": "42 litres",
+      "correct_answer": "option2",
+      "positive_mark": 5,
+      "negative_mark": -4,
+      "type": "MCQ"
+    },
+    {
+      "question": "Find:",
+      "image": "5A_2.png",
+      "option1": "5A_2_1.png",
+      "option2": "5A_2_2.png",
+      "option3": "5A_2_3.png",
+      "option4": "5A_2_4.png",
+      "correct_answer": "option4",
+      "positive_mark": 4,
+      "negative_mark": -2,
+      "type": "MCQ"
+    },
+    {
+      "question": "Find the next term in the following series: 2, 4, 8, 16, 7, 14, 5, 10, (?)",
+      "correct_answer": "1",
+      "positive_mark": 1,
+      "negative_mark": 0,
+      "type": "Integer"
+    },
+    {
+      "question": "A woman on the street makes three charitable donations. First, she gives away one rupee more than half the money she has. To the second charity, she gives two rupees more than half of what she has left. To the third, she gives three rupees more than half of what remains. She is left with a single rupee. How much money did she have initially?",
+      "correct_answer": "42",
+      "positive_mark": 2,
+      "negative_mark": 0,
+      "type": "Integer"
+    },
+    {
+      "question": "Type the product of the unknown terms in the answer box",
+      "image": "5A_1.png",
+      "correct_answer": "80",
+      "positive_mark": 3,
+      "negative_mark": 0,
+      "type": "Integer"
+    }
+  ]
+}
