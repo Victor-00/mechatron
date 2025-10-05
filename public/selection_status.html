@@ -106,34 +106,31 @@
 
             teamIdDisplay.textContent = `Team ID: ${teamId}`;
 
-            // Fetch the list of disqualified teams from the specified URL.
-            fetch('https://mechatron.onrender.com/admin.html')
-                .then(response => {
-                    if (response.status === 404) {
-                        // If the file doesn't exist, no teams have login data, so this team is selected.
-                        displayResult(true);
-                        return null; // Stop the promise chain
-                    }
-                    if (!response.ok) {
-                        // For other server errors (like 500), throw an error.
-                        throw new Error('Server error while checking status.');
-                    }
-                    return response.json(); // If response is OK, parse it as JSON.
-                })
-                .then(loginData => {
-                    if (loginData === null) {
-                        return; // This case was handled by the 404 check.
-                    }
+            // The URL of your API endpoint that returns the list of logged-in teams
+            const apiUrl = '/api/logged-teams';
 
-                    // Assuming loginData is an array of objects like [{ teamId: "Team_A" }, ...]
-                    const isDisqualified = loginData.some(team => team.teamId === teamId);
+            fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Could not connect to the server.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data.success) {
+                        throw new Error(data.message || 'Failed to fetch team data.');
+                    }
                     
-                    // If the team is disqualified, they are not selected.
-                    displayResult(!isDisqualified);
+                    const loggedInTeams = data.loggedInTeams || [];
+                    
+                    // Check if the current team's ID is in the list from the server
+                    const isTeamInList = loggedInTeams.some(team => team.teamId === teamId);
+
+                    // According to your logic: if the team is in the list, they ARE selected.
+                    displayResult(isTeamInList);
                 })
                 .catch(error => {
-                    // This catches network errors or the error thrown above.
-                    console.error('Error checking selection status:', error);
+                    console.error('Error checking status:', error);
                     heading.textContent = 'Error';
                     message.textContent = 'Could not determine your status at this time. Please check your connection or contact support.';
                     container.classList.add('not-selected');
