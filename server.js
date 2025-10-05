@@ -7,9 +7,10 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 const LOGIN_TRACKER_PATH = path.join(__dirname, 'login_tracker.json');
-const DATA_PATH = path.join(__dirname, 'data');
+const SCORES_PATH = path.join(__dirname, 'public', 'scores.json');
+const QUESTIONS_PATH = path.join(__dirname, 'public', 'questions.json');
 
-// CORS configuration for production
+// CORS configuration
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
     ? ['https://mechatron.onrender.com', 'http://mechatron.onrender.com']
@@ -32,30 +33,42 @@ app.use((req, res, next) => {
   next();
 });
 
-// Function to read credentials from environment variables
-function getCredentials() {
-  const credentials = {};
+// Load teams credentials from environment variables
+function getTeamsFromEnv() {
+  const teams = {};
   
+  // Look for environment variables in format: TEAM_ID_<teamid>=<regNum>
   Object.keys(process.env).forEach(key => {
-    if (key.startsWith('TEAM_')) {
-      credentials[key] = process.env[key];
+    if (key.startsWith('TEAM_ID_')) {
+      const teamId = key.replace('TEAM_ID_', '');
+      teams[teamId] = process.env[key];
     }
   });
   
-  return credentials;
+  return teams;
 }
 
-// Function to initialize login tracker file
+// Initialize login tracker file
 function initializeLoginTracker() {
-  if (!fs.existsSync(LOGIN_TRACKER_PATH)) {
-    fs.writeFileSync(LOGIN_TRACKER_PATH, JSON.stringify({ loggedInTeams: [] }, null, 2));
-    console.log('Login tracker file created');
+  try {
+    if (!fs.existsSync(LOGIN_TRACKER_PATH)) {
+      const initialData = { loggedInTeams: [] };
+      fs.writeFileSync(LOGIN_TRACKER_PATH, JSON.stringify(initialData, null, 2));
+      console.log('Login tracker file created');
+    } else {
+      console.log('Login tracker file exists');
+    }
+  } catch (error) {
+    console.error('Error initializing login tracker:', error);
   }
 }
 
-// Function to read login tracker
+// Read login tracker
 function readLoginTracker() {
   try {
+    if (!fs.existsSync(LOGIN_TRACKER_PATH)) {
+      initializeLoginTracker();
+    }
     const data = fs.readFileSync(LOGIN_TRACKER_PATH, 'utf8');
     return JSON.parse(data);
   } catch (error) {
@@ -64,27 +77,36 @@ function readLoginTracker() {
   }
 }
 
-// Function to check if team has already logged in
-function isTeamLoggedIn(teamKey) {
-  const tracker = readLoginTracker();
-  return tracker.loggedInTeams.includes(teamKey);
+// Write login tracker
+function writeLoginTracker(data) {
+  try {
+    fs.writeFileSync(LOGIN_TRACKER_PATH, JSON.stringify(data, null, 2));
+    return true;
+  } catch (error) {
+    console.error('Error writing login tracker:', error);
+    return false;
+  }
 }
 
-// Function to mark team as logged in
-function markTeamAsLoggedIn(teamKey) {
+// Check if team has already logged in
+function isTeamLoggedIn(teamId) {
+  const tracker = readLoginTracker();
+  return tracker.loggedInTeams.some(team => team.teamId === teamId);
+}
+
+// Mark team as logged in
+function markTeamAsLoggedIn(teamId) {
   try {
     const tracker = readLoginTracker();
     
-    if (!tracker.loggedInTeams.includes(teamKey)) {
-      tracker.loggedInTeams.push(teamKey);
-      tracker[teamKey] = {
+    if (!tracker.loggedInTeams.some(team => team.teamId === teamId)) {
+      tracker.loggedInTeams.push({
+        teamId: teamId,
         loginTime: new Date().toISOString(),
         timestamp: Date.now()
-      };
+      });
       
-      fs.writeFileSync(LOGIN_TRACKER_PATH, JSON.stringify(tracker, null, 2));
-      console.log(`Team ${teamKey} marked as logged in`);
-      return true;
+      return writeLoginTracker(tracker);
     }
     return false;
   } catch (error) {
@@ -93,7 +115,7 @@ function markTeamAsLoggedIn(teamKey) {
   }
 }
 
-// Rate limiting (simple implementation)
+// Rate limiting
 const loginAttempts = new Map();
 const RATE_LIMIT_WINDOW = 60000; // 1 minute
 const MAX_ATTEMPTS = 5;
@@ -112,50 +134,20 @@ function checkRateLimit(ip) {
   return true;
 }
 
-// API Routes for data files
-app.get('/api/questions', (req, res) => {
-  const questionsPath = path.join(DATA_PATH, 'questions.json');
-  if (fs.existsSync(questionsPath)) {
-    res.sendFile(questionsPath);
-  } else {
-    res.status(404).json({ error: 'Questions file not found' });
-  }
-});
-
-app.get('/api/teams', (req, res) => {
-  const teamsPath = path.join(DATA_PATH, 'teams.json');
-  if (fs.existsSync(teamsPath)) {
-    res.sendFile(teamsPath);
-  } else {
-    res.status(404).json({ error: 'Teams file not found' });
-  }
-});
-
-app.get('/api/scores', (req, res) => {
-  const scoresPath = path.join(DATA_PATH, 'scores.json');
-  if (fs.existsSync(scoresPath)) {
-    res.sendFile(scoresPath);
-  } else {
-    res.status(404).json({ error: 'Scores file not found' });
-  }
-});
-
-// Save scores endpoint
-app.post('/api/scores', (req, res) => {
+// Get logged in teams endpoint
+app.get('/api/logged-teams', (req, res) => {
   try {
-    const scoresPath = path.join(DATA_PATH, 'scores.json');
-    const scores = req.body;
-    
-    // Ensure data directory exists
-    if (!fs.existsSync(DATA_PATH)) {
-      fs.mkdirSync(DATA_PATH, { recursive: true });
-    }
-    
-    fs.writeFileSync(scoresPath, JSON.stringify(scores, null, 2));
-    res.json({ success: true, message: 'Scores saved successfully' });
+    const tracker = readLoginTracker();
+    res.json({
+      success: true,
+      loggedInTeams: tracker.loggedInTeams || []
+    });
   } catch (error) {
-    console.error('Error saving scores:', error);
-    res.status(500).json({ success: false, message: 'Error saving scores' });
+    console.error('Error fetching logged teams:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching logged in teams'
+    });
   }
 });
 
@@ -180,36 +172,28 @@ app.post('/login', (req, res) => {
     });
   }
   
-  // Format the team key to match environment variable format
-  let teamKey = teamId.toUpperCase();
-  if (!teamKey.startsWith('TEAM_')) {
-    teamKey = 'TEAM_' + teamId.replace(/[^a-zA-Z0-9]/g, '');
-  } else {
-    teamKey = teamKey.replace(/[^a-zA-Z0-9_]/g, '_');
-  }
-  
-  console.log(`Login attempt - Team Key: ${teamKey}`);
+  console.log(`Login attempt - Team ID: ${teamId}`);
   
   // Check if team has already logged in
-  if (isTeamLoggedIn(teamKey)) {
-    console.log(`Team ${teamKey} has already logged in`);
+  if (isTeamLoggedIn(teamId)) {
+    console.log(`Team ${teamId} has already logged in`);
     return res.json({
       success: false,
       message: 'This team has already logged in. Each team can only login once.'
     });
   }
   
-  // Get credentials from environment variables
-  const credentials = getCredentials();
+  // Get teams from environment variables
+  const teams = getTeamsFromEnv();
   
-  // Check if team exists and credentials match
-  if (credentials[teamKey] === regNum) {
-    if (markTeamAsLoggedIn(teamKey)) {
-      console.log(`Login successful for team ${teamKey}`);
+  // Check if credentials match
+  if (teams[teamId] && teams[teamId] === regNum) {
+    if (markTeamAsLoggedIn(teamId)) {
+      console.log(`Login successful for team ${teamId}`);
       return res.json({
         success: true,
         message: 'Login successful',
-        teamId: teamKey
+        teamId: teamId
       });
     } else {
       return res.json({
@@ -218,7 +202,7 @@ app.post('/login', (req, res) => {
       });
     }
   } else {
-    console.log(`Invalid credentials for team ${teamKey}`);
+    console.log(`Invalid credentials for team ${teamId}`);
     return res.json({
       success: false,
       message: 'Invalid Team ID or Registration Number'
@@ -226,16 +210,53 @@ app.post('/login', (req, res) => {
   }
 });
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'Server is running',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
-  });
+// Questions endpoint
+app.get('/questions', (req, res) => {
+  try {
+    if (fs.existsSync(QUESTIONS_PATH)) {
+      res.sendFile(QUESTIONS_PATH);
+    } else {
+      res.status(404).json({ error: 'Questions file not found' });
+    }
+  } catch (error) {
+    console.error('Error serving questions:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-// Admin endpoint - SECURED with admin password
+// Submit quiz endpoint
+app.post('/submit-quiz', (req, res) => {
+  try {
+    const submissionData = req.body;
+    console.log('Quiz submission received:', submissionData);
+    
+    // Read existing scores
+    let scores = [];
+    if (fs.existsSync(SCORES_PATH)) {
+      const scoresData = fs.readFileSync(SCORES_PATH, 'utf8');
+      scores = JSON.parse(scoresData);
+    }
+    
+    // Add new submission
+    scores.push(submissionData);
+    
+    // Write back to file
+    fs.writeFileSync(SCORES_PATH, JSON.stringify(scores, null, 2));
+    
+    res.json({
+      success: true,
+      message: 'Quiz submitted successfully'
+    });
+  } catch (error) {
+    console.error('Error submitting quiz:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error submitting quiz'
+    });
+  }
+});
+
+// Admin endpoint - View logged teams
 app.get('/admin/logged-teams', (req, res) => {
   const adminPassword = req.headers['x-admin-password'] || req.query.password;
   
@@ -249,17 +270,50 @@ app.get('/admin/logged-teams', (req, res) => {
   const tracker = readLoginTracker();
   res.json({
     totalLoggedIn: tracker.loggedInTeams.length,
-    teams: tracker.loggedInTeams,
-    details: tracker
+    teams: tracker.loggedInTeams
   });
 });
 
-// Serve index page for root route
+// Admin endpoint - Reset login tracker
+app.post('/admin/reset-logins', (req, res) => {
+  const adminPassword = req.headers['x-admin-password'] || req.body.password;
+  
+  if (adminPassword !== process.env.ADMIN_PASSWORD) {
+    return res.status(401).json({
+      success: false,
+      message: 'Unauthorized access'
+    });
+  }
+  
+  const resetData = { loggedInTeams: [] };
+  if (writeLoginTracker(resetData)) {
+    res.json({
+      success: true,
+      message: 'Login tracker reset successfully'
+    });
+  } else {
+    res.status(500).json({
+      success: false,
+      message: 'Error resetting login tracker'
+    });
+  }
+});
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'Server is running',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+// Root route
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
-// Catch-all route to serve frontend routes
+// Catch-all route
 app.get('*', (req, res) => {
   const filePath = path.join(__dirname, 'public', req.path);
   if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
@@ -269,21 +323,15 @@ app.get('*', (req, res) => {
   }
 });
 
-// Initialize the login tracker on server start
+// Initialize on server start
 initializeLoginTracker();
 
-// Ensure data directory exists
-if (!fs.existsSync(DATA_PATH)) {
-  fs.mkdirSync(DATA_PATH, { recursive: true });
-  console.log('Data directory created');
-}
+const teams = getTeamsFromEnv();
+console.log(`Loaded ${Object.keys(teams).length} teams from environment variables`);
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`Login tracker file: ${LOGIN_TRACKER_PATH}`);
-  console.log(`Data directory: ${DATA_PATH}`);
-  
-  const credentials = getCredentials();
-  console.log(`Loaded ${Object.keys(credentials).length} team credentials from environment`);
 });
+
