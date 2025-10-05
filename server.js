@@ -8,10 +8,10 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const LOGIN_TRACKER_PATH = path.join(__dirname, 'login_tracker.json');
 const SCORES_PATH = path.join(__dirname, 'public', 'scores.json');
-const QUESTIONS_PATH = path.join(__dirname, 'public', 'questions.json');
 
-// State variable to track if results have been published
+// --- STATE VARIABLES ---
 let resultsPublished = false;
+let activeRound = 'round1'; // Default round is round1
 
 // CORS configuration
 const corsOptions = {
@@ -45,19 +45,15 @@ app.use((req, res, next) => {
 
 function getTeamsFromEnv() {
   const teams = {};
-  
-  // Look for environment variables in format: TEAM_ID_<teamid>=<regNum>
   Object.keys(process.env).forEach(key => {
     if (key.startsWith('TEAM_ID_')) {
       const teamId = key.replace('TEAM_ID_', '');
       teams[teamId] = process.env[key];
     }
   });
-  
   return teams;
 }
 
-// Initialize login tracker file
 function initializeLoginTracker() {
   try {
     if (!fs.existsSync(LOGIN_TRACKER_PATH)) {
@@ -72,7 +68,6 @@ function initializeLoginTracker() {
   }
 }
 
-// Read login tracker
 function readLoginTracker() {
   try {
     if (!fs.existsSync(LOGIN_TRACKER_PATH)) {
@@ -86,7 +81,6 @@ function readLoginTracker() {
   }
 }
 
-// Write login tracker
 function writeLoginTracker(data) {
   try {
     fs.writeFileSync(LOGIN_TRACKER_PATH, JSON.stringify(data, null, 2));
@@ -97,26 +91,23 @@ function writeLoginTracker(data) {
   }
 }
 
-// Check if team has already logged in
 function isTeamLoggedIn(teamId) {
   const tracker = readLoginTracker();
   return tracker.loggedInTeams.some(team => team.teamId === teamId);
 }
 
-// Mark team as logged in
-function markTeamAsLoggedIn(teamId) {
+function markTeamAsLoggedIn(teamId, regNum) {
   try {
     const tracker = readLoginTracker();
-    
     if (!tracker.loggedInTeams.some(team => team.teamId === teamId)) {
       tracker.loggedInTeams.push({
         teamId: teamId,
+        regNum: regNum,
         loginTime: new Date().toISOString(),
         timestamp: Date.now(),
-        marks: 0,  // Initialize marks
-        endTime: null  // Initialize endTime as null
+        marks: 0,
+        endTime: null
       });
-      
       return writeLoginTracker(tracker);
     }
     return false;
@@ -127,269 +118,187 @@ function markTeamAsLoggedIn(teamId) {
 }
 
 // ============================================
-// API ROUTES - MUST BE BEFORE STATIC FILES
+// API ROUTES
 // ============================================
 
-// Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'Server is running',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
-  });
+  res.json({ status: 'Server is running', timestamp: new Date().toISOString() });
 });
 
-// Get logged in teams endpoint
 app.get('/api/logged-teams', (req, res) => {
   try {
-    console.log('API call to /api/logged-teams');
     const tracker = readLoginTracker();
     res.setHeader('Content-Type', 'application/json');
-    res.json({
-      success: true,
-      loggedInTeams: tracker.loggedInTeams || []
-    });
+    res.json({ success: true, loggedInTeams: tracker.loggedInTeams || [] });
   } catch (error) {
-    console.error('Error fetching logged teams:', error);
-    res.setHeader('Content-Type', 'application/json');
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching logged in teams',
-      error: error.message
-    });
+    res.status(500).json({ success: false, message: 'Error fetching teams' });
   }
 });
 
-// Login endpoint
+app.get('/api/status', (req, res) => {
+    res.json({
+        success: true,
+        activeRound: activeRound,
+        resultsPublished: resultsPublished
+    });
+});
+
+app.get('/api/results-status', (req, res) => {
+  res.json({ published: resultsPublished });
+});
+
 app.post('/login', (req, res) => {
   const { teamId, regNum } = req.body;
-  
   if (!teamId || !regNum) {
-    return res.json({
-      success: false,
-      message: 'Team ID and Registration Number are required'
-    });
+    return res.json({ success: false, message: 'Team ID and Reg Number are required' });
   }
-  
-  console.log(`Login attempt - Team ID: ${teamId}`);
-  
-  // Check if team has already logged in
   if (isTeamLoggedIn(teamId)) {
-    console.log(`Team ${teamId} has already logged in`);
-    return res.json({
-      success: false,
-      message: 'This team has already logged in. Each team can only login once.'
-    });
+    return res.json({ success: false, message: 'This team has already logged in.' });
   }
-  
-  // Get teams from environment variables
   const teams = getTeamsFromEnv();
-  
-  // Check if credentials match
   if (teams[teamId] && teams[teamId] === regNum) {
-    if (markTeamAsLoggedIn(teamId)) {
-      console.log(`Login successful for team ${teamId}`);
-      return res.json({
-        success: true,
-        message: 'Login successful',
-        teamId: teamId
-      });
+    if (markTeamAsLoggedIn(teamId, regNum)) {
+      return res.json({ success: true, message: 'Login successful', teamId: teamId });
     } else {
-      return res.json({
-        success: false,
-        message: 'Error updating login status. Please try again.'
-      });
+      return res.json({ success: false, message: 'Error updating login status.' });
     }
   } else {
-    console.log(`Invalid credentials for team ${teamId}`);
-    return res.json({
-      success: false,
-      message: 'Invalid Team ID or Registration Number'
-    });
+    return res.json({ success: false, message: 'Invalid credentials' });
   }
 });
 
-// Questions endpoint
-app.get('/questions', (req, res) => {
-  try {
-    if (fs.existsSync(QUESTIONS_PATH)) {
-      res.sendFile(QUESTIONS_PATH);
-    } else {
-      res.status(404).json({ error: 'Questions file not found' });
+app.get('/questions/:teamId', (req, res) => {
+    try {
+        const { teamId } = req.params;
+        const tracker = readLoginTracker();
+        const team = tracker.loggedInTeams.find(t => t.teamId === teamId);
+
+        if (!team) {
+            return res.status(404).json({ error: 'Team not found or not logged in.' });
+        }
+
+        const regNum = parseInt(team.regNum, 10);
+        if (isNaN(regNum)) {
+            return res.status(400).json({ error: 'Invalid registration number for team.' });
+        }
+
+        const questionSet = regNum % 2 === 0 ? 'a' : 'b';
+        const questionFileName = `${activeRound}${questionSet}.json`;
+        const questionsFilePath = path.join(__dirname, 'public', questionFileName);
+
+        console.log(`Team ${teamId} (Reg: ${regNum}) is ${regNum % 2 === 0 ? 'even' : 'odd'}. Serving file: ${questionFileName}`);
+
+        if (fs.existsSync(questionsFilePath)) {
+            res.sendFile(questionsFilePath);
+        } else {
+            console.error(`Questions file not found: ${questionsFilePath}`);
+            res.status(404).json({ error: `Questions file ${questionFileName} not found.` });
+        }
+    } catch (error) {
+        console.error(`Error serving questions:`, error);
+        res.status(500).json({ error: 'Server error while serving questions.' });
     }
-  } catch (error) {
-    console.error('Error serving questions:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
 });
 
-// Submit quiz endpoint
 app.post('/submit-quiz', (req, res) => {
   try {
     const submissionData = req.body;
-    console.log('Quiz submission received:', submissionData);
-    
-    // Read existing scores
     let scores = [];
     if (fs.existsSync(SCORES_PATH)) {
-      const scoresData = fs.readFileSync(SCORES_PATH, 'utf8');
-      scores = JSON.parse(scoresData);
+      scores = JSON.parse(fs.readFileSync(SCORES_PATH, 'utf8'));
     }
-    
-    // Add new submission
     scores.push(submissionData);
-    
-    // Write back to scores file
     fs.writeFileSync(SCORES_PATH, JSON.stringify(scores, null, 2));
-    
-    // ALSO UPDATE LOGIN TRACKER WITH MARKS AND END TIME
+
     const tracker = readLoginTracker();
     const teamIndex = tracker.loggedInTeams.findIndex(team => team.teamId === submissionData.teamId);
-    
     if (teamIndex !== -1) {
       tracker.loggedInTeams[teamIndex].marks = submissionData.score || 0;
       tracker.loggedInTeams[teamIndex].endTime = new Date().toISOString();
       writeLoginTracker(tracker);
-      console.log(`Updated tracker for team ${submissionData.teamId}: marks=${submissionData.score}, endTime=${tracker.loggedInTeams[teamIndex].endTime}`);
     }
-    
-    res.json({
-      success: true,
-      message: 'Quiz submitted successfully'
-    });
+    res.json({ success: true, message: 'Quiz submitted successfully' });
   } catch (error) {
     console.error('Error submitting quiz:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error submitting quiz'
-    });
+    res.status(500).json({ success: false, message: 'Error submitting quiz' });
   }
-});
-
-// Endpoint for the results.html page to check the status of the switch
-app.get('/api/results-status', (req, res) => {
-    res.json({ published: resultsPublished });
 });
 
 // ============================================
 // ADMIN ROUTES
 // ============================================
 
-// Admin endpoint - View logged teams
-app.get('/admin/logged-teams', (req, res) => {
-  console.log('Admin API call to /admin/logged-teams');
-  const tracker = readLoginTracker();
-  res.json({
-    success: true,
-    totalLoggedIn: tracker.loggedInTeams.length,
-    teams: tracker.loggedInTeams
-  });
+app.post('/admin/set-round', (req, res) => {
+    const { round } = req.body;
+    const validRounds = ['round1', 'round2', 'round3', 'round4', 'round5', 'round6'];
+
+    if (!round || !validRounds.includes(round)) {
+        return res.status(400).json({ success: false, message: 'Invalid round specified.' });
+    }
+
+    activeRound = round;
+    console.log(`Active quiz round set to: ${activeRound}`);
+    res.json({ success: true, message: `Active round set to ${round}`, activeRound: activeRound });
 });
 
-// Admin endpoint - Reset login tracker
+app.post('/admin/publish-results', (req, res) => {
+  resultsPublished = true;
+  console.log('Results have been published.');
+  res.json({ success: true, message: 'Results published' });
+});
+
 app.post('/admin/reset-logins', (req, res) => {
   const resetData = { loggedInTeams: [] };
   if (writeLoginTracker(resetData)) {
-    resultsPublished = false; // <-- RESET THE PUBLISH STATUS
-    console.log('All logins and published status have been reset.');
-    res.json({
-      success: true,
-      message: 'Login tracker reset successfully'
-    });
+    resultsPublished = false;
+    activeRound = 'round1';
+    console.log('Login tracker reset and results unpublished.');
+    res.json({ success: true, message: 'Login tracker reset successfully' });
   } else {
-    res.status(500).json({
-      success: false,
-      message: 'Error resetting login tracker'
-    });
+    res.status(500).json({ success: false, message: 'Error resetting login tracker' });
   }
 });
 
-// Admin endpoint - Remove specific team
-app.post('/admin/remove-team', (req, res) => {
-  const { teamId } = req.body;
-  
-  if (!teamId) {
-    return res.status(400).json({
-      success: false,
-      message: 'Team ID is required'
-    });
-  }
-  
-  try {
-    const tracker = readLoginTracker();
-    const initialLength = tracker.loggedInTeams.length;
-    
-    tracker.loggedInTeams = tracker.loggedInTeams.filter(team => team.teamId !== teamId);
-    
-    if (tracker.loggedInTeams.length < initialLength) {
-      if (writeLoginTracker(tracker)) {
-        res.json({
-          success: true,
-          message: `Team ${teamId} removed successfully`
-        });
-      } else {
-        res.status(500).json({
-          success: false,
-          message: 'Error updating login tracker'
-        });
-      }
-    } else {
-      res.json({
-        success: false,
-        message: 'Team not found'
-      });
+app.post('/admin/remove-teams-batch', (req, res) => {
+    const { teamIds } = req.body;
+    if (!teamIds || !Array.isArray(teamIds)) {
+        return res.status(400).json({ success: false, message: 'Invalid request body' });
     }
-  } catch (error) {
-    console.error('Error removing team:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error removing team'
-    });
-  }
+    try {
+        const tracker = readLoginTracker();
+        const initialLength = tracker.loggedInTeams.length;
+        tracker.loggedInTeams = tracker.loggedInTeams.filter(team => !teamIds.includes(team.teamId));
+        const removedCount = initialLength - tracker.loggedInTeams.length;
+        
+        if (writeLoginTracker(tracker)) {
+            res.json({ success: true, message: `Removed ${removedCount} teams.`, removedCount });
+        } else {
+            res.status(500).json({ success: false, message: 'Error updating login tracker' });
+        }
+    } catch (error) {
+        console.error('Error removing teams in batch:', error);
+        res.status(500).json({ success: false, message: 'Server error during batch removal' });
+    }
 });
 
-// Endpoint for the admin panel to "flip the switch"
-app.post('/admin/publish-results', (req, res) => {
-    resultsPublished = true;
-    console.log('Results have been published. Users will now be redirected.');
-    res.json({ success: true, message: 'Results published.' });
-});
 
 // ============================================
-// STATIC FILES - AFTER API ROUTES
+// STATIC FILES & FINAL ROUTE
 // ============================================
 
-// Serve static files from public directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Root route
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'login.html'));
-});
-
-// Catch-all route for HTML files - MUST BE LAST
 app.get('*', (req, res) => {
-  // Only handle HTML file requests, not API calls
-  if (req.path.startsWith('/api/') || req.path.startsWith('/admin/') || req.path.startsWith('/login') || req.path.startsWith('/submit-quiz') || req.path.startsWith('/questions')) {
-    return res.status(404).json({ error: 'API endpoint not found' });
-  }
-  
-  const filePath = path.join(__dirname, 'public', req.path);
-  if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
-    res.sendFile(filePath);
-  } else {
-    res.sendFile(path.join(__dirname, 'public', 'login.html'));
-  }
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
 // Initialize on server start
 initializeLoginTracker();
-
-const teams = getTeamsFromEnv();
-console.log(`Loaded ${Object.keys(teams).length} teams from environment variables`);
+console.log(`Loaded ${Object.keys(getTeamsFromEnv()).length} teams from env.`);
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`Login tracker file: ${LOGIN_TRACKER_PATH}`);
 });
+
+

@@ -56,6 +56,22 @@
         #quiz-timer { font-weight: 700; font-size: 1.8rem; }
         .quiz-container { grid-area: main; display: flex; flex-direction: column; }
         #question-counter { font-size: 1rem; font-weight: 600; color: var(--dark-grey); margin-bottom: 15px; }
+        
+        #question-image-container {
+            width: 100%;
+            max-height: 250px;
+            margin-bottom: 20px;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        #question-image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 15px;
+            object-fit: contain;
+        }
+
         .question-text { font-size: 1.4rem; font-weight: 600; margin-bottom: 25px; flex-grow: 1; }
         .options-list { list-style: none; padding: 0; margin: 0 0 25px 0; }
         .option-item { background: var(--light-grey); padding: 15px; margin-bottom: 12px; border-radius: 12px; border: 2px solid transparent; cursor: pointer; transition: all 0.2s ease-in-out; }
@@ -103,7 +119,17 @@
     <div class="quiz-wrapper" style="display: none;">
         <div class="info-box meta-data"><h2>Team ID</h2><span id="team-id">Loading...</span></div>
         <div class="info-box timer-box"><h2>Time Left</h2><span id="quiz-timer">5:00</span></div>
-        <div class="quiz-container"><div id="question-counter">Question 1/5</div><h3 class="question-text" id="question-text">Loading question...</h3><ul id="options-list" class="options-list"></ul><div class="control-buttons"><button id="skip-button" class="control-button">Skip</button><button id="clear-button" class="control-button" style="display:none;">Clear Choice</button><button id="next-button" class="control-button" style="display:none;">Next</button></div></div>
+        <div class="quiz-container">
+            <div id="question-counter">Question 1/5</div>
+            <div id="question-image-container"></div>
+            <h3 class="question-text" id="question-text">Loading question...</h3>
+            <ul id="options-list" class="options-list"></ul>
+            <div class="control-buttons">
+                <button id="skip-button" class="control-button">Skip</button>
+                <button id="clear-button" class="control-button" style="display:none;">Clear Choice</button>
+                <button id="next-button" class="control-button" style="display:none;">Next</button>
+            </div>
+        </div>
         <div class="menu-container"><h4 class="menu-title">Question Menu</h4><div id="dice-menu" class="dice-menu"></div></div>
     </div>
 
@@ -132,8 +158,8 @@
       const skipButton = document.getElementById('skip-button');
       const nextButton = document.getElementById('next-button');
       const clearButton = document.getElementById('clear-button');
+      const imageContainer = document.getElementById('question-image-container');
 
-     
       let questions = [];
       let currentQuestionIndex = 0;
       let score = 0;
@@ -145,7 +171,6 @@
       let timeLeft = 300;
       let initialWidth, initialHeight;
 
-      // Get team ID from localStorage
       teamId = localStorage.getItem('currentTeamId');
       if (!teamId) {
         window.location.href = 'login.html';
@@ -176,7 +201,6 @@
       }
 
       function activateSecurityListeners() {
-
           const isLinux = navigator.userAgent.toLowerCase().includes('linux');
 
           function handleTabSwitch() {
@@ -277,22 +301,55 @@
       
       async function fetchQuestions() { 
         try { 
-          const response = await fetch('questions.json'); 
+          if (!teamId) throw new Error("Team ID is missing.");
+          const response = await fetch(`/questions/${teamId}`); 
           if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const errorData = await response.json();
+            throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
           }
           questions = await response.json(); 
           questions.forEach(q => { q.answered = false; q.skipped = false; q.selected = null; }); 
           startQuiz(); 
         } catch (error) { 
           console.error('Failed to fetch questions:', error); 
-          questionText.textContent = 'Error: Could not load quiz questions. Please refresh the page.'; 
-          alert('Failed to load questions. Please ensure questions.json exists in the same directory.');
+          questionText.textContent = 'Error: Could not load quiz questions.'; 
+          alert('Failed to load questions: ' + error.message);
         } 
       }
 
       function startQuiz() { renderDiceMenu(); renderQuestion(); startTimer(); }
-      function renderQuestion() { document.querySelectorAll('.menu-dice').forEach(dice => dice.classList.remove('active')); document.getElementById(`dice-${currentQuestionIndex}`).classList.add('active'); const currentQuestion = questions[currentQuestionIndex]; questionCounter.textContent = `Question ${currentQuestionIndex + 1} / ${questions.length}`; questionText.textContent = currentQuestion.questionText; optionsList.innerHTML = ''; currentQuestion.options.forEach((option, index) => { const li = document.createElement('li'); li.classList.add('option-item'); li.textContent = option; li.onclick = () => selectOption(index); optionsList.appendChild(li); }); clearButton.style.display = 'none'; nextButton.style.display = 'none'; skipButton.style.display = currentQuestion.skipped ? 'none' : 'block'; }
+
+      function renderQuestion() { 
+          document.querySelectorAll('.menu-dice').forEach(dice => dice.classList.remove('active')); 
+          document.getElementById(`dice-${currentQuestionIndex}`).classList.add('active'); 
+          const currentQuestion = questions[currentQuestionIndex]; 
+          questionCounter.textContent = `Question ${currentQuestionIndex + 1} / ${questions.length}`; 
+          
+          imageContainer.innerHTML = '';
+          if (currentQuestion.image) {
+              const img = document.createElement('img');
+              img.src = currentQuestion.image;
+              img.alt = `Question ${currentQuestionIndex + 1} Image`;
+              imageContainer.appendChild(img);
+              imageContainer.style.display = 'flex';
+          } else {
+              imageContainer.style.display = 'none';
+          }
+
+          questionText.textContent = currentQuestion.questionText; 
+          optionsList.innerHTML = ''; 
+          currentQuestion.options.forEach((option, index) => { 
+              const li = document.createElement('li'); 
+              li.classList.add('option-item'); 
+              li.textContent = option; 
+              li.onclick = () => selectOption(index); 
+              optionsList.appendChild(li); 
+          }); 
+          clearButton.style.display = 'none'; 
+          nextButton.style.display = 'none'; 
+          skipButton.style.display = currentQuestion.skipped ? 'none' : 'block'; 
+      }
+
       function selectOption(index) { const currentQuestion = questions[currentQuestionIndex]; currentQuestion.selected = index; currentQuestion.answered = true; Array.from(optionsList.children).forEach((li, i) => { li.classList.toggle('selected', i === index); }); clearButton.style.display = 'block'; nextButton.style.display = 'block'; skipButton.style.display = 'none'; updateDiceStatus(); }
       function clearChoice() { const currentQuestion = questions[currentQuestionIndex]; currentQuestion.selected = null; currentQuestion.answered = false; Array.from(optionsList.children).forEach(li => li.classList.remove('selected')); clearButton.style.display = 'none'; nextButton.style.display = 'none'; skipButton.style.display = 'block'; updateDiceStatus(); }
       function skipQuestion() { questions[currentQuestionIndex].skipped = true; updateDiceStatus(); nextQuestion(); }
@@ -312,3 +369,5 @@
   </script>
 </body>
 </html>
+
+
