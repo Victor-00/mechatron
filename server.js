@@ -13,6 +13,7 @@ const SCORES_PATH = path.join(__dirname, 'public', 'scores.json');
 let resultsPublished = false;
 let activeRound = 'round1';
 let forceRedirectToLogin = false;
+let startQuizSignal = false; // New state for starting the quiz
 
 // CORS configuration
 const corsOptions = {
@@ -132,6 +133,8 @@ app.get('/api/results-status', (req, res) => res.json({ published: resultsPublis
 
 app.get('/api/redirect-status', (req, res) => res.json({ redirect: forceRedirectToLogin }));
 
+app.get('/api/start-quiz-status', (req, res) => res.json({ start: startQuizSignal })); // New endpoint for quiz start
+
 app.post('/login', (req, res) => {
   const { teamId, regNum } = req.body;
   if (!teamId || !regNum) return res.json({ success: false, message: 'Team ID and Reg Number are required' });
@@ -204,6 +207,16 @@ app.post('/admin/set-round', (req, res) => {
     res.json({ success: true, message: `Active round set to ${round}`, activeRound: activeRound });
 });
 
+app.post('/admin/start-quiz', (req, res) => {
+  startQuizSignal = true;
+  console.log('Start quiz signal is ON.');
+  setTimeout(() => {
+    startQuizSignal = false;
+    console.log('Start quiz signal is OFF.');
+  }, 8000);
+  res.json({ success: true, message: 'Quiz start signal sent.' });
+});
+
 app.post('/admin/publish-results', (req, res) => {
   resultsPublished = true;
   console.log('Results publish signal is ON.');
@@ -228,6 +241,7 @@ app.post('/admin/reset-logins', (req, res) => {
   if (writeLoginTracker({ loggedInTeams: [] })) {
     resultsPublished = false;
     forceRedirectToLogin = false;
+    startQuizSignal = false; // Reset the new state
     activeRound = 'round1';
     res.json({ success: true, message: 'Login tracker reset successfully' });
   } else {
@@ -261,18 +275,16 @@ app.post('/admin/remove-teams-batch', (req, res) => {
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('*', (req, res) => {
-  // Define a list of your root-level HTML files
   const htmlFiles = [
     'login.html',
-    'instructions.html', // Add the new instructions file here
+    'instructions.html',
     'quiz.html',
     'results.html',
     'selection_status.html',
     'admin.html'
   ];
   
-  // Clean the requested path
-  const requestedFile = req.path.substring(1); // remove leading '/'
+  const requestedFile = req.path.substring(1);
 
   if (htmlFiles.includes(requestedFile)) {
     const filePath = path.join(__dirname, 'public', requestedFile);
@@ -281,7 +293,6 @@ app.get('*', (req, res) => {
     }
   }
   
-  // For any other request, default to login.html
   res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
