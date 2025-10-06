@@ -8,12 +8,13 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const LOGIN_TRACKER_PATH = path.join(__dirname, 'login_tracker.json');
 const SCORES_PATH = path.join(__dirname, 'public', 'scores.json');
+const SELECTED_TEAMS_PATH = path.join(__dirname, 'public', 'selected_teams.json');
 
 // --- STATE VARIABLES ---
 let resultsPublished = false;
 let activeRound = 'round1';
 let forceRedirectToLogin = false;
-let startQuizSignal = false; // New state for starting the quiz
+let startQuizSignal = false;
 
 // CORS configuration
 const corsOptions = {
@@ -121,6 +122,21 @@ app.get('/api/logged-teams', (req, res) => {
   }
 });
 
+app.get('/api/selected-teams', (req, res) => {
+    try {
+        if (fs.existsSync(SELECTED_TEAMS_PATH)) {
+            const data = fs.readFileSync(SELECTED_TEAMS_PATH, 'utf8');
+            res.setHeader('Content-Type', 'application/json');
+            res.send(data); 
+        } else {
+            res.json({ selectedTeams: [] });
+        }
+    } catch (error) {
+        console.error('Error reading selected teams file:', error);
+        res.status(500).json({ success: false, message: 'Error fetching selected teams.' });
+    }
+});
+
 app.get('/api/status', (req, res) => {
     res.json({
         success: true,
@@ -133,7 +149,7 @@ app.get('/api/results-status', (req, res) => res.json({ published: resultsPublis
 
 app.get('/api/redirect-status', (req, res) => res.json({ redirect: forceRedirectToLogin }));
 
-app.get('/api/start-quiz-status', (req, res) => res.json({ start: startQuizSignal })); // New endpoint for quiz start
+app.get('/api/start-quiz-status', (req, res) => res.json({ start: startQuizSignal }));
 
 app.post('/login', (req, res) => {
   const { teamId, regNum } = req.body;
@@ -141,7 +157,9 @@ app.post('/login', (req, res) => {
   if (isTeamLoggedIn(teamId)) return res.json({ success: false, message: 'This team has already logged in.' });
   
   const teams = getTeamsFromEnv();
-  if (teams[teamId] && teams[teamId] === regNum) {
+  const teamIdNumber = teamId.replace('TEAM_ID_', '');
+
+  if (teams[teamIdNumber] && teams[teamIdNumber] === regNum) {
     if (markTeamAsLoggedIn(teamId, regNum)) {
       return res.json({ success: true, message: 'Login successful', teamId: teamId });
     }
@@ -237,13 +255,39 @@ app.post('/admin/force-redirect', (req, res) => {
   res.json({ success: true, message: 'Force redirect activated.' });
 });
 
+app.post('/admin/finalize-selections', (req, res) => {
+    const { selectedTeams } = req.body;
+    if (!selectedTeams || !Array.isArray(selectedTeams)) {
+        return res.status(400).json({ success: false, message: 'Invalid data format.' });
+    }
+    try {
+        const dataToWrite = JSON.stringify({ selectedTeams }, null, 2);
+        fs.writeFileSync(SELECTED_TEAMS_PATH, dataToWrite);
+        console.log(`Finalized ${selectedTeams.length} teams.`);
+        res.json({ success: true, message: 'Selections finalized successfully.' });
+    } catch (error) {
+        console.error('Error writing selected teams file:', error);
+        res.status(500).json({ success: false, message: 'Failed to write selection file.' });
+    }
+});
+
 app.post('/admin/reset-logins', (req, res) => {
   if (writeLoginTracker({ loggedInTeams: [] })) {
     resultsPublished = false;
     forceRedirectToLogin = false;
-    startQuizSignal = false; // Reset the new state
+    startQuizSignal = false;
     activeRound = 'round1';
-    res.json({ success: true, message: 'Login tracker reset successfully' });
+
+    if (fs.existsSync(SELECTED_TEAMS_PATH)) {
+        try {
+            fs.unlinkSync(SELECTED_TEAMS_PATH);
+            console.log('Cleared selected teams file.');
+        } catch (error) {
+            console.error('Error clearing selected teams file:', error);
+        }
+    }
+
+    res.json({ success: true, message: 'Login tracker and selections reset successfully' });
   } else {
     res.status(500).json({ success: false, message: 'Error resetting login tracker' });
   }
@@ -295,7 +339,6 @@ app.get('*', (req, res) => {
   
   res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
-
 
 // Initialize on server start
 initializeLoginTracker();
