@@ -35,7 +35,7 @@
             margin-bottom: 20px;
         }
 
-        button {
+        button, select {
             padding: 12px 30px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -48,7 +48,7 @@
         }
         
         select {
-            -webkit-appearance: none;
+             -webkit-appearance: none;
             -moz-appearance: none;
             appearance: none;
             padding: 12px 40px 12px 20px;
@@ -376,6 +376,7 @@
         }
 
         function loadData() {
+            // This is the only change: added { cache: 'no-store' }
             fetch('/api/logged-teams', { cache: 'no-store' })
             .then(response => response.json())
             .then(data => {
