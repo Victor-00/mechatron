@@ -109,6 +109,26 @@ function markTeamAsLoggedIn(teamId, regNum) {
   }
 }
 
+function updateTeamLogin(teamId) {
+  try {
+    const tracker = readLoginTracker();
+    const teamIndex = tracker.loggedInTeams.findIndex(team => team.teamId === teamId);
+    if (teamIndex !== -1) {
+      // Reset for the new round
+      tracker.loggedInTeams[teamIndex].loginTime = new Date().toISOString();
+      tracker.loggedInTeams[teamIndex].timestamp = Date.now();
+      tracker.loggedInTeams[teamIndex].marks = 0;
+      tracker.loggedInTeams[teamIndex].endTime = null;
+      return writeLoginTracker(tracker);
+    }
+    return false; // Team not found
+  } catch (error) {
+    console.error(`Error updating login for team ${teamId}:`, error);
+    return false;
+  }
+}
+
+
 // ============================================
 // API ROUTES
 // ============================================
@@ -152,21 +172,55 @@ app.get('/api/redirect-status', (req, res) => res.json({ redirect: forceRedirect
 app.get('/api/start-quiz-status', (req, res) => res.json({ start: startQuizSignal }));
 
 app.post('/login', (req, res) => {
-  const { teamId, regNum } = req.body;
-  if (!teamId || !regNum) return res.json({ success: false, message: 'Team ID and Reg Number are required' });
-  if (isTeamLoggedIn(teamId)) return res.json({ success: false, message: 'This team has already logged in.' });
-  
-  const teams = getTeamsFromEnv();
-  const teamIdNumber = teamId.replace('TEAM_ID_', '');
-
-  if (teams[teamIdNumber] && teams[teamIdNumber] === regNum) {
-    if (markTeamAsLoggedIn(teamId, regNum)) {
-      return res.json({ success: true, message: 'Login successful', teamId: teamId });
+    const { teamId, regNum } = req.body;
+    if (!teamId || !regNum) {
+        return res.json({ success: false, message: 'Team ID and Reg Number are required' });
     }
-    return res.json({ success: false, message: 'Error updating login status.' });
-  }
-  return res.json({ success: false, message: 'Invalid credentials' });
+
+    // Validate credentials first
+    const teams = getTeamsFromEnv();
+    const teamIdNumber = teamId.replace('TEAM_ID_', '');
+    if (!teams[teamIdNumber] || teams[teamIdNumber] !== regNum) {
+        return res.json({ success: false, message: 'Invalid Credentials' });
+    }
+
+    // Handle login status
+    if (isTeamLoggedIn(teamId)) {
+        let isSelected = false;
+        if (fs.existsSync(SELECTED_TEAMS_PATH)) {
+            try {
+                const selectedData = JSON.parse(fs.readFileSync(SELECTED_TEAMS_PATH, 'utf8'));
+                if (selectedData && selectedData.selectedTeams) {
+                    isSelected = selectedData.selectedTeams.includes(teamId);
+                }
+            } catch (error) {
+                console.error('Error reading or parsing selected_teams.json:', error);
+            }
+        }
+
+        if (!isSelected) {
+            return res.json({
+                success: false,
+                message: 'This team has already participated and was not selected for the next round.'
+            });
+        } else {
+            // It's a selected team logging in again. Update their record.
+            if (updateTeamLogin(teamId)) {
+                return res.json({ success: true, message: 'Login successful for next round.', teamId: teamId });
+            } else {
+                return res.status(500).json({ success: false, message: 'Server error while updating login for next round.' });
+            }
+        }
+    } else {
+        // First time login for this round
+        if (markTeamAsLoggedIn(teamId, regNum)) {
+            return res.json({ success: true, message: 'Login successful', teamId: teamId });
+        } else {
+            return res.status(500).json({ success: false, message: 'Server error while recording login.' });
+        }
+    }
 });
+
 
 app.get('/questions/:teamId', (req, res) => {
     try {
