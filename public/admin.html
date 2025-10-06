@@ -74,6 +74,10 @@
         button.success {
             background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
         }
+        
+        button.go {
+            background: linear-gradient(135deg, #22c55e 0%, #a3e635 100%);
+        }
 
         button.warning {
             background: linear-gradient(135deg, #ffa500 0%, #ff6347 100%);
@@ -268,17 +272,22 @@
         </div>
 
         <div class="teams-table">
-            <h2>Logged In Teams</h2>
+            <h2>Management Controls</h2>
             <div id="message"></div>
             
             <div class="controls">
                 <button class="success" onclick="refreshData()">🔄 Refresh</button>
-                <button class="success" id="keep-selected-btn" onclick="keepSelectedTeams()" disabled>✅ Keep Selected Only</button>
-                <button class="danger" id="delete-selected-btn" onclick="deleteSelectedTeams()" disabled>🗑️ Delete Selected</button>
-                <button class="danger" onclick="resetAllLogins()">🗑️ Reset All Logins</button>
+                <button class="go" onclick="startQuizForAll()">▶️ Start Quiz</button>
                 <button class="warning" id="publish-results-btn" onclick="publishResults()">🚀 Publish Results</button>
                 <button class="danger" onclick="forceRedirect()">↩️ Force All to Login</button>
+                <button class="danger" onclick="resetAllLogins()">🗑️ Reset All Logins</button>
             </div>
+            
+            <div class="controls">
+                <button class="success" id="keep-selected-btn" onclick="keepSelectedTeams()" disabled>✅ Keep Selected Only</button>
+                <button class="danger" id="delete-selected-btn" onclick="deleteSelectedTeams()" disabled>🗑️ Delete Selected</button>
+            </div>
+
 
             <div class="controls" style="align-items: center; border-top: 1px solid #eee; padding-top: 20px;">
                 <label for="round-select" style="font-weight: 600; margin-right: 10px;">Quiz Round:</label>
@@ -293,7 +302,7 @@
                 <button class="primary action-btn" onclick="setRound()">Set Active Round</button>
             </div>
 
-
+            <h2 style="margin-top: 30px;">Team Selection</h2>
             <div class="controls" style="align-items: center;">
                 <input type="number" id="num-teams" placeholder="Number of teams" min="1">
                 <input type="text" id="team-ids" placeholder="Team ID numbers (e.g., 3456,3457,3458)">
@@ -345,175 +354,118 @@
 
         function loadData() {
             fetch('/api/logged-teams')
-            .then(response => {
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
                 if (!data.success) {
-                    showMessage('Failed to load data: ' + (data.message || 'Unknown error'), 'error');
+                    showMessage('Failed to load data: ' + data.message, 'error');
                     return;
                 }
-
                 allTeams = data.loggedInTeams || [];
-                
                 allTeams.sort((a, b) => {
                     if (b.marks !== a.marks) return b.marks - a.marks;
                     const aTime = a.endTime ? new Date(a.endTime).getTime() : Infinity;
                     const bTime = b.endTime ? new Date(b.endTime).getTime() : Infinity;
                     return aTime - bTime;
                 });
-                
                 document.getElementById('total-teams').textContent = allTeams.length;
                 updateSelectedCount();
-
                 const tbody = document.getElementById('teams-tbody');
                 if (allTeams.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No teams have logged in yet</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No teams logged in</td></tr>';
                     return;
                 }
-
-                tbody.innerHTML = allTeams.map((team, index) => {
-                    const endTime = team.endTime ? new Date(team.endTime).toLocaleString() : 'Not completed';
-                    const marks = team.marks !== undefined ? team.marks : 'N/A';
-                    return `
+                tbody.innerHTML = allTeams.map((team, index) => `
                     <tr>
-                        <td class="checkbox-cell">
-                            <input type="checkbox" class="team-checkbox" value="${team.teamId}" data-rank="${index + 1}" onchange="updateSelectedCount()">
-                        </td>
+                        <td class="checkbox-cell"><input type="checkbox" class="team-checkbox" value="${team.teamId}" onchange="updateSelectedCount()"></td>
                         <td class="rank-cell">#${index + 1}</td>
                         <td>${team.teamId}</td>
-                        <td class="marks-cell">${marks}</td>
+                        <td class="marks-cell">${team.marks !== undefined ? team.marks : 'N/A'}</td>
                         <td>${new Date(team.loginTime).toLocaleString()}</td>
-                        <td>${endTime}</td>
-                    </tr>
-                    `;
-                }).join('');
-            })
-            .catch(error => {
-                console.error('Error loading data:', error);
-                showMessage('Error loading data: ' + error.message, 'error');
-            });
+                        <td>${team.endTime ? new Date(team.endTime).toLocaleString() : 'N/A'}</td>
+                    </tr>`).join('');
+            }).catch(err => showMessage('Error loading data.', 'error'));
         }
 
         function loadServerStatus() {
-            fetch('/api/status')
-            .then(response => response.json())
-            .then(data => {
+            fetch('/api/status').then(res => res.json()).then(data => {
                 if (data.success) {
-                    const roundText = data.activeRound.charAt(0).toUpperCase() + data.activeRound.slice(1).replace('d', 'd ');
+                    const roundText = data.activeRound.replace('round', 'Round ');
                     document.getElementById('active-round').textContent = roundText;
                     document.getElementById('round-select').value = data.activeRound;
                 }
-            })
-            .catch(error => {
-                console.error('Error fetching server status:', error);
-                document.getElementById('active-round').textContent = 'Error';
-            });
+            }).catch(err => console.error('Error fetching server status:', err));
         }
         
         function setRound() {
             const selectedRound = document.getElementById('round-select').value;
-            if (!selectedRound) {
-                showMessage('Please select a round.', 'error');
-                return;
-            }
-
-            if (!confirm(`Are you sure you want to set the active quiz to ${selectedRound.replace('round', 'Round ')}?`)) {
-                return;
-            }
-
+            if (!confirm(`Set active quiz to ${selectedRound.replace('round', 'Round ')}?`)) return;
             fetch('/admin/set-round', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ round: selectedRound })
-            })
-            .then(response => response.json())
-            .then(data => {
+            }).then(res => res.json()).then(data => {
                 if (data.success) {
-                    const roundText = data.activeRound.charAt(0).toUpperCase() + data.activeRound.slice(1).replace('d', 'd ');
-                    showMessage(`Successfully set active quiz to ${roundText}`, 'success');
-                    loadServerStatus(); // Refresh the status display
+                    showMessage(`Active quiz set to ${data.activeRound.replace('round', 'Round ')}`, 'success');
+                    loadServerStatus();
                 } else {
-                    showMessage('Failed to set round: ' + (data.message || 'Unknown error'), 'error');
+                    showMessage('Failed to set round: ' + data.message, 'error');
                 }
-            })
-            .catch(error => {
-                console.error('Error setting round:', error);
-                showMessage('Error setting round.', 'error');
-            });
+            }).catch(err => showMessage('Error setting round.', 'error'));
+        }
+
+        function startQuizForAll() {
+            if (!confirm('Are you sure you want to start the quiz for all waiting users?')) return;
+            fetch('/admin/start-quiz', { method: 'POST' })
+            .then(res => res.json()).then(data => {
+                if(data.success) {
+                    showMessage('Start signal sent! Users will be redirected for 8 seconds.', 'success');
+                } else {
+                    showMessage('Failed to send start signal.', 'error');
+                }
+            }).catch(err => showMessage('Error sending start signal.', 'error'));
         }
 
         function toggleSelectAll() {
-            const selectAllCheckbox = document.getElementById('select-all');
-            const teamCheckboxes = document.querySelectorAll('.team-checkbox');
-            
-            teamCheckboxes.forEach(checkbox => {
-                checkbox.checked = selectAllCheckbox.checked;
+            document.querySelectorAll('.team-checkbox').forEach(cb => {
+                cb.checked = document.getElementById('select-all').checked;
             });
-            
             updateSelectedCount();
         }
 
         function updateSelectedCount() {
-            const selectedCheckboxes = document.querySelectorAll('.team-checkbox:checked');
-            const count = selectedCheckboxes.length;
-            
+            const count = document.querySelectorAll('.team-checkbox:checked').length;
             document.getElementById('selected-count').textContent = count;
-            
-            const keepBtn = document.getElementById('keep-selected-btn');
-            const deleteBtn = document.getElementById('delete-selected-btn');
-            keepBtn.disabled = count === 0;
-            deleteBtn.disabled = count === 0;
-            
-            const allCheckboxes = document.querySelectorAll('.team-checkbox');
-            const selectAllCheckbox = document.getElementById('select-all');
-            if (allCheckboxes.length > 0) {
-                selectAllCheckbox.checked = count === allCheckboxes.length;
+            document.getElementById('keep-selected-btn').disabled = count === 0;
+            document.getElementById('delete-selected-btn').disabled = count === 0;
+            const allCount = document.querySelectorAll('.team-checkbox').length;
+            if (allCount > 0) {
+                document.getElementById('select-all').checked = count === allCount;
             }
         }
 
         function getSelectedTeamIds() {
-            const selectedCheckboxes = document.querySelectorAll('.team-checkbox:checked');
-            return Array.from(selectedCheckboxes).map(cb => cb.value);
+            return Array.from(document.querySelectorAll('.team-checkbox:checked')).map(cb => cb.value);
         }
 
         function keepSelectedTeams() {
-            const selectedTeamIds = getSelectedTeamIds();
-            
-            if (selectedTeamIds.length === 0) {
-                showMessage('No teams selected to keep', 'error');
-                return;
-            }
-
-            const allCheckboxes = document.querySelectorAll('.team-checkbox');
-            const allTeamIds = Array.from(allCheckboxes).map(cb => cb.value);
-            const teamsToRemove = allTeamIds.filter(teamId => !selectedTeamIds.includes(teamId));
-
-            if (teamsToRemove.length === 0) {
+            const selectedIds = getSelectedTeamIds();
+            if (selectedIds.length === 0) return;
+            const allIds = Array.from(document.querySelectorAll('.team-checkbox')).map(cb => cb.value);
+            const idsToRemove = allIds.filter(id => !selectedIds.includes(id));
+            if (idsToRemove.length === 0) {
                 showMessage('All teams are selected. Nothing to remove.', 'error');
                 return;
             }
-
-            const confirmMsg = `Keep ${selectedTeamIds.length} selected team(s) and remove ${teamsToRemove.length} other team(s)?`;
-
-            if (!confirm(confirmMsg)) return;
-
+            if (!confirm(`Keep ${selectedIds.length} team(s) and remove ${idsToRemove.length} others?`)) return;
             fetch('/admin/remove-teams-batch', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ teamIds: teamsToRemove })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    showMessage(`Successfully kept ${selectedTeamIds.length} team(s).`, 'success');
-                } else {
-                     showMessage('Error keeping teams: ' + data.message, 'error');
-                }
+                body: JSON.stringify({ teamIds: idsToRemove })
+            }).then(res => res.json()).then(data => {
+                if (data.success) showMessage('Successfully updated team list.', 'success');
+                else showMessage('Error: ' + data.message, 'error');
                 loadData();
-            })
-            .catch(err => showMessage('Network error while keeping teams.', 'error'));
+            }).catch(err => showMessage('Network error.', 'error'));
         }
 
         function refreshData() {
@@ -524,154 +476,83 @@
 
         function resetAllLogins() {
             if (!confirm('Are you sure you want to reset ALL logins? This cannot be undone!')) return;
-
-            fetch('/admin/reset-logins', { method: 'POST' })
-            .then(response => response.json())
-            .then(data => {
+            fetch('/admin/reset-logins', { method: 'POST' }).then(res => res.json()).then(data => {
                 if (data.success) {
-                    showMessage('All logins reset successfully');
+                    showMessage('All logins reset successfully.');
                     loadData();
                 } else {
-                    showMessage('Failed to reset logins', 'error');
+                    showMessage('Failed to reset logins.', 'error');
                 }
-            })
-            .catch(error => showMessage('Error resetting logins', 'error'));
+            }).catch(err => showMessage('Error resetting logins.', 'error'));
         }
 
         function deleteSelectedTeams() {
-            const selectedTeamIds = getSelectedTeamIds();
-            
-            if (selectedTeamIds.length === 0) {
-                showMessage('No teams selected to delete', 'error');
-                return;
-            }
-
-            const confirmMsg = `Delete ${selectedTeamIds.length} selected team(s)?`;
-            if (!confirm(confirmMsg)) return;
-
+            const selectedIds = getSelectedTeamIds();
+            if (selectedIds.length === 0) return;
+            if (!confirm(`Delete ${selectedIds.length} selected team(s)?`)) return;
             fetch('/admin/remove-teams-batch', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ teamIds: selectedTeamIds })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    showMessage(`Successfully deleted ${data.removedCount} team(s).`, 'success');
-                } else {
-                     showMessage('Error deleting teams: ' + data.message, 'error');
-                }
+                body: JSON.stringify({ teamIds: selectedIds })
+            }).then(res => res.json()).then(data => {
+                if (data.success) showMessage(`Successfully deleted ${data.removedCount} team(s).`, 'success');
+                else showMessage('Error: ' + data.message, 'error');
                 loadData();
-            })
-            .catch(err => showMessage('Network error while deleting teams.', 'error'));
+            }).catch(err => showMessage('Network error.', 'error'));
         }
         
         function publishResults() {
-             if (!confirm('Are you sure you want to publish the results? This will redirect all waiting users to the selection page.')) {
-                return;
-            }
-            fetch('/admin/publish-results', { method: 'POST' })
-            .then(res => res.json())
-            .then(data => {
-                if(data.success) {
-                    showMessage('Results published! Signal is active for 8 seconds.', 'success');
-                } else {
-                    showMessage('Failed to publish results.', 'error');
-                }
-            })
-            .catch(err => showMessage('Error publishing results.', 'error'));
+             if (!confirm('Publish results? This redirects users on the results page for 8 seconds.')) return;
+            fetch('/admin/publish-results', { method: 'POST' }).then(res => res.json()).then(data => {
+                if(data.success) showMessage('Results published! Signal is active for 8 seconds.', 'success');
+                else showMessage('Failed to publish results.', 'error');
+            }).catch(err => showMessage('Error publishing results.', 'error'));
         }
 
         function forceRedirect() {
-            if (!confirm('Are you sure you want to force all users on the selection page to return to the login screen?')) {
-                return;
-            }
-            fetch('/admin/force-redirect', { method: 'POST' })
-            .then(res => res.json())
-            .then(data => {
-                if(data.success) {
-                    showMessage('Redirect command sent! Signal is active for 8 seconds.', 'success');
-                } else {
-                    showMessage('Failed to send redirect command.', 'error');
-                }
-            })
-            .catch(err => showMessage('Error sending redirect command.', 'error'));
+            if (!confirm('Force all users on the selection page to the login screen? (Signal active for 8 seconds)')) return;
+            fetch('/admin/force-redirect', { method: 'POST' }).then(res => res.json()).then(data => {
+                if(data.success) showMessage('Redirect command sent! Signal is active for 8 seconds.', 'success');
+                else showMessage('Failed to send redirect command.', 'error');
+            }).catch(err => showMessage('Error sending redirect command.', 'error'));
         }
 
         function selectSpecificTeams() {
-            const numTeamsInput = document.getElementById('num-teams');
-            const teamIdsInput = document.getElementById('team-ids');
+            const numTeams = parseInt(document.getElementById('num-teams').value);
+            const teamIdsStr = document.getElementById('team-ids').value.trim();
+            if (!numTeams || numTeams < 1) return showMessage('Please enter a valid number of teams.', 'error');
+            if (!teamIdsStr) return showMessage('Please enter team IDs.', 'error');
+            const teamIdNumbers = teamIdsStr.split(',').map(id => id.trim()).filter(Boolean);
+            if (teamIdNumbers.length !== numTeams) return showMessage(`Number of teams (${numTeams}) does not match IDs entered (${teamIdNumbers.length}).`, 'error');
             
-            const numTeams = parseInt(numTeamsInput.value);
-            const teamIdsStr = teamIdsInput.value.trim();
-            
-            if (!numTeams || numTeams < 1) {
-                showMessage('Please enter a valid number of teams', 'error');
-                return;
-            }
-            
-            if (!teamIdsStr) {
-                showMessage('Please enter team ID numbers', 'error');
-                return;
-            }
-            
-            const teamIdNumbers = teamIdsStr.split(',').map(id => id.trim()).filter(id => id.length > 0);
-            
-            if (teamIdNumbers.length !== numTeams) {
-                showMessage(`Number of teams (${numTeams}) doesn't match number of IDs entered (${teamIdNumbers.length})`, 'error');
-                return;
-            }
-            
-            const allCheckboxes = document.querySelectorAll('.team-checkbox');
-            allCheckboxes.forEach(cb => cb.checked = false);
-            
+            document.querySelectorAll('.team-checkbox').forEach(cb => cb.checked = false);
             let foundCount = 0;
-            let notFoundTeams = [];
-            
-            teamIdNumbers.forEach(teamId => {
-                const checkbox = document.querySelector(`.team-checkbox[value="${teamId}"]`);
-                if (checkbox) {
-                    checkbox.checked = true;
+            let notFound = [];
+            teamIdNumbers.forEach(id => {
+                const cb = document.querySelector(`.team-checkbox[value="${id}"]`);
+                if (cb) {
+                    cb.checked = true;
                     foundCount++;
                 } else {
-                    notFoundTeams.push(teamId);
+                    notFound.push(id);
                 }
             });
-            
             updateSelectedCount();
-            
-            if (foundCount === teamIdNumbers.length) {
-                showMessage(`Successfully selected ${foundCount} team(s)`, 'success');
-            } else {
-                showMessage(`Selected ${foundCount} team(s). Not found: ${notFoundTeams.join(', ')}`, 'error');
-            }
-            
-            numTeamsInput.value = '';
-            teamIdsInput.value = '';
+            if (notFound.length > 0) showMessage(`Selected ${foundCount} team(s). Not found: ${notFound.join(', ')}`, 'error');
+            else showMessage(`Successfully selected ${foundCount} team(s).`, 'success');
+            document.getElementById('num-teams').value = '';
+            document.getElementById('team-ids').value = '';
         }
 
         function selectTopN() {
-            const topNInput = document.getElementById('top-n');
-            const n = parseInt(topNInput.value);
-            
-            if (!n || n < 1) {
-                showMessage('Please enter a valid number', 'error');
-                return;
-            }
-            
+            const n = parseInt(document.getElementById('top-n').value);
+            if (!n || n < 1) return showMessage('Please enter a valid number.', 'error');
             const allCheckboxes = document.querySelectorAll('.team-checkbox');
-            
-            if (n > allCheckboxes.length) {
-                showMessage(`Only ${allCheckboxes.length} teams available. Selecting all.`, 'error');
-            }
-            
-            allCheckboxes.forEach((checkbox, index) => {
-                checkbox.checked = index < n;
-            });
-            
+            if (n > allCheckboxes.length) showMessage(`Only ${allCheckboxes.length} teams available. Selecting all.`, 'error');
+            allCheckboxes.forEach((cb, index) => cb.checked = index < n);
             updateSelectedCount();
-            showMessage(`Selected top ${Math.min(n, allCheckboxes.length)} candidate(s)`, 'success');
-            topNInput.value = '';
+            showMessage(`Selected top ${Math.min(n, allCheckboxes.length)} candidate(s).`, 'success');
+            document.getElementById('top-n').value = '';
         }
     </script>
 </body>
