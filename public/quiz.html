@@ -18,26 +18,21 @@
             color: var(--text-dark); display: flex; justify-content: center; align-items: center;
             min-height: 100vh; padding: 20px; box-sizing: border-box;
         }
-        #entry-gate, .warning-overlay {
-            position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(10px);
-            display: flex; justify-content: center; align-items: center; z-index: 1000;
+        .warning-overlay {
+            position: fixed; inset: 0; background-color: rgba(120, 0, 0, 0.7); backdrop-filter: blur(10px);
+            display: flex; justify-content: center; align-items: center; z-index: 1001;
             color: white; text-align: center;
         }
-        .warning-overlay { background-color: rgba(120, 0, 0, 0.7); z-index: 1001; }
         .entry-content {
             background: rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 40px;
-            max-width: 500px; animation: fadeIn 0.5s ease-in-out;
+            max-width: 500px;
         }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-        .entry-content h2 { font-size: 2rem; margin-top: 0; }
-        .entry-content ul { text-align: left; display: inline-block; margin-bottom: 30px; }
-        .entry-button, .resume-button {
+        .resume-button {
             color: white; padding: 15px 30px; border: none; border-radius: 12px;
             font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: transform 0.2s ease;
+            background-color: var(--warning-color);
         }
-        #start-quiz-button { background-color: var(--success-color); }
-        .resume-button { background-color: var(--warning-color); }
-        .entry-button:hover, .resume-button:hover { transform: scale(1.05); }
+        .resume-button:hover { transform: scale(1.05); }
         .quiz-wrapper {
             width: 90%; max-width: 1200px; display: grid; grid-template-columns: 1fr 1fr;
             grid-template-rows: auto 1fr; gap: 20px;
@@ -103,19 +98,6 @@
     </style>
 </head>
 <body>
-    <div id="entry-gate">
-        <div class="entry-content">
-            <h2>Quiz Rules & Instructions</h2>
-            <p>To ensure fairness, this quiz will run in a secured fullscreen mode.</p>
-            <ul>
-                <li style="color: #ffcccc;"><strong>Switching tabs will terminate the quiz immediately.</strong></li>
-                <li>You will receive two warnings for exiting fullscreen (ESC key).</li>
-                <li>A third violation for exiting fullscreen will terminate the quiz.</li>
-            </ul>
-            <button id="start-quiz-button" class="entry-button">Click Here to Begin</button>
-        </div>
-    </div>
-
     <div id="esc-warning-1" class="warning-overlay" style="display: none;"><div class="entry-content"><h2>Warning 1 of 2</h2><p>Exiting fullscreen is not allowed.</p><button class="resume-button">Click to Resume</button></div></div>
     <div id="esc-warning-2" class="warning-overlay" style="display: none;"><div class="entry-content"><h2>Final Warning</h2><p>Exiting fullscreen again will terminate the quiz.</p><button class="resume-button">Click to Resume</button></div></div>
     <div id="tab-warning-1" class="warning-overlay" style="display: none;"><div class="entry-content"><h2>Warning 1 of 2</h2><p>Switching tabs is not allowed.</p><button class="resume-button">Click to Resume</button></div></div>
@@ -144,8 +126,6 @@
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       
-      const entryGate = document.getElementById('entry-gate');
-      const startButton = document.getElementById('start-quiz-button');
       const quizWrapper = document.querySelector('.quiz-wrapper');
       
       const overlays = {
@@ -188,13 +168,13 @@
       }
       teamIdDisplay.textContent = teamId;
 
-      startButton.addEventListener('click', startAndSecureQuiz);
+      // The quiz now starts automatically when the page loads
+      startAndSecureQuiz();
 
       function startAndSecureQuiz() {
           if (document.documentElement.requestFullscreen) {
               document.documentElement.requestFullscreen();
           }
-          entryGate.style.display = 'none';
           quizWrapper.style.display = 'grid';
           initialWidth = window.screen.width;
           initialHeight = window.screen.height;
@@ -354,7 +334,6 @@
 
           questionText.textContent = currentQuestion.question; 
           
-          // Show/hide elements based on question type
           if (currentQuestion.type === 'MCQ') {
               optionsList.style.display = 'block';
               riddleContainer.style.display = 'none';
@@ -387,7 +366,7 @@
           } else if (currentQuestion.type === 'Riddle') {
               optionsList.style.display = 'none';
               riddleContainer.style.display = 'block';
-              riddleInput.value = currentQuestion.selected || ''; // Show previous answer if exists
+              riddleInput.value = currentQuestion.selected || '';
           }
           
           updateButtonStates();
@@ -418,7 +397,7 @@
       
       function skipQuestion() { 
           questions[currentQuestionIndex].skipped = true; 
-          questions[currentQuestionIndex].answered = false; // A skipped question is not an answered one
+          questions[currentQuestionIndex].answered = false;
           questions[currentQuestionIndex].selected = null;
           updateDiceStatus(); 
           goToNextQuestion(); 
@@ -430,7 +409,6 @@
               currentQuestion.selected = riddleInput.value.trim();
               currentQuestion.answered = true;
           } else if (currentQuestion.type === 'Riddle' && riddleInput.value.trim() === '') {
-              // Don't mark as answered if input is empty
               currentQuestion.answered = false;
           }
           
@@ -460,7 +438,7 @@
 
           clearButton.style.display = isAnswered ? 'block' : 'none';
           skipButton.style.display = !isAnswered ? 'block' : 'none';
-          nextButton.style.display = 'block'; // Always show next button
+          nextButton.style.display = 'block';
       }
 
       function renderDiceMenu() { 
