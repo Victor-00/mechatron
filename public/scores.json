@@ -214,5 +214,13 @@
     "answeredQuestions": 5,
     "totalQuestions": 5,
     "status": "Completed"
+  },
+  {
+    "teamId": "255",
+    "score": 2,
+    "timeTaken": 27464,
+    "answeredQuestions": 10,
+    "totalQuestions": 10,
+    "status": "Completed"
   }
 ]

@@ -50,28 +50,15 @@
             color: var(--primary-color);
             font-size: 2.5rem;
             margin-top: 0;
-            margin-bottom: 10px;
-        }
-        
-        #performance-title {
-            font-size: 1.8rem;
-            color: var(--text-dark);
-            margin-top: 0;
             margin-bottom: 25px;
         }
         
-        .score-display {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 15px;
-        }
-
         .team-info {
             font-size: 1.1rem;
             margin-bottom: 25px;
-            display: flex;
-            justify-content: center;
-            gap: 30px;
+            background-color: rgba(255,255,255,0.3);
+            padding: 10px;
+            border-radius: 8px;
         }
         
         #team-id {
@@ -105,14 +92,8 @@
 
     <div class="results-container">
         <h1>Submission Successful!</h1>
-        <h2 id="performance-title">Calculating...</h2>
         
-        <p class="score-display"><span id="score">--</span> / <span id="total-marks">--</span></p>
-
-        <div class="team-info">
-            <span>Team: <strong id="team-id"></strong></span>
-            <span>Time: <strong id="time-taken">0m 0s</strong></span>
-        </div>
+        <p class="team-info">Team: <strong id="team-id"></strong></p>
 
         <p class="wait-message">
             Your results have been locked in. Please wait while the final results are being published...
@@ -125,37 +106,14 @@
             const resultsData = localStorage.getItem('quizResults');
 
             if (!resultsData) {
-                // If there are no results, redirect to login.
                 window.location.href = 'login.html';
                 return;
             }
 
             const results = JSON.parse(resultsData);
 
-            // Populate the UI elements
             document.getElementById('team-id').textContent = results.teamId;
-            document.getElementById('score').textContent = results.score;
-            document.getElementById('total-marks').textContent = results.totalMarks;
 
-            const minutes = Math.floor(results.timeTaken / 60);
-            const seconds = results.timeTaken % 60;
-            document.getElementById('time-taken').textContent = `${minutes}m ${seconds.toString().padStart(2, '0')}s`;
-
-            // Set performance title based on score
-            const scorePercentage = (results.score / results.totalMarks) * 100;
-            const titleElement = document.getElementById('performance-title');
-            
-            if (scorePercentage >= 90) {
-                titleElement.textContent = '🏆 Quiz Master!';
-            } else if (scorePercentage >= 70) {
-                titleElement.textContent = '⭐ Excellent Effort!';
-            } else if (scorePercentage >= 50) {
-                titleElement.textContent = '👍 Solid Performance!';
-            } else {
-                titleElement.textContent = '💪 Valiant Effort!';
-            }
-
-            // Trigger confetti
             confetti({
                 particleCount: 150,
                 spread: 90,
@@ -168,7 +126,6 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.published) {
-                            // If results are published, stop polling and redirect
                             clearInterval(statusCheckInterval);
                             window.location.href = 'selection_status.html';
                         }
@@ -182,4 +139,5 @@
 
 </body>
 </html>
+
 

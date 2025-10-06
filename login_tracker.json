@@ -1,5 +1,13 @@
 {
   "loggedInTeams": [
-    
+    {
+      "teamId": "255",
+      "regNum": "1255",
+      "loginTime": "2025-10-06T19:52:38.357Z",
+      "timestamp": 1759780358357,
+      "marks": 2,
+      "endTime": "2025-10-06T19:53:18.604Z",
+      "timeTaken": 27464
+    }
   ]
 }
