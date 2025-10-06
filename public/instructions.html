@@ -90,6 +90,7 @@
             background-color: #f59e0b;
         }
         .resume-button:hover { transform: scale(1.05); }
+
     </style>
 </head>
 <body>
@@ -147,8 +148,7 @@
 
             function terminateSession() {
                 quizTerminated = true;
-                // You might want to log this event or redirect to a specific "terminated" page
-                document.body.innerHTML = `<div style="text-align: center; padding-top: 50px;"><h2>Session Terminated</h2><p>You have violated the rules.</p></div>`;
+                document.body.innerHTML = `<div style="text-align: center; padding-top: 50px; color: white;"><h2>Session Terminated</h2><p>You have violated the rules.</p></div>`;
                 if (document.exitFullscreen) {
                     document.exitFullscreen();
                 }
@@ -202,9 +202,8 @@
                 }, 3000); // Check every 3 seconds
             }
             
-            // This event listener handles the initial click to enter fullscreen, which is required by most browsers
-            document.body.addEventListener('click', startAndSecure, { once: true });
-            alert("Click anywhere on the screen to enter secure fullscreen mode and begin waiting for the quiz.");
+            // Automatically start the secure mode on page load
+            startAndSecure();
         });
     </script>
 </body>
