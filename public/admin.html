@@ -87,6 +87,10 @@
             background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
             color: #333;
         }
+        
+        button.finalize {
+             background: linear-gradient(135deg, #5eead4 0%, #9333ea 100%);
+        }
 
         .stats {
             display: grid;
@@ -286,6 +290,7 @@
             <div class="controls">
                 <button class="success" id="keep-selected-btn" onclick="keepSelectedTeams()" disabled>✅ Keep Selected Only</button>
                 <button class="danger" id="delete-selected-btn" onclick="deleteSelectedTeams()" disabled>🗑️ Delete Selected</button>
+                <button class="finalize" id="finalize-btn" onclick="finalizeSelections()" disabled>💾 Finalize Selections</button>
             </div>
 
 
@@ -305,7 +310,7 @@
             <h2 style="margin-top: 30px;">Team Selection</h2>
             <div class="controls" style="align-items: center;">
                 <input type="number" id="num-teams" placeholder="Number of teams" min="1">
-                <input type="text" id="team-ids" placeholder="Team ID numbers (e.g., 3456,3457,3458)">
+                <input type="text" id="team-ids" placeholder="Team ID numbers (e.g., TEAM_ID_1,TEAM_ID_2)">
                 <button class="warning action-btn" onclick="selectSpecificTeams()">🎯 Select Teams</button>
             </div>
 
@@ -437,6 +442,7 @@
             document.getElementById('selected-count').textContent = count;
             document.getElementById('keep-selected-btn').disabled = count === 0;
             document.getElementById('delete-selected-btn').disabled = count === 0;
+            document.getElementById('finalize-btn').disabled = count === 0;
             const allCount = document.querySelectorAll('.team-checkbox').length;
             if (allCount > 0) {
                 document.getElementById('select-all').checked = count === allCount;
@@ -475,10 +481,10 @@
         }
 
         function resetAllLogins() {
-            if (!confirm('Are you sure you want to reset ALL logins? This cannot be undone!')) return;
+            if (!confirm('Are you sure you want to reset ALL logins and selections? This cannot be undone!')) return;
             fetch('/admin/reset-logins', { method: 'POST' }).then(res => res.json()).then(data => {
                 if (data.success) {
-                    showMessage('All logins reset successfully.');
+                    showMessage('All logins and selections reset successfully.');
                     loadData();
                 } else {
                     showMessage('Failed to reset logins.', 'error');
@@ -499,6 +505,30 @@
                 else showMessage('Error: ' + data.message, 'error');
                 loadData();
             }).catch(err => showMessage('Network error.', 'error'));
+        }
+
+        function finalizeSelections() {
+            const selectedTeamIds = getSelectedTeamIds();
+            if (selectedTeamIds.length === 0) {
+                return showMessage('No teams selected to finalize.', 'error');
+            }
+            if (!confirm(`Finalize these ${selectedTeamIds.length} teams? This will overwrite the current selection list.`)) {
+                return;
+            }
+            fetch('/admin/finalize-selections', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ selectedTeams: selectedTeamIds })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage(`Successfully finalized ${selectedTeamIds.length} teams.`, 'success');
+                } else {
+                    showMessage('Failed to finalize selections: ' + data.message, 'error');
+                }
+            })
+            .catch(err => showMessage('Network error while finalizing selections.', 'error'));
         }
         
         function publishResults() {
