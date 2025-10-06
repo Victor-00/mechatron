@@ -127,8 +127,8 @@
                     .then(data => {
                         if (data.redirect) {
                             clearInterval(redirectCheckInterval);
+                            // Do NOT clear currentTeamId here, so auto-login can work
                             localStorage.removeItem('quizResults');
-                            localStorage.removeItem('currentTeamId');
                             window.location.href = 'login.html';
                         }
                     })
