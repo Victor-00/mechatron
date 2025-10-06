@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --success-color: #22c55e;
+            --primary-color: #6d28d9;
         }
         body {
             margin: 0; 
@@ -22,23 +22,18 @@
             min-height: 100vh; 
             padding: 20px; 
             box-sizing: border-box;
+            overflow: hidden;
         }
-        #entry-gate {
-            position: fixed; 
-            inset: 0; 
-            background-color: rgba(0, 0, 0, 0.7); 
-            backdrop-filter: blur(10px);
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            z-index: 1000;
+        .content-wrapper {
+            position: relative;
+            z-index: 100;
             text-align: center;
         }
         .entry-content {
             background: rgba(255, 255, 255, 0.1); 
             border-radius: 20px; 
-            padding: 40px;
-            max-width: 500px; 
+            padding: 50px;
+            max-width: 700px; 
             animation: fadeIn 0.5s ease-in-out;
         }
         @keyframes fadeIn { 
@@ -46,32 +41,59 @@
             to { opacity: 1; transform: scale(1); } 
         }
         .entry-content h2 { 
-            font-size: 2rem; 
+            font-size: 2.5rem; 
             margin-top: 0; 
+        }
+        .entry-content p {
+            font-size: 1.1rem;
+            line-height: 1.6;
         }
         .entry-content ul { 
             text-align: left; 
             display: inline-block; 
             margin-bottom: 30px; 
+            font-size: 1.1rem;
+            line-height: 1.6;
         }
-        .entry-button {
-            color: white; 
-            padding: 15px 30px; 
-            border: none; 
+
+        .wait-message {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            background: white;
+            padding: 15px 25px;
             border-radius: 12px;
-            font-size: 1.2rem; 
-            font-weight: bold; 
-            cursor: pointer; 
-            transition: transform 0.2s ease;
-            background-color: var(--success-color);
         }
-        .entry-button:hover { 
-            transform: scale(1.05); 
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto 0;
         }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Anti-cheat styles */
+        .warning-overlay {
+            position: fixed; inset: 0; background-color: rgba(120, 0, 0, 0.7); backdrop-filter: blur(10px);
+            display: none; justify-content: center; align-items: center; z-index: 1001;
+        }
+        .resume-button {
+            color: white; padding: 15px 30px; border: none; border-radius: 12px;
+            font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: transform 0.2s ease;
+            background-color: #f59e0b;
+        }
+        .resume-button:hover { transform: scale(1.05); }
     </style>
 </head>
 <body>
-    <div id="entry-gate">
+    <div class="content-wrapper">
         <div class="entry-content">
             <h2>Quiz Rules & Instructions</h2>
             <p>To ensure fairness, this quiz will run in a secured fullscreen mode.</p>
@@ -80,15 +102,111 @@
                 <li>You will receive two warnings for exiting fullscreen (ESC key).</li>
                 <li>A third violation for exiting fullscreen will terminate the quiz.</li>
             </ul>
-            <button id="start-quiz-button" class="entry-button">Click Here to Begin</button>
+            <div class="wait-message">
+                Waiting for the admin to start the quiz...
+                <div class="loader"></div>
+            </div>
         </div>
     </div>
 
+    <!-- Warning Overlays -->
+    <div id="esc-warning-1" class="warning-overlay"><div class="entry-content"><h2>Warning 1 of 2</h2><p>Exiting fullscreen is not allowed.</p><button class="resume-button">Click to Resume</button></div></div>
+    <div id="esc-warning-2" class="warning-overlay"><div class="entry-content"><h2>Final Warning</h2><p>Exiting fullscreen again will terminate the quiz.</p><button class="resume-button">Click to Resume</button></div></div>
+    <div id="tab-warning-1" class="warning-overlay"><div class="entry-content"><h2>Warning 1 of 2</h2><p>Switching tabs is not allowed.</p><button class="resume-button">Click to Resume</button></div></div>
+    <div id="tab-warning-2" class="warning-overlay"><div class="entry-content"><h2>Final Warning</h2><p>Switching tabs again will terminate the quiz.</p><button class="resume-button">Click to Resume</button></div></div>
+
     <script>
-        document.getElementById('start-quiz-button').addEventListener('click', () => {
-            // Redirect to the quiz page when the user is ready to start
-            window.location.href = 'quiz.html';
+        document.addEventListener('DOMContentLoaded', () => {
+            let escWarningCount = 0;
+            let tabSwitchCount = 0;
+            let quizTerminated = false;
+
+            const overlays = {
+                esc1: document.getElementById('esc-warning-1'),
+                esc2: document.getElementById('esc-warning-2'),
+                tab1: document.getElementById('tab-warning-1'),
+                tab2: document.getElementById('tab-warning-2'),
+            };
+
+            function startAndSecure() {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                    });
+                }
+                activateSecurityListeners();
+                startPolling();
+            }
+
+            function resumeFromWarning() {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen();
+                }
+                Object.values(overlays).forEach(overlay => overlay.style.display = 'none');
+            }
+
+            function terminateSession() {
+                quizTerminated = true;
+                // You might want to log this event or redirect to a specific "terminated" page
+                document.body.innerHTML = `<div style="text-align: center; padding-top: 50px;"><h2>Session Terminated</h2><p>You have violated the rules.</p></div>`;
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+            
+            function activateSecurityListeners() {
+                document.querySelectorAll('.resume-button').forEach(btn => btn.addEventListener('click', resumeFromWarning));
+
+                document.addEventListener('fullscreenchange', () => {
+                    if (!document.fullscreenElement && !quizTerminated) {
+                        escWarningCount++;
+                        if (escWarningCount === 1) overlays.esc1.style.display = 'flex';
+                        else if (escWarningCount === 2) overlays.esc2.style.display = 'flex';
+                        else terminateSession();
+                    }
+                });
+
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden && !quizTerminated) {
+                        tabSwitchCount++;
+                        if (tabSwitchCount === 1) overlays.tab1.style.display = 'flex';
+                        else if (tabSwitchCount === 2) overlays.tab2.style.display = 'flex';
+                        else terminateSession();
+                    }
+                });
+
+                 window.addEventListener('beforeunload', (e) => { 
+                    if (!quizTerminated) { 
+                        e.preventDefault(); 
+                        e.returnValue = 'Are you sure you want to leave? Your session may be terminated.'; 
+                    } 
+                });
+            }
+
+            function startPolling() {
+                const pollingInterval = setInterval(() => {
+                    if (quizTerminated) {
+                        clearInterval(pollingInterval);
+                        return;
+                    }
+                    
+                    fetch('/api/start-quiz-status')
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.start) {
+                                clearInterval(pollingInterval);
+                                window.location.href = 'quiz.html';
+                            }
+                        })
+                        .catch(err => console.error("Error polling for start signal:", err));
+                }, 3000); // Check every 3 seconds
+            }
+            
+            // This event listener handles the initial click to enter fullscreen, which is required by most browsers
+            document.body.addEventListener('click', startAndSecure, { once: true });
+            alert("Click anywhere on the screen to enter secure fullscreen mode and begin waiting for the quiz.");
         });
     </script>
 </body>
 </html>
+
