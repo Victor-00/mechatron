@@ -99,7 +99,7 @@ function markTeamAsLoggedIn(teamId, regNum) {
         timestamp: Date.now(),
         marks: 0,
         endTime: null,
-        timeTaken: null // Initialize timeTaken
+        timeTaken: null 
       });
       return writeLoginTracker(tracker);
     }
@@ -115,7 +115,6 @@ function updateTeamLogin(teamId) {
     const tracker = readLoginTracker();
     const teamIndex = tracker.loggedInTeams.findIndex(team => team.teamId === teamId);
     if (teamIndex !== -1) {
-      // Reset for the new round
       tracker.loggedInTeams[teamIndex].loginTime = new Date().toISOString();
       tracker.loggedInTeams[teamIndex].timestamp = Date.now();
       tracker.loggedInTeams[teamIndex].marks = 0;
@@ -123,7 +122,7 @@ function updateTeamLogin(teamId) {
       tracker.loggedInTeams[teamIndex].timeTaken = null;
       return writeLoginTracker(tracker);
     }
-    return false; // Team not found
+    return false;
   } catch (error) {
     console.error(`Error updating login for team ${teamId}:`, error);
     return false;
@@ -255,7 +254,7 @@ app.post('/submit-quiz', (req, res) => {
     if (teamIndex !== -1) {
       tracker.loggedInTeams[teamIndex].marks = submissionData.score || 0;
       tracker.loggedInTeams[teamIndex].endTime = new Date().toISOString();
-      tracker.loggedInTeams[teamIndex].timeTaken = submissionData.timeTaken; // Save the time taken
+      tracker.loggedInTeams[teamIndex].timeTaken = submissionData.timeTaken;
       writeLoginTracker(tracker);
     }
     res.json({ success: true, message: 'Quiz submitted successfully' });
@@ -353,15 +352,36 @@ app.post('/admin/remove-teams-batch', (req, res) => {
         return res.status(400).json({ success: false, message: 'Invalid request' });
     }
     try {
+        // Update login_tracker.json
         const tracker = readLoginTracker();
         const initialLength = tracker.loggedInTeams.length;
         tracker.loggedInTeams = tracker.loggedInTeams.filter(team => !teamIds.includes(team.teamId));
-        if (writeLoginTracker(tracker)) {
+        const loginTrackerWritten = writeLoginTracker(tracker);
+
+        // Update selected_teams.json if it exists
+        if (fs.existsSync(SELECTED_TEAMS_PATH)) {
+            try {
+                const selectedData = JSON.parse(fs.readFileSync(SELECTED_TEAMS_PATH, 'utf8'));
+                if (selectedData && Array.isArray(selectedData.selectedTeams)) {
+                    const initialSelectedLength = selectedData.selectedTeams.length;
+                    selectedData.selectedTeams = selectedData.selectedTeams.filter(teamId => !teamIds.includes(teamId));
+                    if (selectedData.selectedTeams.length < initialSelectedLength) {
+                        fs.writeFileSync(SELECTED_TEAMS_PATH, JSON.stringify(selectedData, null, 2));
+                        console.log('Updated selected_teams.json after deletion.');
+                    }
+                }
+            } catch (err) {
+                console.error("Error updating selected_teams.json:", err);
+            }
+        }
+
+        if (loginTrackerWritten) {
             res.json({ success: true, removedCount: initialLength - tracker.loggedInTeams.length });
         } else {
             res.status(500).json({ success: false, message: 'Error updating login tracker' });
         }
     } catch (error) {
+        console.error('Error during batch removal:', error);
         res.status(500).json({ success: false, message: 'Server error' });
     }
 });
@@ -402,5 +422,4 @@ console.log(`Loaded ${Object.keys(getTeamsFromEnv()).length} teams from env.`);
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is running on port ${PORT}`);
 });
-
 
