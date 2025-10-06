@@ -231,6 +231,20 @@
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       
+      const loginFormContainer = document.getElementById('login-form-container');
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      if (isMobile) {
+          loginFormContainer.innerHTML = `
+              <h2 class="form-title font-fredoka">Unsupported Device</h2>
+              <div class="message-box error" style="display: block;">
+                  This quiz is not supported on mobile devices. Please use a desktop or laptop computer.
+              </div>
+          `;
+          loginFormContainer.classList.add('form-visible');
+          return; // Stop all further script execution for mobile
+      }
+
       const existingTeamId = localStorage.getItem('currentTeamId');
       if (existingTeamId) {
           fetch('/api/selected-teams', { cache: 'no-store' })
@@ -260,8 +274,7 @@
         boardBackground.appendChild(cell);
       }
 
-      const loginForm = document.getElementById('login-form-container');
-      loginForm.classList.add('form-visible');
+      loginFormContainer.classList.add('form-visible');
       createDice();
       
       document.getElementById('login-form').addEventListener('submit', async function (event) {
