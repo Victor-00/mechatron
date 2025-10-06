@@ -210,7 +210,7 @@ app.post('/admin/publish-results', (req, res) => {
   setTimeout(() => {
     resultsPublished = false;
     console.log('Results publish signal is OFF.');
-  }, 8000); // Turn off after 8 seconds
+  }, 8000);
   res.json({ success: true, message: 'Results published' });
 });
 
@@ -220,7 +220,7 @@ app.post('/admin/force-redirect', (req, res) => {
   setTimeout(() => {
     forceRedirectToLogin = false;
     console.log('Force redirect signal is OFF.');
-  }, 8000); // Turn off after 8 seconds
+  }, 8000);
   res.json({ success: true, message: 'Force redirect activated.' });
 });
 
@@ -261,8 +261,30 @@ app.post('/admin/remove-teams-batch', (req, res) => {
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('*', (req, res) => {
+  // Define a list of your root-level HTML files
+  const htmlFiles = [
+    'login.html',
+    'instructions.html', // Add the new instructions file here
+    'quiz.html',
+    'results.html',
+    'selection_status.html',
+    'admin.html'
+  ];
+  
+  // Clean the requested path
+  const requestedFile = req.path.substring(1); // remove leading '/'
+
+  if (htmlFiles.includes(requestedFile)) {
+    const filePath = path.join(__dirname, 'public', requestedFile);
+    if (fs.existsSync(filePath)) {
+      return res.sendFile(filePath);
+    }
+  }
+  
+  // For any other request, default to login.html
   res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
+
 
 // Initialize on server start
 initializeLoginTracker();
