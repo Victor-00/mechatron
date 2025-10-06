@@ -558,7 +558,8 @@
             loginMessage.classList.add('success');
             loginMessage.classList.remove('error');
             localStorage.setItem('currentTeamId', teamId);
-            window.location.href = 'quiz.html';
+            // *** THIS IS THE ONLY CHANGE ***
+            window.location.href = 'instructions.html';
           } else {
             loginMessage.textContent = 'Login failed: ' + data.message;
             loginMessage.classList.add('error');
