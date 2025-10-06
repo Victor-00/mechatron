@@ -155,6 +155,7 @@
       let currentQuestionIndex = 0;
       let score = 0;
       let quizTimer;
+      let quizStartTime; // To record the precise start time
       let quizHasEnded = false;
       let teamId = '';
       let escWarningCount = 0;
@@ -172,6 +173,7 @@
       startAndSecureQuiz();
 
       function startAndSecureQuiz() {
+          quizStartTime = Date.now(); // Record precise start time
           if (document.documentElement.requestFullscreen) {
               document.documentElement.requestFullscreen();
           }
@@ -254,12 +256,16 @@
         pauseTimer();
 
         calculateScore();
-        const finalTimeInSeconds = 300 - timeLeft;
+        const timeTakenMs = Date.now() - quizStartTime; // Calculate precise time
         const totalPossibleMarks = questions.reduce((acc, q) => acc + (q.positive_mark || 1), 0);
         
         const submissionData = {
-          teamId: teamId, score: score, timeTaken: finalTimeInSeconds,
-          answeredQuestions: questions.filter(q => q.answered).length, totalQuestions: questions.length, status: 'Completed'
+          teamId: teamId, 
+          score: score, 
+          timeTaken: timeTakenMs,
+          answeredQuestions: questions.filter(q => q.answered).length, 
+          totalQuestions: questions.length, 
+          status: 'Completed'
         };
         
         if (options.reason === 'violation_limit') {
@@ -267,7 +273,10 @@
         }
 
         localStorage.setItem('quizResults', JSON.stringify({
-          teamId: teamId, score: score, totalQuestions: questions.length, timeTaken: finalTimeInSeconds,
+          teamId: teamId, 
+          score: score, 
+          totalQuestions: questions.length, 
+          timeTaken: timeTakenMs,
           totalMarks: totalPossibleMarks
         }));
         
@@ -340,11 +349,6 @@
                   li.classList.add('option-item'); 
                   li.dataset.key = opt.key;
 
-                  // Restore selected state
-                  if (currentQuestion.selected === opt.key) {
-                      li.classList.add('selected');
-                  }
-
                   if (opt.value.toLowerCase().endsWith('.png')) {
                       const img = document.createElement('img');
                       img.src = `images/${opt.value}`;
@@ -353,6 +357,10 @@
                       li.textContent = opt.value; 
                   }
                   
+                  if (currentQuestion.selected === opt.key) {
+                      li.classList.add('selected');
+                  }
+
                   li.onclick = () => selectOption(opt.key); 
                   optionsList.appendChild(li); 
               });
@@ -483,4 +491,5 @@
   </script>
 </body>
 </html>
+
 

@@ -346,13 +346,14 @@
                         <th class="rank-cell">Rank</th>
                         <th>Team ID</th>
                         <th class="marks-cell">Marks</th>
-                        <th>Login Time</th>
+                        <th class="marks-cell">Time Taken (s)</th>
+                        <th>Quiz Start Time</th>
                         <th>End Time</th>
                     </tr>
                 </thead>
                 <tbody id="teams-tbody">
                     <tr>
-                        <td colspan="6" style="text-align: center;">Loading...</td>
+                        <td colspan="7" style="text-align: center;">Loading...</td>
                     </tr>
                 </tbody>
             </table>
@@ -376,7 +377,6 @@
         }
 
         function loadData() {
-            // This is the only change: added { cache: 'no-store' }
             fetch('/api/logged-teams', { cache: 'no-store' })
             .then(response => response.json())
             .then(data => {
@@ -387,26 +387,34 @@
                 allTeams = data.loggedInTeams || [];
                 allTeams.sort((a, b) => {
                     if (b.marks !== a.marks) return b.marks - a.marks;
-                    const aTime = a.endTime ? new Date(a.endTime).getTime() : Infinity;
-                    const bTime = b.endTime ? new Date(b.endTime).getTime() : Infinity;
+                    const aTime = a.timeTaken || Infinity;
+                    const bTime = b.timeTaken || Infinity;
                     return aTime - bTime;
                 });
                 document.getElementById('total-teams').textContent = allTeams.length;
                 updateSelectedCount();
                 const tbody = document.getElementById('teams-tbody');
                 if (allTeams.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No teams logged in</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No teams logged in</td></tr>';
                     return;
                 }
-                tbody.innerHTML = allTeams.map((team, index) => `
+                tbody.innerHTML = allTeams.map((team, index) => {
+                    const marks = team.marks !== undefined ? team.marks : 'N/A';
+                    const timeTaken = team.timeTaken ? (team.timeTaken / 1000).toFixed(3) : 'N/A';
+                    const startTime = new Date(team.loginTime).toLocaleString();
+                    const endTime = team.endTime ? new Date(team.endTime).toLocaleString() : 'N/A';
+
+                    return `
                     <tr>
                         <td class="checkbox-cell"><input type="checkbox" class="team-checkbox" value="${team.teamId}" onchange="updateSelectedCount()"></td>
                         <td class="rank-cell">#${index + 1}</td>
                         <td>${team.teamId}</td>
-                        <td class="marks-cell">${team.marks !== undefined ? team.marks : 'N/A'}</td>
-                        <td>${new Date(team.loginTime).toLocaleString()}</td>
-                        <td>${team.endTime ? new Date(team.endTime).toLocaleString() : 'N/A'}</td>
-                    </tr>`).join('');
+                        <td class="marks-cell">${marks}</td>
+                        <td class="marks-cell">${timeTaken}</td>
+                        <td>${startTime}</td>
+                        <td>${endTime}</td>
+                    </tr>`
+                }).join('');
             }).catch(err => showMessage('Error loading data.', 'error'));
         }
 
@@ -616,4 +624,5 @@
     </script>
 </body>
 </html>
+
 

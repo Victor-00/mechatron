@@ -98,7 +98,8 @@ function markTeamAsLoggedIn(teamId, regNum) {
         loginTime: new Date().toISOString(),
         timestamp: Date.now(),
         marks: 0,
-        endTime: null
+        endTime: null,
+        timeTaken: null // Initialize timeTaken
       });
       return writeLoginTracker(tracker);
     }
@@ -119,6 +120,7 @@ function updateTeamLogin(teamId) {
       tracker.loggedInTeams[teamIndex].timestamp = Date.now();
       tracker.loggedInTeams[teamIndex].marks = 0;
       tracker.loggedInTeams[teamIndex].endTime = null;
+      tracker.loggedInTeams[teamIndex].timeTaken = null;
       return writeLoginTracker(tracker);
     }
     return false; // Team not found
@@ -177,14 +179,12 @@ app.post('/login', (req, res) => {
         return res.json({ success: false, message: 'Team ID and Reg Number are required' });
     }
 
-    // Validate credentials first
     const teams = getTeamsFromEnv();
     const teamIdNumber = teamId.replace('TEAM_ID_', '');
     if (!teams[teamIdNumber] || teams[teamIdNumber] !== regNum) {
         return res.json({ success: false, message: 'Invalid Credentials' });
     }
 
-    // Handle login status
     if (isTeamLoggedIn(teamId)) {
         let isSelected = false;
         if (fs.existsSync(SELECTED_TEAMS_PATH)) {
@@ -204,7 +204,6 @@ app.post('/login', (req, res) => {
                 message: 'This team has already participated and was not selected for the next round.'
             });
         } else {
-            // It's a selected team logging in again. Update their record.
             if (updateTeamLogin(teamId)) {
                 return res.json({ success: true, message: 'Login successful for next round.', teamId: teamId });
             } else {
@@ -212,7 +211,6 @@ app.post('/login', (req, res) => {
             }
         }
     } else {
-        // First time login for this round
         if (markTeamAsLoggedIn(teamId, regNum)) {
             return res.json({ success: true, message: 'Login successful', teamId: teamId });
         } else {
@@ -257,10 +255,12 @@ app.post('/submit-quiz', (req, res) => {
     if (teamIndex !== -1) {
       tracker.loggedInTeams[teamIndex].marks = submissionData.score || 0;
       tracker.loggedInTeams[teamIndex].endTime = new Date().toISOString();
+      tracker.loggedInTeams[teamIndex].timeTaken = submissionData.timeTaken; // Save the time taken
       writeLoginTracker(tracker);
     }
     res.json({ success: true, message: 'Quiz submitted successfully' });
   } catch (error) {
+    console.error('Error submitting quiz:', error);
     res.status(500).json({ success: false, message: 'Error submitting quiz' });
   }
 });
@@ -394,6 +394,7 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
+
 // Initialize on server start
 initializeLoginTracker();
 console.log(`Loaded ${Object.keys(getTeamsFromEnv()).length} teams from env.`);
@@ -401,4 +402,5 @@ console.log(`Loaded ${Object.keys(getTeamsFromEnv()).length} teams from env.`);
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
 
