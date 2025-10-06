@@ -277,6 +277,7 @@
                 <button class="danger" id="delete-selected-btn" onclick="deleteSelectedTeams()" disabled>🗑️ Delete Selected</button>
                 <button class="danger" onclick="resetAllLogins()">🗑️ Reset All Logins</button>
                 <button class="warning" id="publish-results-btn" onclick="publishResults()">🚀 Publish Results</button>
+                <button class="danger" onclick="forceRedirect()">↩️ Force All to Login</button>
             </div>
 
             <div class="controls" style="align-items: center; border-top: 1px solid #eee; padding-top: 20px;">
@@ -581,6 +582,22 @@
             .catch(err => showMessage('Error publishing results.', 'error'));
         }
 
+        function forceRedirect() {
+            if (!confirm('Are you sure you want to force all users on the selection page to return to the login screen?')) {
+                return;
+            }
+            fetch('/admin/force-redirect', { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    showMessage('Redirect command sent successfully!', 'success');
+                } else {
+                    showMessage('Failed to send redirect command.', 'error');
+                }
+            })
+            .catch(err => showMessage('Error sending redirect command.', 'error'));
+        }
+
         function selectSpecificTeams() {
             const numTeamsInput = document.getElementById('num-teams');
             const teamIdsInput = document.getElementById('team-ids');
@@ -659,5 +676,4 @@
     </script>
 </body>
 </html>
-
 
