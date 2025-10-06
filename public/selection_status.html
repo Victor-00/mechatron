@@ -65,19 +65,8 @@
             font-weight: 600;
         }
 
-        /* Status-specific styling */
-        .selected .status-heading {
-            color: var(--success-color);
-        }
-
-        .not-selected .status-heading {
-            color: var(--danger-color);
-        }
-        
-        #loading-message {
-            font-style: italic;
-        }
-
+        .selected .status-heading { color: var(--success-color); }
+        .not-selected .status-heading { color: var(--danger-color); }
     </style>
 </head>
 <body>
@@ -91,52 +80,32 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const teamId = localStorage.getItem('currentTeamId');
-
             const container = document.getElementById('status-container');
             const heading = document.getElementById('status-heading');
             const message = document.getElementById('status-message');
             const teamIdDisplay = document.getElementById('team-id-display');
 
             if (!teamId) {
-                heading.textContent = 'Error';
-                message.textContent = 'Could not find your Team ID. Please log in again.';
-                container.classList.add('not-selected');
+                window.location.href = 'login.html';
                 return;
             }
 
             teamIdDisplay.textContent = `Team ID: ${teamId}`;
 
-            const apiUrl = '/api/logged-teams';
-
-            // Fetch with caching disabled to ensure fresh data
-            fetch(apiUrl, {
-                cache: 'no-cache',
-                headers: {
-                    'Cache-Control': 'no-cache'
-                }
-            })
+            fetch('/api/logged-teams', { cache: 'no-store' })
                 .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Could not connect to the server.');
-                    }
+                    if (!response.ok) throw new Error('Could not connect to the server.');
                     return response.json();
                 })
                 .then(data => {
-                    if (!data.success) {
-                        throw new Error(data.message || 'Failed to fetch team data.');
-                    }
-                    
-                    const loggedInTeams = data.loggedInTeams || [];
-                    
-                    const isTeamInList = loggedInTeams.some(team => team.teamId === teamId);
-
-                    // If team is in the list, they are NOT selected (reversed logic)
-                    displayResult(!isTeamInList);
+                    if (!data.success) throw new Error(data.message || 'Failed to fetch team data.');
+                    const isTeamInList = data.loggedInTeams.some(team => team.teamId === teamId);
+                    displayResult(!isTeamInList); // If NOT in the list, they are selected
                 })
                 .catch(error => {
                     console.error('Error checking status:', error);
                     heading.textContent = 'Error';
-                    message.textContent = 'Could not determine your status at this time. Please check your connection or contact support.';
+                    message.textContent = 'Could not determine status. Please contact support.';
                     container.classList.add('not-selected');
                 });
 
@@ -148,9 +117,24 @@
                 } else {
                     container.classList.add('not-selected');
                     heading.textContent = 'Thank You For Your Participation';
-                    message.innerHTML = 'You have <strong>not been selected</strong> for the next round. We wish you the best in your future endeavors.';
+                    message.innerHTML = 'You have <strong>not been selected</strong> for the next round.';
                 }
             }
+
+            // Start polling the server for the redirect command
+            const redirectCheckInterval = setInterval(() => {
+                fetch('/api/redirect-status')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.redirect) {
+                            clearInterval(redirectCheckInterval);
+                            localStorage.removeItem('quizResults');
+                            localStorage.removeItem('currentTeamId');
+                            window.location.href = 'login.html';
+                        }
+                    })
+                    .catch(error => console.error('Error checking redirect status:', error));
+            }, 3000); // Check every 3 seconds
         });
     </script>
 
