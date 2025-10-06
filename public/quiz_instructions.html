@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Instructions</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --success-color: #22c55e;
+        }
+        body {
+            margin: 0; 
+            font-family: 'Poppins', sans-serif; 
+            background: linear-gradient(135deg, #f5d742 0%, #4ade80 100%);
+            color: white; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            min-height: 100vh; 
+            padding: 20px; 
+            box-sizing: border-box;
+        }
+        #entry-gate {
+            position: fixed; 
+            inset: 0; 
+            background-color: rgba(0, 0, 0, 0.7); 
+            backdrop-filter: blur(10px);
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 1000;
+            text-align: center;
+        }
+        .entry-content {
+            background: rgba(255, 255, 255, 0.1); 
+            border-radius: 20px; 
+            padding: 40px;
+            max-width: 500px; 
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: scale(0.9); } 
+            to { opacity: 1; transform: scale(1); } 
+        }
+        .entry-content h2 { 
+            font-size: 2rem; 
+            margin-top: 0; 
+        }
+        .entry-content ul { 
+            text-align: left; 
+            display: inline-block; 
+            margin-bottom: 30px; 
+        }
+        .entry-button {
+            color: white; 
+            padding: 15px 30px; 
+            border: none; 
+            border-radius: 12px;
+            font-size: 1.2rem; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: transform 0.2s ease;
+            background-color: var(--success-color);
+        }
+        .entry-button:hover { 
+            transform: scale(1.05); 
+        }
+    </style>
+</head>
+<body>
+    <div id="entry-gate">
+        <div class="entry-content">
+            <h2>Quiz Rules & Instructions</h2>
+            <p>To ensure fairness, this quiz will run in a secured fullscreen mode.</p>
+            <ul>
+                <li style="color: #ffcccc;"><strong>Switching tabs will terminate the quiz immediately.</strong></li>
+                <li>You will receive two warnings for exiting fullscreen (ESC key).</li>
+                <li>A third violation for exiting fullscreen will terminate the quiz.</li>
+            </ul>
+            <button id="start-quiz-button" class="entry-button">Click Here to Begin</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('start-quiz-button').addEventListener('click', () => {
+            // Redirect to the quiz page when the user is ready to start
+            window.location.href = 'quiz.html';
+        });
+    </script>
+</body>
+</html>
