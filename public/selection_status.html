@@ -92,15 +92,15 @@
 
             teamIdDisplay.textContent = `Team ID: ${teamId}`;
 
-            fetch('/api/logged-teams', { cache: 'no-store' })
+            fetch('/api/selected-teams', { cache: 'no-store' })
                 .then(response => {
                     if (!response.ok) throw new Error('Could not connect to the server.');
                     return response.json();
                 })
                 .then(data => {
-                    if (!data.success) throw new Error(data.message || 'Failed to fetch team data.');
-                    const isTeamInList = data.loggedInTeams.some(team => team.teamId === teamId);
-                    displayResult(!isTeamInList); // If NOT in the list, they are selected
+                    const selectedTeams = data.selectedTeams || [];
+                    const isTeamSelected = selectedTeams.some(selectedId => selectedId === teamId);
+                    displayResult(isTeamSelected);
                 })
                 .catch(error => {
                     console.error('Error checking status:', error);
@@ -121,7 +121,6 @@
                 }
             }
 
-            // Start polling the server for the redirect command
             const redirectCheckInterval = setInterval(() => {
                 fetch('/api/redirect-status')
                     .then(response => response.json())
@@ -134,7 +133,7 @@
                         }
                     })
                     .catch(error => console.error('Error checking redirect status:', error));
-            }, 3000); // Check every 3 seconds
+            }, 3000);
         });
     </script>
 
