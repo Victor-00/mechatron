@@ -20,13 +20,14 @@
         }
         .warning-overlay {
             position: fixed; inset: 0; background-color: rgba(120, 0, 0, 0.7); backdrop-filter: blur(10px);
-            display: flex; justify-content: center; align-items: center; z-index: 1001;
+            display: none; justify-content: center; align-items: center; z-index: 1001;
             color: white; text-align: center;
         }
         .entry-content {
             background: rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 40px;
-            max-width: 500px;
+            max-width: 500px; animation: fadeIn 0.5s ease-in-out;
         }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
         .resume-button {
             color: white; padding: 15px 30px; border: none; border-radius: 12px;
             font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: transform 0.2s ease;
@@ -168,7 +169,6 @@
       }
       teamIdDisplay.textContent = teamId;
 
-      // The quiz now starts automatically when the page loads
       startAndSecureQuiz();
 
       function startAndSecureQuiz() {
@@ -206,20 +206,12 @@
               }
           }
 
-          document.addEventListener('visibilitychange', () => {
-              if (document.hidden) handleTabSwitch();
-          });
-
-          window.addEventListener('blur', () => {
-              if (isLinux) handleTabSwitch();
-          });
-
+          document.addEventListener('visibilitychange', () => { if (document.hidden) handleTabSwitch(); });
+          window.addEventListener('blur', () => { if (isLinux) handleTabSwitch(); });
           window.addEventListener('resize', () => {
             if (quizHasEnded || !initialWidth || !initialHeight) return;
-            const widthThreshold = initialWidth * 0.6;
-            const heightThreshold = initialHeight * 0.6;
-            if (window.innerWidth < widthThreshold || window.innerHeight < heightThreshold) {
-                alert("Cheating detected. Splitting the screen is not allowed and will terminate the quiz.");
+            if (window.innerWidth < (initialWidth * 0.6) || window.innerHeight < (initialHeight * 0.6)) {
+                alert("Cheating detected. Splitting the screen is not allowed.");
                 endQuiz({ reason: 'violation_limit' });
             }
           });
@@ -339,17 +331,19 @@
               riddleContainer.style.display = 'none';
               optionsList.innerHTML = '';
               
-              const options = [];
-              for (let i = 1; i <= 4; i++) {
-                  if (currentQuestion[`option${i}`]) {
-                      options.push({ key: `option${i}`, value: currentQuestion[`option${i}`] });
-                  }
-              }
+              const options = ['option1', 'option2', 'option3', 'option4']
+                  .filter(key => currentQuestion[key])
+                  .map(key => ({ key, value: currentQuestion[key] }));
 
               options.forEach(opt => { 
                   const li = document.createElement('li'); 
                   li.classList.add('option-item'); 
                   li.dataset.key = opt.key;
+
+                  // Restore selected state
+                  if (currentQuestion.selected === opt.key) {
+                      li.classList.add('selected');
+                  }
 
                   if (opt.value.toLowerCase().endsWith('.png')) {
                       const img = document.createElement('img');
