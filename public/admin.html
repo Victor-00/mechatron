@@ -35,7 +35,7 @@
             margin-bottom: 20px;
         }
 
-        button, select {
+        button {
             padding: 12px 30px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -48,11 +48,18 @@
         }
         
         select {
-             -webkit-appearance: none;
+            -webkit-appearance: none;
             -moz-appearance: none;
             appearance: none;
-            padding-right: 40px;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' class='bi bi-chevron-down' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+            padding: 12px 40px 12px 20px;
+            background-color: white;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            color: #333;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23667eea' class='bi bi-chevron-down' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: right 15px center;
         }
@@ -176,6 +183,15 @@
             flex-wrap: wrap;
         }
 
+        .control-group {
+            background: white;
+            border: none;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+
         .checkbox-cell {
             text-align: center;
             width: 50px;
@@ -294,23 +310,25 @@
             </div>
 
 
-            <div class="controls" style="align-items: center; border-top: 1px solid #eee; padding-top: 20px;">
-                <label for="round-select" style="font-weight: 600; margin-right: 10px;">Quiz Round:</label>
-                <select id="round-select">
-                    <option value="round1">Round 1</option>
-                    <option value="round2">Round 2</option>
-                    <option value="round3">Round 3</option>
-                    <option value="round4">Round 4</option>
-                    <option value="round5">Round 5</option>
-                    <option value="round6">Round 6</option>
-                </select>
-                <button class="primary action-btn" onclick="setRound()">Set Active Round</button>
+            <div class="control-group">
+                <h3 style="margin-bottom: 15px; color: #667eea;">Quiz Round Control</h3>
+                <div class="controls" style="align-items: center; margin-bottom: 0;">
+                    <label for="round-select" style="font-weight: 600; margin-right: 10px;">Quiz Round:</label>
+                    <select id="round-select">
+                        <option value="round1">Round 1</option>
+                        <option value="round2">Round 2</option>
+                        <option value="round3">Round 3</option>
+                        <option value="round4">Round 4</option>
+                        <option value="round5">Round 5</option>
+                        <option value="round6">Round 6</option>
+                    </select>
+                    <button class="primary action-btn" onclick="setRound()">Set Active Round</button>
+                </div>
             </div>
 
             <h2 style="margin-top: 30px;">Team Selection</h2>
             <div class="controls" style="align-items: center;">
-                <input type="number" id="num-teams" placeholder="Number of teams" min="1">
-                <input type="text" id="team-ids" placeholder="Team ID numbers (e.g., TEAM_ID_1,TEAM_ID_2)">
+                <input type="text" id="team-ids" placeholder="Team IDs (e.g., TEAM_ID_1,TEAM_ID_2)">
                 <button class="warning action-btn" onclick="selectSpecificTeams()">🎯 Select Teams</button>
             </div>
 
@@ -358,7 +376,7 @@
         }
 
         function loadData() {
-            fetch('/api/logged-teams')
+            fetch('/api/logged-teams', { cache: 'no-store' })
             .then(response => response.json())
             .then(data => {
                 if (!data.success) {
@@ -548,16 +566,21 @@
         }
 
         function selectSpecificTeams() {
-            const numTeams = parseInt(document.getElementById('num-teams').value);
-            const teamIdsStr = document.getElementById('team-ids').value.trim();
-            if (!numTeams || numTeams < 1) return showMessage('Please enter a valid number of teams.', 'error');
-            if (!teamIdsStr) return showMessage('Please enter team IDs.', 'error');
-            const teamIdNumbers = teamIdsStr.split(',').map(id => id.trim()).filter(Boolean);
-            if (teamIdNumbers.length !== numTeams) return showMessage(`Number of teams (${numTeams}) does not match IDs entered (${teamIdNumbers.length}).`, 'error');
+            const teamIdsInput = document.getElementById('team-ids');
+            const teamIdsStr = teamIdsInput.value.trim();
+            if (!teamIdsStr) {
+                return showMessage('Please enter team IDs.', 'error');
+            }
             
+            const teamIdNumbers = teamIdsStr.split(',').map(id => id.trim()).filter(Boolean);
+            if(teamIdNumbers.length === 0) {
+                return showMessage('Please enter valid team IDs.', 'error');
+            }
+
             document.querySelectorAll('.team-checkbox').forEach(cb => cb.checked = false);
             let foundCount = 0;
             let notFound = [];
+            
             teamIdNumbers.forEach(id => {
                 const cb = document.querySelector(`.team-checkbox[value="${id}"]`);
                 if (cb) {
@@ -567,11 +590,16 @@
                     notFound.push(id);
                 }
             });
+            
             updateSelectedCount();
-            if (notFound.length > 0) showMessage(`Selected ${foundCount} team(s). Not found: ${notFound.join(', ')}`, 'error');
-            else showMessage(`Successfully selected ${foundCount} team(s).`, 'success');
-            document.getElementById('num-teams').value = '';
-            document.getElementById('team-ids').value = '';
+            
+            if (notFound.length > 0) {
+                showMessage(`Selected ${foundCount} of ${teamIdNumbers.length} teams. Not found: ${notFound.join(', ')}`, 'error');
+            } else {
+                showMessage(`Successfully selected ${foundCount} team(s).`, 'success');
+            }
+            
+            teamIdsInput.value = '';
         }
 
         function selectTopN() {
