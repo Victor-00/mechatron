@@ -574,7 +574,7 @@
             .then(res => res.json())
             .then(data => {
                 if(data.success) {
-                    showMessage('Results published successfully! Users will be redirected.', 'success');
+                    showMessage('Results published! Signal is active for 8 seconds.', 'success');
                 } else {
                     showMessage('Failed to publish results.', 'error');
                 }
@@ -590,7 +590,7 @@
             .then(res => res.json())
             .then(data => {
                 if(data.success) {
-                    showMessage('Redirect command sent successfully!', 'success');
+                    showMessage('Redirect command sent! Signal is active for 8 seconds.', 'success');
                 } else {
                     showMessage('Failed to send redirect command.', 'error');
                 }
