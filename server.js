@@ -12,7 +12,7 @@ const SCORES_PATH = path.join(__dirname, 'public', 'scores.json');
 // --- STATE VARIABLES ---
 let resultsPublished = false;
 let activeRound = 'round1';
-let forceRedirectToLogin = false; // New state variable
+let forceRedirectToLogin = false;
 
 // CORS configuration
 const corsOptions = {
@@ -130,7 +130,7 @@ app.get('/api/status', (req, res) => {
 
 app.get('/api/results-status', (req, res) => res.json({ published: resultsPublished }));
 
-app.get('/api/redirect-status', (req, res) => res.json({ redirect: forceRedirectToLogin })); // New API endpoint
+app.get('/api/redirect-status', (req, res) => res.json({ redirect: forceRedirectToLogin }));
 
 app.post('/login', (req, res) => {
   const { teamId, regNum } = req.body;
@@ -206,18 +206,28 @@ app.post('/admin/set-round', (req, res) => {
 
 app.post('/admin/publish-results', (req, res) => {
   resultsPublished = true;
+  console.log('Results publish signal is ON.');
+  setTimeout(() => {
+    resultsPublished = false;
+    console.log('Results publish signal is OFF.');
+  }, 8000); // Turn off after 8 seconds
   res.json({ success: true, message: 'Results published' });
 });
 
-app.post('/admin/force-redirect', (req, res) => { // New admin endpoint
+app.post('/admin/force-redirect', (req, res) => {
   forceRedirectToLogin = true;
+  console.log('Force redirect signal is ON.');
+  setTimeout(() => {
+    forceRedirectToLogin = false;
+    console.log('Force redirect signal is OFF.');
+  }, 8000); // Turn off after 8 seconds
   res.json({ success: true, message: 'Force redirect activated.' });
 });
 
 app.post('/admin/reset-logins', (req, res) => {
   if (writeLoginTracker({ loggedInTeams: [] })) {
     resultsPublished = false;
-    forceRedirectToLogin = false; // Reset the new state
+    forceRedirectToLogin = false;
     activeRound = 'round1';
     res.json({ success: true, message: 'Login tracker reset successfully' });
   } else {
