@@ -41,7 +41,7 @@
         }
         .resume-button:hover { transform: scale(1.05); }
         .quiz-wrapper {
-            width: 90%; max-width: 1200px; display: grid; grid-template-columns: 1fr 1fr;
+            width: 90%; max-width: 1200px; display: none; grid-template-columns: 1fr 1fr;
             grid-template-rows: auto 1fr; gap: 20px;
             grid-template-areas: "meta timer" "main menu";
         }
@@ -505,22 +505,31 @@
       
       function calculateScore() {
         score = questions.reduce((acc, q) => {
+            // Only process questions that the user has answered
             if (q.answered && q.selected) {
-                if (q.type === 'MCQ' && q.selected === q.correct_answer) {
+                let isCorrect = false;
+
+                // Determine if the answer is correct based on the question type
+                if (q.type === 'MCQ') {
+                    isCorrect = (q.selected === q.correct_answer);
+                } else if (q.type === 'Riddle' && Array.isArray(q.correct_answer)) {
+                    const correctAnswers = q.correct_answer.map(ans => String(ans).toLowerCase());
+                    isCorrect = correctAnswers.includes(String(q.selected).toLowerCase());
+                } else if (q.type === 'Integer') {
+                    isCorrect = (String(q.selected) === String(q.correct_answer));
+                }
+
+                // Apply points based on whether the answer was correct or not
+                if (isCorrect) {
+                    // Add positive marks for a correct answer (default to 1 if not specified)
                     return acc + (q.positive_mark || 1);
-                }
-                if (q.type === 'Riddle' && Array.isArray(q.correct_answer)) {
-                    const correctAnswers = q.correct_answer.map(ans => ans.toLowerCase());
-                    if (correctAnswers.includes(q.selected.toLowerCase())) {
-                       return acc + (q.positive_mark || 1);
-                    }
-                }
-                if (q.type === 'Integer') {
-                    if (String(q.selected) === String(q.correct_answer)) {
-                        return acc + (q.positive_mark || 1);
-                    }
+                } else {
+                    // Add negative marks for an incorrect answer (default to 0 if not specified)
+                    return acc + (q.negative_mark || 0);
                 }
             }
+            
+            // If the question was skipped or left unanswered, the score does not change
             return acc;
         }, 0);
       }
@@ -532,4 +541,3 @@
   </script>
 </body>
 </html>
-
