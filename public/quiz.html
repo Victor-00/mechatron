@@ -367,8 +367,6 @@
 
           questionText.textContent = currentQuestion.question; 
           
-          // ** THE FIX IS HERE **
-          // Clear previous state before rendering new question type
           optionsList.innerHTML = '';
           optionsList.style.display = 'none';
           riddleContainer.style.display = 'none';
@@ -401,9 +399,16 @@
                   optionsList.appendChild(li); 
               });
 
-          } else if (currentQuestion.type === 'Riddle') {
+          } else if (currentQuestion.type === 'Riddle' || currentQuestion.type === 'Integer') {
               riddleContainer.style.display = 'block';
               riddleInput.value = currentQuestion.selected || '';
+              if (currentQuestion.type === 'Integer') {
+                  riddleInput.type = 'number';
+                  riddleInput.placeholder = 'Type your numerical answer here...';
+              } else {
+                  riddleInput.type = 'text';
+                  riddleInput.placeholder = 'Type your answer here...';
+              }
           }
           
           updateButtonStates();
@@ -442,10 +447,12 @@
 
       function handleNextClick() {
           const currentQuestion = questions[currentQuestionIndex];
-          if(currentQuestion.type === 'Riddle' && riddleInput.value.trim() !== '') {
+          const isInputType = currentQuestion.type === 'Riddle' || currentQuestion.type === 'Integer';
+
+          if(isInputType && riddleInput.value.trim() !== '') {
               currentQuestion.selected = riddleInput.value.trim();
               currentQuestion.answered = true;
-          } else if (currentQuestion.type === 'Riddle' && riddleInput.value.trim() === '') {
+          } else if (isInputType && riddleInput.value.trim() === '') {
               currentQuestion.answered = false;
           }
           
@@ -471,7 +478,8 @@
 
       function updateButtonStates() {
           const currentQuestion = questions[currentQuestionIndex];
-          const isAnswered = currentQuestion.answered || (currentQuestion.type === 'Riddle' && riddleInput.value.trim());
+          const isInputType = currentQuestion.type === 'Riddle' || currentQuestion.type === 'Integer';
+          const isAnswered = currentQuestion.answered || (isInputType && riddleInput.value.trim());
 
           clearButton.style.display = isAnswered ? 'block' : 'none';
           skipButton.style.display = !isAnswered ? 'block' : 'none';
@@ -512,6 +520,11 @@
                     const correctAnswers = q.correct_answer.map(ans => ans.toLowerCase());
                     if (correctAnswers.includes(q.selected.toLowerCase())) {
                        return acc + (q.positive_mark || 1);
+                    }
+                }
+                if (q.type === 'Integer') {
+                    if (String(q.selected) === String(q.correct_answer)) {
+                        return acc + (q.positive_mark || 1);
                     }
                 }
             }
