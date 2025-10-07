@@ -79,9 +79,8 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Anti-cheat styles */
         .warning-overlay {
-            position: fixed; inset: 0; background-color: rgba(120, 0, 0, 0.7); backdrop-filter: blur(10px);
+            position: fixed; inset: 0; background-color: rgba(120, 0, 0, 0.9); backdrop-filter: blur(10px);
             display: none; justify-content: center; align-items: center; z-index: 1001;
         }
         .resume-button {
@@ -91,7 +90,6 @@
         }
         .resume-button:hover { transform: scale(1.05); }
 
-        /* New Click Prompt Overlay */
         #click-prompt-overlay {
             position: fixed;
             inset: 0;
@@ -113,11 +111,9 @@
             margin-top: 10px;
             opacity: 0.8;
         }
-
     </style>
 </head>
 <body>
-    <!-- New Click Prompt Overlay -->
     <div id="click-prompt-overlay">
         <h1>Click anywhere to begin</h1>
         <p>This will enter secure fullscreen mode</p>
@@ -128,7 +124,8 @@
             <h2>Quiz Rules & Instructions</h2>
             <p>To ensure fairness, this quiz will run in a secured fullscreen mode.</p>
             <ul>
-                <li style="background-color: rgba(239, 68, 68, 0.8); color: white; padding: 10px; border-radius: 8px; margin: 5px -10px;"><strong>Switching tabs will terminate the quiz immediately.</strong></li>
+                <li style="background-color: rgba(239, 68, 68, 0.8); color: white; padding: 10px; border-radius: 8px; margin: 5px -10px;"><strong>Switching tabs or windows will terminate the quiz immediately.</strong></li>
+                <li style="background-color: rgba(239, 68, 68, 0.8); color: white; padding: 10px; border-radius: 8px; margin: 5px -10px;"><strong>Pressing Windows key or Command key will terminate the quiz.</strong></li>
                 <li>You will receive two warnings for exiting fullscreen (ESC key).</li>
                 <li>A third violation for exiting fullscreen will terminate the quiz.</li>
             </ul>
@@ -139,72 +136,133 @@
         </div>
     </div>
 
-    <!-- Warning Overlays -->
     <div id="esc-warning-1" class="warning-overlay"><div class="entry-content"><h2>Warning 1 of 2</h2><p>Exiting fullscreen is not allowed.</p><button class="resume-button">Click to Resume</button></div></div>
     <div id="esc-warning-2" class="warning-overlay"><div class="entry-content"><h2>Final Warning</h2><p>Exiting fullscreen again will terminate the quiz.</p><button class="resume-button">Click to Resume</button></div></div>
-    <div id="tab-warning-1" class="warning-overlay"><div class="entry-content"><h2>Warning 1 of 2</h2><p>Switching tabs is not allowed.</p><button class="resume-button">Click to Resume</button></div></div>
-    <div id="tab-warning-2" class="warning-overlay"><div class="entry-content"><h2>Final Warning</h2><p>Switching tabs again will terminate the quiz.</p><button class="resume-button">Click to Resume</button></div></div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             let escWarningCount = 0;
-            let tabSwitchCount = 0;
             let quizTerminated = false;
+            let fullscreenCheckInterval;
 
             const clickPrompt = document.getElementById('click-prompt-overlay');
             const overlays = {
                 esc1: document.getElementById('esc-warning-1'),
-                esc2: document.getElementById('esc-warning-2'),
-                tab1: document.getElementById('tab-warning-1'),
-                tab2: document.getElementById('tab-warning-2'),
+                esc2: document.getElementById('esc-warning-2')
             };
 
-            function startAndSecure() {
-                // Hide the click prompt
-                clickPrompt.style.display = 'none';
-
-                if (document.documentElement.requestFullscreen) {
-                    document.documentElement.requestFullscreen().catch(err => {
-                        console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+            function enterFullscreen() {
+                const elem = document.documentElement;
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen().catch(err => {
+                        console.error(`Error attempting to enable full-screen mode: ${err.message}`);
                     });
+                } else if (elem.mozRequestFullScreen) {
+                    elem.mozRequestFullScreen();
+                } else if (elem.webkitRequestFullscreen) {
+                    elem.webkitRequestFullscreen();
+                } else if (elem.msRequestFullscreen) {
+                    elem.msRequestFullscreen();
                 }
+            }
+
+            function startAndSecure() {
+                clickPrompt.style.display = 'none';
+                enterFullscreen();
                 activateSecurityListeners();
                 startPolling();
+                startFullscreenMonitor();
             }
 
             function resumeFromWarning() {
-                if (document.documentElement.requestFullscreen) {
-                    document.documentElement.requestFullscreen();
-                }
+                enterFullscreen();
                 Object.values(overlays).forEach(overlay => overlay.style.display = 'none');
             }
 
             function terminateSession() {
                 quizTerminated = true;
-                document.body.innerHTML = `<div style="text-align: center; padding-top: 50px; color: white;"><h2>Session Terminated</h2><p>You have violated the rules.</p></div>`;
+                if (fullscreenCheckInterval) clearInterval(fullscreenCheckInterval);
+                document.body.innerHTML = `<div style="text-align: center; padding-top: 50px; color: white;"><h2>Session Terminated</h2><p>You have violated the quiz rules.</p></div>`;
                 if (document.exitFullscreen) {
                     document.exitFullscreen();
                 }
             }
             
+            function startFullscreenMonitor() {
+                fullscreenCheckInterval = setInterval(() => {
+                    if (!document.fullscreenElement && !quizTerminated) {
+                        const overlayVisible = Array.from(Object.values(overlays)).some(
+                            overlay => overlay.style.display === 'flex'
+                        );
+                        if (!overlayVisible) {
+                            escWarningCount++;
+                            if (escWarningCount === 1) {
+                                overlays.esc1.style.display = 'flex';
+                            } else if (escWarningCount === 2) {
+                                overlays.esc2.style.display = 'flex';
+                            } else {
+                                terminateSession();
+                            }
+                        }
+                    }
+                }, 500);
+            }
+
             function activateSecurityListeners() {
-                document.querySelectorAll('.resume-button').forEach(btn => btn.addEventListener('click', resumeFromWarning));
+                document.querySelectorAll('.resume-button').forEach(btn => 
+                    btn.addEventListener('click', resumeFromWarning)
+                );
 
                 document.addEventListener('fullscreenchange', () => {
                     if (!document.fullscreenElement && !quizTerminated) {
-                        escWarningCount++;
-                        if (escWarningCount === 1) overlays.esc1.style.display = 'flex';
-                        else if (escWarningCount === 2) overlays.esc2.style.display = 'flex';
-                        else terminateSession();
+                        const overlayVisible = Array.from(Object.values(overlays)).some(
+                            overlay => overlay.style.display === 'flex'
+                        );
+                        if (!overlayVisible) {
+                            escWarningCount++;
+                            if (escWarningCount === 1) overlays.esc1.style.display = 'flex';
+                            else if (escWarningCount === 2) overlays.esc2.style.display = 'flex';
+                            else terminateSession();
+                        }
                     }
                 });
 
                 document.addEventListener('visibilitychange', () => {
                     if (document.hidden && !quizTerminated) {
-                        tabSwitchCount++;
-                        if (tabSwitchCount === 1) overlays.tab1.style.display = 'flex';
-                        else if (tabSwitchCount === 2) overlays.tab2.style.display = 'flex';
-                        else terminateSession();
+                        alert("Tab/Window switching detected. Quiz terminated.");
+                        terminateSession();
+                    }
+                });
+
+                window.addEventListener('blur', () => {
+                    if (!quizTerminated) {
+                        const overlayVisible = Array.from(Object.values(overlays)).some(
+                            overlay => overlay.style.display === 'flex'
+                        );
+                        if (!overlayVisible) {
+                            alert("Window focus lost. Quiz terminated.");
+                            terminateSession();
+                        }
+                    }
+                });
+
+                document.addEventListener('keydown', (e) => {
+                    if (quizTerminated) return;
+                    
+                    // Detect Windows key or Command key
+                    if (e.key === 'Meta' || e.metaKey || e.key === 'OS') {
+                        e.preventDefault();
+                        alert("System key detected. Quiz terminated.");
+                        terminateSession();
+                        return;
+                    }
+
+                    // Block other dangerous keys
+                    if (e.key === 'F11' || (e.altKey && e.key === 'Tab') || 
+                        (e.ctrlKey && e.key === 'Tab') || (e.altKey && e.key === 'F4')) {
+                        e.preventDefault();
+                        alert("Forbidden key combination. Quiz terminated.");
+                        terminateSession();
                     }
                 });
             }
@@ -221,17 +279,16 @@
                         .then(data => {
                             if (data.start) {
                                 clearInterval(pollingInterval);
+                                if (fullscreenCheckInterval) clearInterval(fullscreenCheckInterval);
                                 window.location.href = 'quiz.html';
                             }
                         })
                         .catch(err => console.error("Error polling for start signal:", err));
-                }, 3000); // Check every 3 seconds
+                }, 3000);
             }
             
-            // Replaces the alert with a clickable overlay
             clickPrompt.addEventListener('click', startAndSecure, { once: true });
         });
     </script>
 </body>
 </html>
-
