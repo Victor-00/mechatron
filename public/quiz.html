@@ -228,8 +228,6 @@
       }
 
       function activateSecurityListeners() {
-          const isLinux = navigator.userAgent.toLowerCase().includes('linux');
-
           function handleTabSwitch() {
               if (quizHasEnded) return;
               tabSwitchCount++;
@@ -244,7 +242,7 @@
           }
 
           document.addEventListener('visibilitychange', () => { if (document.hidden) handleTabSwitch(); });
-          window.addEventListener('blur', () => { if (isLinux) handleTabSwitch(); });
+          window.addEventListener('blur', handleTabSwitch);
           window.addEventListener('resize', () => {
             if (quizHasEnded || !initialWidth || !initialHeight) return;
             if (window.innerWidth < (initialWidth * 0.6) || window.innerHeight < (initialHeight * 0.6)) {
