@@ -76,7 +76,15 @@
         .option-item img { max-width: 100%; max-height: 80px; border-radius: 8px; }
         
         #riddle-answer-container { margin-bottom: 25px; }
-        #riddle-answer { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid var(--primary-color); font-family: 'Poppins', sans-serif; font-size: 1rem; }
+        #riddle-answer { 
+            width: 100%; 
+            padding: 15px; 
+            border-radius: 12px; 
+            border: 2px solid var(--primary-color); 
+            font-family: 'Poppins', sans-serif; 
+            font-size: 1rem; 
+            box-sizing: border-box;
+        }
 
         .control-buttons { display: flex; gap: 15px; margin-top: auto; }
         .control-button { padding: 12px 24px; border-radius: 12px; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; transition: all 0.2s ease; flex-grow: 1; }
@@ -155,7 +163,7 @@
       let currentQuestionIndex = 0;
       let score = 0;
       let quizTimer;
-      let quizStartTime; // To record the precise start time
+      let quizStartTime;
       let quizHasEnded = false;
       let teamId = '';
       let escWarningCount = 0;
@@ -173,7 +181,7 @@
       startAndSecureQuiz();
 
       function startAndSecureQuiz() {
-          quizStartTime = Date.now(); // Record precise start time
+          quizStartTime = Date.now();
           if (document.documentElement.requestFullscreen) {
               document.documentElement.requestFullscreen();
           }
@@ -231,7 +239,6 @@
               }
           });
           
-          window.addEventListener('beforeunload', (e) => { if (!quizHasEnded) { e.preventDefault(); e.returnValue = ''; } });
           document.addEventListener('contextmenu', (e) => e.preventDefault());
           const disableEvent = (e) => e.preventDefault();
           ['copy', 'paste', 'cut'].forEach(event => document.addEventListener(event, disableEvent));
@@ -256,7 +263,7 @@
         pauseTimer();
 
         calculateScore();
-        const timeTakenMs = Date.now() - quizStartTime; // Calculate precise time
+        const timeTakenMs = Date.now() - quizStartTime;
         const totalPossibleMarks = questions.reduce((acc, q) => acc + (q.positive_mark || 1), 0);
         
         const submissionData = {
@@ -491,5 +498,4 @@
   </script>
 </body>
 </html>
-
 
