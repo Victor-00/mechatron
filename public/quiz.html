@@ -205,7 +205,7 @@
       function startAndSecureQuiz() {
           clickPrompt.style.display = 'none';
           contentWrapper.classList.remove('blurry');
-          quizWrapper.style.display = 'grid'; // Make sure the quiz is visible
+          quizWrapper.style.display = 'grid';
           
           quizStartTime = Date.now();
           if (document.documentElement.requestFullscreen) {
@@ -367,10 +367,14 @@
 
           questionText.textContent = currentQuestion.question; 
           
+          // ** THE FIX IS HERE **
+          // Clear previous state before rendering new question type
+          optionsList.innerHTML = '';
+          optionsList.style.display = 'none';
+          riddleContainer.style.display = 'none';
+
           if (currentQuestion.type === 'MCQ') {
               optionsList.style.display = 'block';
-              riddleContainer.style.display = 'none';
-              optionsList.innerHTML = '';
               
               const options = ['option1', 'option2', 'option3', 'option4']
                   .filter(key => currentQuestion[key])
@@ -398,7 +402,6 @@
               });
 
           } else if (currentQuestion.type === 'Riddle') {
-              optionsList.style.display = 'none';
               riddleContainer.style.display = 'block';
               riddleInput.value = currentQuestion.selected || '';
           }
