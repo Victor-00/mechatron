@@ -19,7 +19,7 @@
             min-height: 100vh; padding: 20px; box-sizing: border-box;
         }
         .warning-overlay {
-            position: fixed; inset: 0; background-color: rgba(120, 0, 0, 0.7); backdrop-filter: blur(10px);
+            position: fixed; inset: 0; background-color: rgba(120, 0, 0, 0.9); backdrop-filter: blur(10px);
             display: none; justify-content: center; align-items: center; z-index: 1001;
             color: white; text-align: center;
         }
@@ -76,15 +76,7 @@
         .option-item img { max-width: 100%; max-height: 80px; border-radius: 8px; }
         
         #riddle-answer-container { margin-bottom: 25px; }
-        #riddle-answer { 
-            width: 100%; 
-            padding: 15px; 
-            border-radius: 12px; 
-            border: 2px solid var(--primary-color); 
-            font-family: 'Poppins', sans-serif; 
-            font-size: 1rem; 
-            box-sizing: border-box;
-        }
+        #riddle-answer { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid var(--primary-color); font-family: 'Poppins', sans-serif; font-size: 1rem; }
 
         .control-buttons { display: flex; gap: 15px; margin-top: auto; }
         .control-button { padding: 12px 24px; border-radius: 12px; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; transition: all 0.2s ease; flex-grow: 1; }
@@ -109,8 +101,6 @@
 <body>
     <div id="esc-warning-1" class="warning-overlay" style="display: none;"><div class="entry-content"><h2>Warning 1 of 2</h2><p>Exiting fullscreen is not allowed.</p><button class="resume-button">Click to Resume</button></div></div>
     <div id="esc-warning-2" class="warning-overlay" style="display: none;"><div class="entry-content"><h2>Final Warning</h2><p>Exiting fullscreen again will terminate the quiz.</p><button class="resume-button">Click to Resume</button></div></div>
-    <div id="tab-warning-1" class="warning-overlay" style="display: none;"><div class="entry-content"><h2>Warning 1 of 2</h2><p>Switching tabs is not allowed.</p><button class="resume-button">Click to Resume</button></div></div>
-    <div id="tab-warning-2" class="warning-overlay" style="display: none;"><div class="entry-content"><h2>Final Warning</h2><p>Switching tabs again will terminate the quiz.</p><button class="resume-button">Click to Resume</button></div></div>
 
     <div class="quiz-wrapper" style="display: none;">
         <div class="info-box meta-data"><h2>Team ID</h2><span id="team-id">Loading...</span></div>
@@ -139,9 +129,7 @@
       
       const overlays = {
           esc1: document.getElementById('esc-warning-1'),
-          esc2: document.getElementById('esc-warning-2'),
-          tab1: document.getElementById('tab-warning-1'),
-          tab2: document.getElementById('tab-warning-2'),
+          esc2: document.getElementById('esc-warning-2')
       };
       
       document.querySelectorAll('.resume-button').forEach(btn => btn.addEventListener('click', resumeFromWarning));
@@ -163,11 +151,11 @@
       let currentQuestionIndex = 0;
       let score = 0;
       let quizTimer;
+      let fullscreenCheckInterval;
       let quizStartTime;
       let quizHasEnded = false;
       let teamId = '';
       let escWarningCount = 0;
-      let tabSwitchCount = 0;
       let timeLeft = 300;
       let initialWidth, initialHeight;
 
@@ -180,44 +168,96 @@
 
       startAndSecureQuiz();
 
+      function enterFullscreen() {
+          const elem = document.documentElement;
+          if (elem.requestFullscreen) {
+              elem.requestFullscreen().catch(err => console.error('Fullscreen error:', err));
+          } else if (elem.mozRequestFullScreen) {
+              elem.mozRequestFullScreen();
+          } else if (elem.webkitRequestFullscreen) {
+              elem.webkitRequestFullscreen();
+          } else if (elem.msRequestFullscreen) {
+              elem.msRequestFullscreen();
+          }
+      }
+
       function startAndSecureQuiz() {
           quizStartTime = Date.now();
-          if (document.documentElement.requestFullscreen) {
-              document.documentElement.requestFullscreen();
-          }
+          enterFullscreen();
           quizWrapper.style.display = 'grid';
           initialWidth = window.screen.width;
           initialHeight = window.screen.height;
           activateSecurityListeners();
+          startFullscreenMonitor();
           fetchQuestions();
       }
 
       function resumeFromWarning() {
-          if (document.documentElement.requestFullscreen) {
-              document.documentElement.requestFullscreen();
-          }
+          enterFullscreen();
           Object.values(overlays).forEach(overlay => overlay.style.display = 'none');
           resumeTimer();
       }
 
+      function startFullscreenMonitor() {
+          fullscreenCheckInterval = setInterval(() => {
+              if (!document.fullscreenElement && !quizHasEnded) {
+                  const overlayVisible = Array.from(Object.values(overlays)).some(
+                      overlay => overlay.style.display === 'flex'
+                  );
+                  if (!overlayVisible) {
+                      escWarningCount++;
+                      pauseTimer();
+                      if (escWarningCount === 1) {
+                          overlays.esc1.style.display = 'flex';
+                      } else if (escWarningCount === 2) {
+                          overlays.esc2.style.display = 'flex';
+                      } else {
+                          alert("Third violation (ESC Press). Quiz terminated.");
+                          endQuiz({ reason: 'violation_limit' });
+                      }
+                  }
+              }
+          }, 500);
+      }
+
       function activateSecurityListeners() {
-          const isLinux = navigator.userAgent.toLowerCase().includes('linux');
+          document.addEventListener('fullscreenchange', () => {
+              if (!document.fullscreenElement && !quizHasEnded) {
+                  const overlayVisible = Array.from(Object.values(overlays)).some(
+                      overlay => overlay.style.display === 'flex'
+                  );
+                  if (!overlayVisible) {
+                      escWarningCount++;
+                      pauseTimer();
+                      if (escWarningCount === 1) overlays.esc1.style.display = 'flex';
+                      else if (escWarningCount === 2) overlays.esc2.style.display = 'flex';
+                      else {
+                          alert("Third violation (ESC Press). Quiz terminated.");
+                          endQuiz({ reason: 'violation_limit' });
+                      }
+                  }
+              }
+          });
 
-          function handleTabSwitch() {
-              if (quizHasEnded) return;
-              tabSwitchCount++;
-              pauseTimer();
-
-              if (tabSwitchCount === 1) overlays.tab1.style.display = 'flex';
-              else if (tabSwitchCount === 2) overlays.tab2.style.display = 'flex';
-              else {
-                  alert("Third violation (Tab/Window Switch). Quiz terminated.");
+          document.addEventListener('visibilitychange', () => {
+              if (document.hidden && !quizHasEnded) {
+                  alert("Tab/Window switching detected. Quiz terminated.");
                   endQuiz({ reason: 'violation_limit' });
               }
-          }
+          });
 
-          document.addEventListener('visibilitychange', () => { if (document.hidden) handleTabSwitch(); });
-          window.addEventListener('blur', () => { if (isLinux) handleTabSwitch(); });
+          window.addEventListener('blur', () => {
+              if (!quizHasEnded) {
+                  const overlayVisible = Array.from(Object.values(overlays)).some(
+                      overlay => overlay.style.display === 'flex'
+                  );
+                  if (!overlayVisible) {
+                      alert("Window focus lost. Quiz terminated.");
+                      endQuiz({ reason: 'violation_limit' });
+                  }
+              }
+          });
+
           window.addEventListener('resize', () => {
             if (quizHasEnded || !initialWidth || !initialHeight) return;
             if (window.innerWidth < (initialWidth * 0.6) || window.innerHeight < (initialHeight * 0.6)) {
@@ -226,23 +266,41 @@
             }
           });
           
-          document.addEventListener('fullscreenchange', () => {
-              if (!document.fullscreenElement && !quizHasEnded) {
-                  escWarningCount++;
-                  pauseTimer();
-                  if (escWarningCount === 1) { overlays.esc1.style.display = 'flex'; }
-                  else if (escWarningCount === 2) { overlays.esc2.style.display = 'flex'; }
-                  else {
-                      alert("Third violation (ESC Press). Quiz terminated.");
-                      endQuiz({ reason: 'violation_limit' });
-                  }
+          document.addEventListener('keydown', (e) => {
+              if (quizHasEnded) return;
+              
+              // Detect Windows key, Command key, or Super key
+              if (e.key === 'Meta' || e.metaKey || e.key === 'OS') {
+                  e.preventDefault();
+                  alert("System key detected. Quiz terminated.");
+                  endQuiz({ reason: 'violation_limit' });
+                  return;
               }
+
+              // Block other dangerous keys
+              if (e.key === 'F11' || (e.altKey && e.key === 'Tab') || 
+                  (e.ctrlKey && e.key === 'Tab') || (e.altKey && e.key === 'F4')) {
+                  e.preventDefault();
+                  alert("Forbidden key combination. Quiz terminated.");
+                  endQuiz({ reason: 'violation_limit' });
+              }
+
+              // Prevent F5 refresh
+              if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) {
+                  e.preventDefault();
+              }
+          });
+          
+          window.addEventListener('beforeunload', (e) => { 
+              if (!quizHasEnded) { 
+                  e.preventDefault(); 
+                  e.returnValue = ''; 
+              } 
           });
           
           document.addEventListener('contextmenu', (e) => e.preventDefault());
           const disableEvent = (e) => e.preventDefault();
           ['copy', 'paste', 'cut'].forEach(event => document.addEventListener(event, disableEvent));
-          document.addEventListener('keydown', (e) => { if (!quizHasEnded && (e.key === 'F5' || (e.ctrlKey && e.key === 'r'))) { e.preventDefault(); } });
       }
       
       function pauseTimer() { clearInterval(quizTimer); }
@@ -261,6 +319,7 @@
         if (quizHasEnded) return;
         quizHasEnded = true;
         pauseTimer();
+        if (fullscreenCheckInterval) clearInterval(fullscreenCheckInterval);
 
         calculateScore();
         const timeTakenMs = Date.now() - quizStartTime;
@@ -498,4 +557,3 @@
   </script>
 </body>
 </html>
-
