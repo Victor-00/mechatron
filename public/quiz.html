@@ -192,6 +192,7 @@
       let teamId = '';
       let escWarningCount = 0;
       let tabSwitchCount = 0;
+      let warningInProgress = false; // Flag to prevent double warnings
       let timeLeft = 300;
       let initialWidth, initialHeight;
 
@@ -225,11 +226,14 @@
           }
           Object.values(overlays).forEach(overlay => overlay.style.display = 'none');
           resumeTimer();
+          setTimeout(() => { warningInProgress = false; }, 500); // Reset flag after a delay
       }
 
       function activateSecurityListeners() {
           function handleTabSwitch() {
-              if (quizHasEnded) return;
+              if (quizHasEnded || warningInProgress) return;
+              warningInProgress = true; // Set flag to prevent double trigger
+
               tabSwitchCount++;
               pauseTimer();
 
