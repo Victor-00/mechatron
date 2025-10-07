@@ -128,10 +128,8 @@
     </div>
 
     <div class="content-wrapper blurry">
-        <div id="esc-warning-1" class="warning-overlay" style="display: none;"><div class="entry-content"><h2>Warning 1 of 2</h2><p>Exiting fullscreen is not allowed.</p><button class="resume-button">Click to Resume</button></div></div>
-        <div id="esc-warning-2" class="warning-overlay" style="display: none;"><div class="entry-content"><h2>Final Warning</h2><p>Exiting fullscreen again will terminate the quiz.</p><button class="resume-button">Click to Resume</button></div></div>
-        <div id="tab-warning-1" class="warning-overlay" style="display: none;"><div class="entry-content"><h2>Warning 1 of 2</h2><p>Switching tabs is not allowed.</p><button class="resume-button">Click to Resume</button></div></div>
-        <div id="tab-warning-2" class="warning-overlay" style="display: none;"><div class="entry-content"><h2>Final Warning</h2><p>Switching tabs again will terminate the quiz.</p><button class="resume-button">Click to Resume</button></div></div>
+        <div id="warning-1" class="warning-overlay" style="display: none;"><div class="entry-content"><h2>Warning 1 of 2</h2><p>Leaving the quiz window is not allowed.</p><button class="resume-button">Click to Resume</button></div></div>
+        <div id="warning-2" class="warning-overlay" style="display: none;"><div class="entry-content"><h2>Final Warning</h2><p>Leaving the quiz window again will terminate the quiz.</p><button class="resume-button">Click to Resume</button></div></div>
 
         <div class="quiz-wrapper">
             <div class="info-box meta-data"><h2>Team ID</h2><span id="team-id">Loading...</span></div>
@@ -162,10 +160,8 @@
       const quizWrapper = document.querySelector('.quiz-wrapper');
       
       const overlays = {
-          esc1: document.getElementById('esc-warning-1'),
-          esc2: document.getElementById('esc-warning-2'),
-          tab1: document.getElementById('tab-warning-1'),
-          tab2: document.getElementById('tab-warning-2'),
+          warning1: document.getElementById('warning-1'),
+          warning2: document.getElementById('warning-2'),
       };
       
       document.querySelectorAll('.resume-button').forEach(btn => btn.addEventListener('click', resumeFromWarning));
@@ -190,9 +186,8 @@
       let quizStartTime;
       let quizHasEnded = false;
       let teamId = '';
-      let escWarningCount = 0;
-      let tabSwitchCount = 0;
-      let warningInProgress = false; // Flag to prevent double warnings
+      let violationCount = 0;
+      let warningInProgress = false;
       let timeLeft = 300;
       let initialWidth, initialHeight;
 
@@ -226,46 +221,40 @@
           }
           Object.values(overlays).forEach(overlay => overlay.style.display = 'none');
           resumeTimer();
-          setTimeout(() => { warningInProgress = false; }, 500); // Reset flag after a delay
+          setTimeout(() => { warningInProgress = false; }, 500);
       }
 
       function activateSecurityListeners() {
-          function handleTabSwitch() {
+          function handleViolation() {
               if (quizHasEnded || warningInProgress) return;
-              warningInProgress = true; // Set flag to prevent double trigger
+              warningInProgress = true;
 
-              tabSwitchCount++;
+              violationCount++;
               pauseTimer();
 
-              if (tabSwitchCount === 1) overlays.tab1.style.display = 'flex';
-              else if (tabSwitchCount === 2) overlays.tab2.style.display = 'flex';
+              if (violationCount === 1) overlays.warning1.style.display = 'flex';
+              else if (violationCount === 2) overlays.warning2.style.display = 'flex';
               else {
-                  alert("Third violation (Tab/Window Switch). Quiz terminated.");
+                  alert("Third violation. Quiz terminated.");
                   endQuiz({ reason: 'violation_limit' });
               }
           }
 
-          document.addEventListener('visibilitychange', () => { if (document.hidden) handleTabSwitch(); });
-          window.addEventListener('blur', handleTabSwitch);
+          document.addEventListener('visibilitychange', () => { if (document.hidden) handleViolation(); });
+          window.addEventListener('blur', handleViolation);
+          
+          document.addEventListener('fullscreenchange', () => {
+              if (!document.fullscreenElement && !quizHasEnded) {
+                  handleViolation();
+              }
+          });
+          
           window.addEventListener('resize', () => {
             if (quizHasEnded || !initialWidth || !initialHeight) return;
             if (window.innerWidth < (initialWidth * 0.6) || window.innerHeight < (initialHeight * 0.6)) {
                 alert("Cheating detected. Splitting the screen is not allowed.");
                 endQuiz({ reason: 'violation_limit' });
             }
-          });
-          
-          document.addEventListener('fullscreenchange', () => {
-              if (!document.fullscreenElement && !quizHasEnded) {
-                  escWarningCount++;
-                  pauseTimer();
-                  if (escWarningCount === 1) { overlays.esc1.style.display = 'flex'; }
-                  else if (escWarningCount === 2) { overlays.esc2.style.display = 'flex'; }
-                  else {
-                      alert("Third violation (ESC Press). Quiz terminated.");
-                      endQuiz({ reason: 'violation_limit' });
-                  }
-              }
           });
           
           document.addEventListener('contextmenu', (e) => e.preventDefault());
