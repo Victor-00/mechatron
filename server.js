@@ -99,7 +99,8 @@ function markTeamAsLoggedIn(teamId, regNum) {
         timestamp: Date.now(),
         marks: 0,
         endTime: null,
-        timeTaken: null 
+        timeTaken: null,
+        status: 'In Progress'
       });
       return writeLoginTracker(tracker);
     }
@@ -120,6 +121,7 @@ function updateTeamLogin(teamId) {
       tracker.loggedInTeams[teamIndex].marks = 0;
       tracker.loggedInTeams[teamIndex].endTime = null;
       tracker.loggedInTeams[teamIndex].timeTaken = null;
+      tracker.loggedInTeams[teamIndex].status = 'In Progress';
       return writeLoginTracker(tracker);
     }
     return false;
@@ -128,7 +130,6 @@ function updateTeamLogin(teamId) {
     return false;
   }
 }
-
 
 // ============================================
 // API ROUTES
@@ -218,7 +219,6 @@ app.post('/login', (req, res) => {
     }
 });
 
-
 app.get('/questions/:teamId', (req, res) => {
     try {
         const { teamId } = req.params;
@@ -251,10 +251,24 @@ app.post('/submit-quiz', (req, res) => {
 
     const tracker = readLoginTracker();
     const teamIndex = tracker.loggedInTeams.findIndex(team => team.teamId === submissionData.teamId);
+    
     if (teamIndex !== -1) {
-      tracker.loggedInTeams[teamIndex].marks = submissionData.score || 0;
-      tracker.loggedInTeams[teamIndex].endTime = new Date().toISOString();
-      tracker.loggedInTeams[teamIndex].timeTaken = submissionData.timeTaken;
+      const isTerminated = submissionData.status && submissionData.status.includes('Terminated');
+      
+      if (isTerminated) {
+        // Mark as terminated with N/A values
+        tracker.loggedInTeams[teamIndex].marks = null;
+        tracker.loggedInTeams[teamIndex].endTime = new Date().toISOString();
+        tracker.loggedInTeams[teamIndex].timeTaken = null;
+        tracker.loggedInTeams[teamIndex].status = submissionData.status;
+      } else {
+        // Normal completion
+        tracker.loggedInTeams[teamIndex].marks = submissionData.score || 0;
+        tracker.loggedInTeams[teamIndex].endTime = new Date().toISOString();
+        tracker.loggedInTeams[teamIndex].timeTaken = submissionData.timeTaken;
+        tracker.loggedInTeams[teamIndex].status = submissionData.status || 'Completed';
+      }
+      
       writeLoginTracker(tracker);
     }
     res.json({ success: true, message: 'Quiz submitted successfully' });
@@ -313,11 +327,28 @@ app.post('/admin/finalize-selections', (req, res) => {
     if (!selectedTeams || !Array.isArray(selectedTeams)) {
         return res.status(400).json({ success: false, message: 'Invalid data format.' });
     }
+    
+    // Filter out any terminated teams from selections
+    const tracker = readLoginTracker();
+    const validSelections = selectedTeams.filter(teamId => {
+        const team = tracker.loggedInTeams.find(t => t.teamId === teamId);
+        return team && (!team.status || !team.status.includes('Terminated'));
+    });
+    
+    if (validSelections.length < selectedTeams.length) {
+        console.log(`Filtered out ${selectedTeams.length - validSelections.length} terminated teams from selection.`);
+    }
+    
     try {
-        const dataToWrite = JSON.stringify({ selectedTeams }, null, 2);
+        const dataToWrite = JSON.stringify({ selectedTeams: validSelections }, null, 2);
         fs.writeFileSync(SELECTED_TEAMS_PATH, dataToWrite);
-        console.log(`Finalized ${selectedTeams.length} teams.`);
-        res.json({ success: true, message: 'Selections finalized successfully.' });
+        console.log(`Finalized ${validSelections.length} teams.`);
+        res.json({ 
+            success: true, 
+            message: 'Selections finalized successfully.',
+            finalizedCount: validSelections.length,
+            filteredCount: selectedTeams.length - validSelections.length
+        });
     } catch (error) {
         console.error('Error writing selected teams file:', error);
         res.status(500).json({ success: false, message: 'Failed to write selection file.' });
@@ -352,13 +383,11 @@ app.post('/admin/remove-teams-batch', (req, res) => {
         return res.status(400).json({ success: false, message: 'Invalid request' });
     }
     try {
-        // Update login_tracker.json
         const tracker = readLoginTracker();
         const initialLength = tracker.loggedInTeams.length;
         tracker.loggedInTeams = tracker.loggedInTeams.filter(team => !teamIds.includes(team.teamId));
         const loginTrackerWritten = writeLoginTracker(tracker);
 
-        // Update selected_teams.json if it exists
         if (fs.existsSync(SELECTED_TEAMS_PATH)) {
             try {
                 const selectedData = JSON.parse(fs.readFileSync(SELECTED_TEAMS_PATH, 'utf8'));
@@ -414,7 +443,6 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
-
 // Initialize on server start
 initializeLoginTracker();
 console.log(`Loaded ${Object.keys(getTeamsFromEnv()).length} teams from env.`);
@@ -422,4 +450,3 @@ console.log(`Loaded ${Object.keys(getTeamsFromEnv()).length} teams from env.`);
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is running on port ${PORT}`);
 });
-
