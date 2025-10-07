@@ -220,8 +220,8 @@
     <div class="login-form" id="login-form-container">
       <h2 class="form-title font-fredoka">Team Login</h2>
       <form id="login-form">
-        <input type="text" name="teamId" placeholder="Team ID (e.g., TEAM_ID_1)" required class="form-input">
-        <input type="password" name="regNum" placeholder="Registration Number" required class="form-input">
+        <input type="text" name="teamId" placeholder="Team ID" required class="form-input">
+        <input type="password" name="regNum" placeholder="Delegate ID" required class="form-input">
         <button type="submit" class="submit-button">Let's Play!</button>
         <div id="login-message" class="message-box" style="display: none;"></div>
       </form>
@@ -242,7 +242,7 @@
               </div>
           `;
           loginFormContainer.classList.add('form-visible');
-          return; // Stop all further script execution for mobile
+          return;
       }
 
       const existingTeamId = localStorage.getItem('currentTeamId');
