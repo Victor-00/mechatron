@@ -225,12 +225,30 @@ app.get('/questions/:teamId', (req, res) => {
         const team = readLoginTracker().loggedInTeams.find(t => t.teamId === teamId);
         if (!team) return res.status(404).json({ error: 'Team not found or not logged in.' });
 
-        const regNum = parseInt(team.regNum, 10);
-        if (isNaN(regNum)) return res.status(400).json({ error: 'Invalid registration number.' });
+        const regNumStr = String(team.regNum);
+        if (!regNumStr || regNumStr.length === 0) {
+            return res.status(400).json({ error: 'Registration number is missing.' });
+        }
 
-        const questionSet = regNum % 2 === 0 ? 'a' : 'b';
+        let digitToCheck;
+        if (regNumStr.length >= 3) {
+            const thirdLastChar = regNumStr.charAt(regNumStr.length - 3);
+            digitToCheck = parseInt(thirdLastChar, 10);
+        } else {
+            const lastChar = regNumStr.charAt(regNumStr.length - 1);
+            digitToCheck = parseInt(lastChar, 10);
+            console.log(`Registration number is short. Using last digit (${digitToCheck}) as fallback.`);
+        }
+        
+        if (isNaN(digitToCheck)) {
+             return res.status(400).json({ error: 'Invalid character in registration number.' });
+        }
+
+        const questionSet = digitToCheck % 2 === 0 ? 'a' : 'b';
         const questionFileName = `${activeRound}${questionSet}.json`;
         const questionsFilePath = path.join(__dirname, 'public', questionFileName);
+
+        console.log(`Team ${teamId} (Reg: ${regNumStr}) -> Digit: ${digitToCheck} -> Set: ${questionSet}. Serving file: ${questionFileName}`);
 
         if (fs.existsSync(questionsFilePath)) {
             res.sendFile(questionsFilePath);
@@ -238,6 +256,7 @@ app.get('/questions/:teamId', (req, res) => {
             res.status(404).json({ error: `Questions file not found: ${questionFileName}` });
         }
     } catch (error) {
+        console.error('Error serving questions:', error);
         res.status(500).json({ error: 'Server error while serving questions.' });
     }
 });
@@ -284,7 +303,7 @@ app.post('/admin/start-quiz', (req, res) => {
   setTimeout(() => {
     startQuizSignal = false;
     console.log('Start quiz signal is OFF.');
-  }, 360000); // 6 minutes
+  }, 120000); // 2 minutes
   res.json({ success: true, message: 'Quiz start signal sent.' });
 });
 
@@ -294,7 +313,7 @@ app.post('/admin/publish-results', (req, res) => {
   setTimeout(() => {
     resultsPublished = false;
     console.log('Results publish signal is OFF.');
-  }, 360000); // 6 minutes
+  }, 120000); // 2 minutes
   res.json({ success: true, message: 'Results published' });
 });
 
@@ -304,7 +323,7 @@ app.post('/admin/force-redirect', (req, res) => {
   setTimeout(() => {
     forceRedirectToLogin = false;
     console.log('Force redirect signal is OFF.');
-  }, 360000); // 6 minutes
+  }, 120000); // 2 minutes
   res.json({ success: true, message: 'Force redirect activated.' });
 });
 
