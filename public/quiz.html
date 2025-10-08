@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Snakes and Ladders Quiz</title>
+    <link rel="icon" type="image/png" href="favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
@@ -41,7 +42,7 @@
         }
         .resume-button:hover { transform: scale(1.05); }
         .quiz-wrapper {
-            width: 90%; max-width: 1200px; display: grid; grid-template-columns: 1fr 1fr;
+            width: 90%; max-width: 1200px; display: none; grid-template-columns: 1fr 1fr;
             grid-template-rows: auto 1fr; gap: 20px;
             grid-template-areas: "meta timer" "main menu";
         }
@@ -133,7 +134,7 @@
 
         <div class="quiz-wrapper">
             <div class="info-box meta-data"><h2>Team ID</h2><span id="team-id">Loading...</span></div>
-            <div class="info-box timer-box"><h2>Time Left</h2><span id="quiz-timer">15:00</span></div>
+            <div class="info-box timer-box"><h2>Time Left</h2><span id="quiz-timer">5:00</span></div>
             <div class="quiz-container">
                 <div id="question-counter">Question 1/5</div>
                 <div id="question-image-container"></div>
@@ -188,7 +189,7 @@
       let teamId = '';
       let violationCount = 0;
       let warningInProgress = false;
-      let timeLeft = 900;
+      let timeLeft = 300;
       let initialWidth, initialHeight;
 
       teamId = localStorage.getItem('currentTeamId');
@@ -205,9 +206,7 @@
           
           quizStartTime = Date.now();
           if (document.documentElement.requestFullscreen) {
-              document.documentElement.requestFullscreen().catch(err => {
-                  console.error(`Fullscreen request failed: ${err.message} (${err.name})`);
-              });
+              document.documentElement.requestFullscreen();
           }
           initialWidth = window.screen.width;
           initialHeight = window.screen.height;
@@ -275,7 +274,7 @@
           if (timeLeft <= 0) { clearInterval(quizTimer); endQuiz(); }
         }, 1000);
       }
-      function startTimer() { timeLeft = 900; resumeTimer(); }
+      function startTimer() { timeLeft = 300; resumeTimer(); }
       
       async function endQuiz(options = {}) {
         if (quizHasEnded) return;
@@ -507,22 +506,31 @@
       
       function calculateScore() {
         score = questions.reduce((acc, q) => {
+            // Only process questions that the user has answered
             if (q.answered && q.selected) {
-                if (q.type === 'MCQ' && q.selected === q.correct_answer) {
+                let isCorrect = false;
+
+                // Determine if the answer is correct based on the question type
+                if (q.type === 'MCQ') {
+                    isCorrect = (q.selected === q.correct_answer);
+                } else if (q.type === 'Riddle' && Array.isArray(q.correct_answer)) {
+                    const correctAnswers = q.correct_answer.map(ans => String(ans).toLowerCase());
+                    isCorrect = correctAnswers.includes(String(q.selected).toLowerCase());
+                } else if (q.type === 'Integer') {
+                    isCorrect = (String(q.selected) === String(q.correct_answer));
+                }
+
+                // Apply points based on whether the answer was correct or not
+                if (isCorrect) {
+                    // Add positive marks for a correct answer (default to 1 if not specified)
                     return acc + (q.positive_mark || 1);
-                }
-                if (q.type === 'Riddle' && Array.isArray(q.correct_answer)) {
-                    const correctAnswers = q.correct_answer.map(ans => ans.toLowerCase());
-                    if (correctAnswers.includes(q.selected.toLowerCase())) {
-                       return acc + (q.positive_mark || 1);
-                    }
-                }
-                if (q.type === 'Integer') {
-                    if (String(q.selected) === String(q.correct_answer)) {
-                        return acc + (q.positive_mark || 1);
-                    }
+                } else {
+                    // Add negative marks for an incorrect answer (default to 0 if not specified)
+                    return acc + (q.negative_mark || 0);
                 }
             }
+            
+            // If the question was skipped or left unanswered, the score does not change
             return acc;
         }, 0);
       }
