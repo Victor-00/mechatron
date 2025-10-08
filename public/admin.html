@@ -446,11 +446,11 @@
         }
 
         function startQuizForAll() {
-            if (!confirm('Are you sure you want to start the quiz for all waiting users?')) return;
+            if (!confirm('Are you sure you want to start the quiz for all waiting users? (Signal active for 2 minutes)')) return;
             fetch('/admin/start-quiz', { method: 'POST' })
             .then(res => res.json()).then(data => {
                 if(data.success) {
-                    showMessage('Start signal sent! Users will be redirected for 6 minutes.', 'success');
+                    showMessage('Start signal sent! Users will be redirected for 2 minutes.', 'success');
                 } else {
                     showMessage('Failed to send start signal.', 'error');
                 }
@@ -559,17 +559,17 @@
         }
         
         function publishResults() {
-             if (!confirm('Publish results? This redirects users on the results page for 6 minutes.')) return;
+             if (!confirm('Publish results? This redirects users on the results page for 2 minutes.')) return;
             fetch('/admin/publish-results', { method: 'POST' }).then(res => res.json()).then(data => {
-                if(data.success) showMessage('Results published! Signal is active for 6 minutes.', 'success');
+                if(data.success) showMessage('Results published! Signal is active for 2 minutes.', 'success');
                 else showMessage('Failed to publish results.', 'error');
             }).catch(err => showMessage('Error publishing results.', 'error'));
         }
 
         function forceRedirect() {
-            if (!confirm('Force all users on the selection page to the login screen? (Signal active for 6 minutes)')) return;
+            if (!confirm('Force all users on the selection page to the login screen? (Signal active for 2 minutes)')) return;
             fetch('/admin/force-redirect', { method: 'POST' }).then(res => res.json()).then(data => {
-                if(data.success) showMessage('Redirect command sent! Signal is active for 6 minutes.', 'success');
+                if(data.success) showMessage('Redirect command sent! Signal is active for 2 minutes.', 'success');
                 else showMessage('Failed to send redirect command.', 'error');
             }).catch(err => showMessage('Error sending redirect command.', 'error'));
         }
