@@ -61,7 +61,7 @@
       "correct_answer": ["palm tree","Palm tree","PALM TREE"],
       "positive_mark": 1,
       "negative_mark": 0,
-      "type": " Riddle"
+      "type": "Riddle"
     },
     {
       "question": "Series: 655, 439, 314, 250, 223, ? ",
