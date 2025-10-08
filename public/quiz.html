@@ -188,7 +188,7 @@
       let teamId = '';
       let violationCount = 0;
       let warningInProgress = false;
-      let timeLeft = 900; // 15 minutes in seconds
+      let timeLeft = 900;
       let initialWidth, initialHeight;
 
       teamId = localStorage.getItem('currentTeamId');
@@ -205,7 +205,9 @@
           
           quizStartTime = Date.now();
           if (document.documentElement.requestFullscreen) {
-              document.documentElement.requestFullscreen();
+              document.documentElement.requestFullscreen().catch(err => {
+                  console.error(`Fullscreen request failed: ${err.message} (${err.name})`);
+              });
           }
           initialWidth = window.screen.width;
           initialHeight = window.screen.height;
@@ -417,4 +419,119 @@
           }); 
           
           updateButtonStates();
-          updateDiceSt
+          updateDiceStatus(); 
+      }
+      
+      function clearChoice() { 
+          const currentQuestion = questions[currentQuestionIndex]; 
+          currentQuestion.selected = null; 
+          currentQuestion.answered = false; 
+          Array.from(optionsList.children).forEach(li => li.classList.remove('selected')); 
+          riddleInput.value = '';
+          updateButtonStates(); 
+          updateDiceStatus(); 
+      }
+      
+      function skipQuestion() { 
+          questions[currentQuestionIndex].skipped = true; 
+          questions[currentQuestionIndex].answered = false;
+          questions[currentQuestionIndex].selected = null;
+          updateDiceStatus(); 
+          goToNextQuestion(); 
+      }
+
+      function handleNextClick() {
+          const currentQuestion = questions[currentQuestionIndex];
+          const isInputType = currentQuestion.type === 'Riddle' || currentQuestion.type === 'Integer';
+
+          if(isInputType && riddleInput.value.trim() !== '') {
+              currentQuestion.selected = riddleInput.value.trim();
+              currentQuestion.answered = true;
+          } else if (isInputType && riddleInput.value.trim() === '') {
+              currentQuestion.answered = false;
+          }
+          
+          updateDiceStatus();
+          goToNextQuestion();
+      }
+      
+      function goToNextQuestion() {
+          const next = questions.findIndex((q, i) => !q.answered && !q.skipped && i > currentQuestionIndex); 
+          if (next !== -1) { 
+              currentQuestionIndex = next; 
+              renderQuestion(); 
+          } else { 
+              const firstUnanswered = questions.findIndex((q, i) => !q.answered && !q.skipped);
+              if (firstUnanswered !== -1) {
+                  currentQuestionIndex = firstUnanswered;
+                  renderQuestion();
+              } else {
+                 endQuiz(); 
+              }
+          }
+      }
+
+      function updateButtonStates() {
+          const currentQuestion = questions[currentQuestionIndex];
+          const isInputType = currentQuestion.type === 'Riddle' || currentQuestion.type === 'Integer';
+          const isAnswered = currentQuestion.answered || (isInputType && riddleInput.value.trim());
+
+          clearButton.style.display = isAnswered ? 'block' : 'none';
+          skipButton.style.display = !isAnswered ? 'block' : 'none';
+          nextButton.style.display = 'block';
+      }
+
+      function renderDiceMenu() { 
+          diceMenu.innerHTML = ''; 
+          questions.forEach((q, i) => { 
+              const dice = document.createElement('div'); 
+              dice.classList.add('menu-dice'); 
+              dice.id = `dice-${i}`; 
+              dice.textContent = i + 1; 
+              dice.addEventListener('click', () => { 
+                  currentQuestionIndex = i; 
+                  renderQuestion(); 
+              }); 
+              diceMenu.appendChild(dice); 
+          }); 
+      }
+      
+      function updateDiceStatus() { 
+          questions.forEach((q, i) => { 
+              const dice = document.getElementById(`dice-${i}`); 
+              dice.classList.remove('answered', 'skipped'); 
+              if (q.answered) dice.classList.add('answered'); 
+              else if (q.skipped) dice.classList.add('skipped'); 
+          }); 
+      }
+      
+      function calculateScore() {
+        score = questions.reduce((acc, q) => {
+            if (q.answered && q.selected) {
+                if (q.type === 'MCQ' && q.selected === q.correct_answer) {
+                    return acc + (q.positive_mark || 1);
+                }
+                if (q.type === 'Riddle' && Array.isArray(q.correct_answer)) {
+                    const correctAnswers = q.correct_answer.map(ans => ans.toLowerCase());
+                    if (correctAnswers.includes(q.selected.toLowerCase())) {
+                       return acc + (q.positive_mark || 1);
+                    }
+                }
+                if (q.type === 'Integer') {
+                    if (String(q.selected) === String(q.correct_answer)) {
+                        return acc + (q.positive_mark || 1);
+                    }
+                }
+            }
+            return acc;
+        }, 0);
+      }
+      
+      skipButton.addEventListener('click', skipQuestion); 
+      nextButton.addEventListener('click', handleNextClick); 
+      clearButton.addEventListener('click', clearChoice);
+    });
+  </script>
+</body>
+</html>
+
