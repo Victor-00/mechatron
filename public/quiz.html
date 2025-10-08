@@ -41,7 +41,7 @@
         }
         .resume-button:hover { transform: scale(1.05); }
         .quiz-wrapper {
-            width: 90%; max-width: 1200px; display: none; grid-template-columns: 1fr 1fr;
+            width: 90%; max-width: 1200px; display: grid; grid-template-columns: 1fr 1fr;
             grid-template-rows: auto 1fr; gap: 20px;
             grid-template-areas: "meta timer" "main menu";
         }
@@ -133,7 +133,7 @@
 
         <div class="quiz-wrapper">
             <div class="info-box meta-data"><h2>Team ID</h2><span id="team-id">Loading...</span></div>
-            <div class="info-box timer-box"><h2>Time Left</h2><span id="quiz-timer">5:00</span></div>
+            <div class="info-box timer-box"><h2>Time Left</h2><span id="quiz-timer">15:00</span></div>
             <div class="quiz-container">
                 <div id="question-counter">Question 1/5</div>
                 <div id="question-image-container"></div>
@@ -188,7 +188,7 @@
       let teamId = '';
       let violationCount = 0;
       let warningInProgress = false;
-      let timeLeft = 300;
+      let timeLeft = 900; // 15 minutes in seconds
       let initialWidth, initialHeight;
 
       teamId = localStorage.getItem('currentTeamId');
@@ -273,7 +273,7 @@
           if (timeLeft <= 0) { clearInterval(quizTimer); endQuiz(); }
         }, 1000);
       }
-      function startTimer() { timeLeft = 300; resumeTimer(); }
+      function startTimer() { timeLeft = 900; resumeTimer(); }
       
       async function endQuiz(options = {}) {
         if (quizHasEnded) return;
@@ -417,127 +417,4 @@
           }); 
           
           updateButtonStates();
-          updateDiceStatus(); 
-      }
-      
-      function clearChoice() { 
-          const currentQuestion = questions[currentQuestionIndex]; 
-          currentQuestion.selected = null; 
-          currentQuestion.answered = false; 
-          Array.from(optionsList.children).forEach(li => li.classList.remove('selected')); 
-          riddleInput.value = '';
-          updateButtonStates(); 
-          updateDiceStatus(); 
-      }
-      
-      function skipQuestion() { 
-          questions[currentQuestionIndex].skipped = true; 
-          questions[currentQuestionIndex].answered = false;
-          questions[currentQuestionIndex].selected = null;
-          updateDiceStatus(); 
-          goToNextQuestion(); 
-      }
-
-      function handleNextClick() {
-          const currentQuestion = questions[currentQuestionIndex];
-          const isInputType = currentQuestion.type === 'Riddle' || currentQuestion.type === 'Integer';
-
-          if(isInputType && riddleInput.value.trim() !== '') {
-              currentQuestion.selected = riddleInput.value.trim();
-              currentQuestion.answered = true;
-          } else if (isInputType && riddleInput.value.trim() === '') {
-              currentQuestion.answered = false;
-          }
-          
-          updateDiceStatus();
-          goToNextQuestion();
-      }
-      
-      function goToNextQuestion() {
-          const next = questions.findIndex((q, i) => !q.answered && !q.skipped && i > currentQuestionIndex); 
-          if (next !== -1) { 
-              currentQuestionIndex = next; 
-              renderQuestion(); 
-          } else { 
-              const firstUnanswered = questions.findIndex((q, i) => !q.answered && !q.skipped);
-              if (firstUnanswered !== -1) {
-                  currentQuestionIndex = firstUnanswered;
-                  renderQuestion();
-              } else {
-                 endQuiz(); 
-              }
-          }
-      }
-
-      function updateButtonStates() {
-          const currentQuestion = questions[currentQuestionIndex];
-          const isInputType = currentQuestion.type === 'Riddle' || currentQuestion.type === 'Integer';
-          const isAnswered = currentQuestion.answered || (isInputType && riddleInput.value.trim());
-
-          clearButton.style.display = isAnswered ? 'block' : 'none';
-          skipButton.style.display = !isAnswered ? 'block' : 'none';
-          nextButton.style.display = 'block';
-      }
-
-      function renderDiceMenu() { 
-          diceMenu.innerHTML = ''; 
-          questions.forEach((q, i) => { 
-              const dice = document.createElement('div'); 
-              dice.classList.add('menu-dice'); 
-              dice.id = `dice-${i}`; 
-              dice.textContent = i + 1; 
-              dice.addEventListener('click', () => { 
-                  currentQuestionIndex = i; 
-                  renderQuestion(); 
-              }); 
-              diceMenu.appendChild(dice); 
-          }); 
-      }
-      
-      function updateDiceStatus() { 
-          questions.forEach((q, i) => { 
-              const dice = document.getElementById(`dice-${i}`); 
-              dice.classList.remove('answered', 'skipped'); 
-              if (q.answered) dice.classList.add('answered'); 
-              else if (q.skipped) dice.classList.add('skipped'); 
-          }); 
-      }
-      
-      function calculateScore() {
-        score = questions.reduce((acc, q) => {
-            // Only process questions that the user has answered
-            if (q.answered && q.selected) {
-                let isCorrect = false;
-
-                // Determine if the answer is correct based on the question type
-                if (q.type === 'MCQ') {
-                    isCorrect = (q.selected === q.correct_answer);
-                } else if (q.type === 'Riddle' && Array.isArray(q.correct_answer)) {
-                    const correctAnswers = q.correct_answer.map(ans => String(ans).toLowerCase());
-                    isCorrect = correctAnswers.includes(String(q.selected).toLowerCase());
-                } else if (q.type === 'Integer') {
-                    isCorrect = (String(q.selected) === String(q.correct_answer));
-                }
-
-                // Apply points based on whether the answer was correct or not
-                if (isCorrect) {
-                    // Add positive marks for a correct answer (default to 1 if not specified)
-                    return acc + (q.positive_mark || 1);
-                } else {
-                    // Add negative marks for an incorrect answer (default to 0 if not specified)
-                    return acc + (q.negative_mark || 0);
-                }
-            }
-            
-            // If the question was skipped or left unanswered, the score does not change
-            return acc;
-        }, 0);
-      }
-      
-      skipButton.addEventListener('click', skipQuestion); 
-      nextButton.addEventListener('click', handleNextClick); 
-      clearButton.addEventListener('click', clearChoice);
-    });
-  </script>
-</body>
-</html>
+          updateDiceSt
