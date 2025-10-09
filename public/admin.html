@@ -242,6 +242,38 @@
             color: #667eea;
             margin-right: 10px;
         }
+        
+        .toggle-details {
+            cursor: pointer;
+            font-size: 1.2rem;
+            text-align: center;
+            width: 30px;
+            user-select: none;
+        }
+        .details-row {
+            display: none;
+            background-color: #fafafa;
+        }
+        .details-content {
+            padding: 20px 40px;
+        }
+        .answer-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 5px;
+        }
+        .answer-item:last-child {
+            border-bottom: none;
+        }
+        .answer-item.correct {
+            color: #155724;
+            background-color: #d4edda;
+        }
+        .answer-item.incorrect {
+            color: #721c24;
+            background-color: #f8d7da;
+        }
 
         @media (max-width: 768px) {
             .teams-table {
@@ -301,6 +333,7 @@
                 <button class="warning" id="publish-results-btn" onclick="publishResults()">🚀 Publish Results</button>
                 <button class="danger" onclick="forceRedirect()">↩️ Force All to Login</button>
                 <button class="danger" onclick="resetAllLogins()">🗑️ Reset All Logins</button>
+                <button class="primary" onclick="exportData()">📤 Export to Excel</button>
             </div>
             
             <div class="controls">
@@ -309,11 +342,10 @@
                 <button class="finalize" id="finalize-btn" onclick="finalizeSelections()" disabled>💾 Finalize Selections</button>
             </div>
 
-
             <div class="control-group">
                 <h3 style="margin-bottom: 15px; color: #667eea;">Quiz Round Control</h3>
                 <div class="controls" style="align-items: center; margin-bottom: 0;">
-                    <label for="round-select" style="font-weight: 600; margin-right: 10px;">Quiz Round:</label>
+                    <label for="round-select" style="font-weight: 600; margin-right: 10px;">Set Next Round:</label>
                     <select id="round-select">
                         <option value="round1">Round 1</option>
                         <option value="round2">Round 2</option>
@@ -322,7 +354,7 @@
                         <option value="round5">Round 5</option>
                         <option value="round6">Round 6</option>
                     </select>
-                    <button class="primary action-btn" onclick="setRound()">Set Active Round</button>
+                    <button class="primary action-btn" onclick="setRound()">Set & Prepare Round</button>
                 </div>
             </div>
 
@@ -340,6 +372,7 @@
             <table>
                 <thead>
                     <tr>
+                        <th style="width: 30px;"></th>
                         <th class="checkbox-cell">
                             <input type="checkbox" id="select-all" onchange="toggleSelectAll()">
                         </th>
@@ -353,7 +386,7 @@
                 </thead>
                 <tbody id="teams-tbody">
                     <tr>
-                        <td colspan="7" style="text-align: center;">Loading...</td>
+                        <td colspan="8" style="text-align: center;">Loading...</td>
                     </tr>
                 </tbody>
             </table>
@@ -373,7 +406,7 @@
             messageDiv.innerHTML = `<div class="message ${type}">${text}</div>`;
             setTimeout(() => {
                 messageDiv.innerHTML = '';
-            }, 3000);
+            }, 4000);
         }
 
         function loadData() {
@@ -395,17 +428,29 @@
                 updateSelectedCount();
                 const tbody = document.getElementById('teams-tbody');
                 if (allTeams.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No teams logged in</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No teams logged in</td></tr>';
                     return;
                 }
                 tbody.innerHTML = allTeams.map((team, index) => {
-                    const marks = team.marks !== undefined ? team.marks : 'N/A';
+                    const marks = team.marks !== null ? team.marks : 'N/A';
                     const timeTaken = team.timeTaken ? (team.timeTaken / 1000).toFixed(3) : 'N/A';
-                    const startTime = new Date(team.loginTime).toLocaleString();
+                    const startTime = team.quizStartTime ? new Date(team.quizStartTime).toLocaleString() : 'N/A';
                     const endTime = team.endTime ? new Date(team.endTime).toLocaleString() : 'N/A';
 
+                    const answersHtml = team.answers && team.answers.length > 0 ? team.answers.map((ans, i) => {
+                        const selectedAnswer = ans.selected || "Skipped";
+                        const correctAnswer = Array.isArray(ans.correct_answer) ? ans.correct_answer.join(', ') : ans.correct_answer;
+                        return `
+                        <div class="answer-item ${ans.isCorrect ? 'correct' : 'incorrect'}">
+                            <strong>Q${i+1}:</strong> ${ans.question}
+                            <br>
+                            <em>Selected:</em> ${selectedAnswer} | <em>Correct:</em> ${correctAnswer}
+                        </div>
+                    `}).join('') : '<div class="answer-item">No answer details available.</div>';
+
                     return `
-                    <tr>
+                    <tr class="main-row">
+                        <td class="toggle-details" onclick="toggleDetails(${index})">▶</td>
                         <td class="checkbox-cell"><input type="checkbox" class="team-checkbox" value="${team.teamId}" onchange="updateSelectedCount()"></td>
                         <td class="rank-cell">#${index + 1}</td>
                         <td>${team.teamId}</td>
@@ -413,9 +458,29 @@
                         <td class="marks-cell">${timeTaken}</td>
                         <td>${startTime}</td>
                         <td>${endTime}</td>
-                    </tr>`
+                    </tr>
+                    <tr class="details-row" id="details-${index}">
+                        <td colspan="8">
+                            <div class="details-content">
+                                <h4>Answer Details</h4>
+                                ${answersHtml}
+                            </div>
+                        </td>
+                    </tr>`;
                 }).join('');
             }).catch(err => showMessage('Error loading data.', 'error'));
+        }
+
+        function toggleDetails(index) {
+            const detailsRow = document.getElementById(`details-${index}`);
+            const toggleCell = detailsRow.previousElementSibling.querySelector('.toggle-details');
+            if (detailsRow.style.display === 'none' || detailsRow.style.display === '') {
+                detailsRow.style.display = 'table-row';
+                toggleCell.innerHTML = '▼';
+            } else {
+                detailsRow.style.display = 'none';
+                toggleCell.innerHTML = '▶';
+            }
         }
 
         function loadServerStatus() {
@@ -430,15 +495,16 @@
         
         function setRound() {
             const selectedRound = document.getElementById('round-select').value;
-            if (!confirm(`Set active quiz to ${selectedRound.replace('round', 'Round ')}?`)) return;
+            if (!confirm(`This will set the active quiz to ${selectedRound.replace('round', 'Round ')} and reset progress for all finalized teams. This action cannot be undone.`)) return;
             fetch('/admin/set-round', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ round: selectedRound })
             }).then(res => res.json()).then(data => {
                 if (data.success) {
-                    showMessage(`Active quiz set to ${data.activeRound.replace('round', 'Round ')}`, 'success');
+                    showMessage(data.message, 'success');
                     loadServerStatus();
+                    loadData();
                 } else {
                     showMessage('Failed to set round: ' + data.message, 'error');
                 }
@@ -449,11 +515,8 @@
             if (!confirm('Are you sure you want to start the quiz for all waiting users? (Signal active for 2 minutes)')) return;
             fetch('/admin/start-quiz', { method: 'POST' })
             .then(res => res.json()).then(data => {
-                if(data.success) {
-                    showMessage('Start signal sent! Users will be redirected for 2 minutes.', 'success');
-                } else {
-                    showMessage('Failed to send start signal.', 'error');
-                }
+                if(data.success) { showMessage('Start signal sent! Users will be redirected for 2 minutes.', 'success'); } 
+                else { showMessage('Failed to send start signal.', 'error'); }
             }).catch(err => showMessage('Error sending start signal.', 'error'));
         }
 
@@ -485,10 +548,7 @@
             if (selectedIds.length === 0) return;
             const allIds = Array.from(document.querySelectorAll('.team-checkbox')).map(cb => cb.value);
             const idsToRemove = allIds.filter(id => !selectedIds.includes(id));
-            if (idsToRemove.length === 0) {
-                showMessage('All teams are selected. Nothing to remove.', 'error');
-                return;
-            }
+            if (idsToRemove.length === 0) return showMessage('All teams are selected. Nothing to remove.', 'error');
             if (!confirm(`Keep ${selectedIds.length} team(s) and remove ${idsToRemove.length} others?`)) return;
             fetch('/admin/remove-teams-batch', {
                 method: 'POST',
@@ -513,9 +573,7 @@
                 if (data.success) {
                     showMessage('All logins and selections reset successfully.');
                     loadData();
-                } else {
-                    showMessage('Failed to reset logins.', 'error');
-                }
+                } else { showMessage('Failed to reset logins.', 'error'); }
             }).catch(err => showMessage('Error resetting logins.', 'error'));
         }
 
@@ -536,26 +594,16 @@
 
         function finalizeSelections() {
             const selectedTeamIds = getSelectedTeamIds();
-            if (selectedTeamIds.length === 0) {
-                return showMessage('No teams selected to finalize.', 'error');
-            }
-            if (!confirm(`Finalize these ${selectedTeamIds.length} teams? This will overwrite the current selection list.`)) {
-                return;
-            }
+            if (selectedTeamIds.length === 0) return showMessage('No teams selected to finalize.', 'error');
+            if (!confirm(`Finalize these ${selectedTeamIds.length} teams? This will overwrite the current selection list.`)) return;
             fetch('/admin/finalize-selections', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ selectedTeams: selectedTeamIds })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    showMessage(`Successfully finalized ${selectedTeamIds.length} teams.`, 'success');
-                } else {
-                    showMessage('Failed to finalize selections: ' + data.message, 'error');
-                }
-            })
-            .catch(err => showMessage('Network error while finalizing selections.', 'error'));
+            }).then(res => res.json()).then(data => {
+                if (data.success) showMessage(`Successfully finalized ${selectedTeamIds.length} teams.`, 'success');
+                else showMessage('Failed to finalize selections: ' + data.message, 'error');
+            }).catch(err => showMessage('Network error while finalizing selections.', 'error'));
         }
         
         function publishResults() {
@@ -577,37 +625,22 @@
         function selectSpecificTeams() {
             const teamIdsInput = document.getElementById('team-ids');
             const teamIdsStr = teamIdsInput.value.trim();
-            if (!teamIdsStr) {
-                return showMessage('Please enter team IDs.', 'error');
-            }
-            
+            if (!teamIdsStr) return showMessage('Please enter team IDs.', 'error');
             const teamIdNumbers = teamIdsStr.split(',').map(id => id.trim()).filter(Boolean);
-            if(teamIdNumbers.length === 0) {
-                return showMessage('Please enter valid team IDs.', 'error');
-            }
-
+            if(teamIdNumbers.length === 0) return showMessage('Please enter valid team IDs.', 'error');
             document.querySelectorAll('.team-checkbox').forEach(cb => cb.checked = false);
             let foundCount = 0;
             let notFound = [];
-            
             teamIdNumbers.forEach(id => {
                 const cb = document.querySelector(`.team-checkbox[value="${id}"]`);
                 if (cb) {
                     cb.checked = true;
                     foundCount++;
-                } else {
-                    notFound.push(id);
-                }
+                } else { notFound.push(id); }
             });
-            
             updateSelectedCount();
-            
-            if (notFound.length > 0) {
-                showMessage(`Selected ${foundCount} of ${teamIdNumbers.length} teams. Not found: ${notFound.join(', ')}`, 'error');
-            } else {
-                showMessage(`Successfully selected ${foundCount} team(s).`, 'success');
-            }
-            
+            if (notFound.length > 0) showMessage(`Selected ${foundCount} of ${teamIdNumbers.length} teams. Not found: ${notFound.join(', ')}`, 'error');
+            else showMessage(`Successfully selected ${foundCount} team(s).`, 'success');
             teamIdsInput.value = '';
         }
 
@@ -621,7 +654,12 @@
             showMessage(`Selected top ${Math.min(n, allCheckboxes.length)} candidate(s).`, 'success');
             document.getElementById('top-n').value = '';
         }
+
+        function exportData() {
+            window.location.href = '/admin/export';
+        }
     </script>
 </body>
 </html>
+
 

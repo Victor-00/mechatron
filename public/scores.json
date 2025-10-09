@@ -222,5 +222,1116 @@
     "answeredQuestions": 10,
     "totalQuestions": 10,
     "status": "Completed"
+  },
+  {
+    "teamId": "22",
+    "score": 1,
+    "timeTaken": 27010,
+    "answeredQuestions": 10,
+    "totalQuestions": 10,
+    "status": "Completed",
+    "detailedAnswers": [
+      {
+        "question": "What comes next: 3, 7, 15, 31, 63, ?",
+        "selected": "option3",
+        "correct_answer": "option1",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "I have cities, but no houses. I have mountains, but no trees. I have water, but no fish. What am I?",
+        "selected": "asfdas",
+        "correct_answer": [
+          "Map",
+          "map",
+          "MAP"
+        ],
+        "isCorrect": false,
+        "type": "Riddle",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "Fill in the space",
+        "selected": "option1",
+        "correct_answer": "option3",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "A solid cube measuring 3 inches on each side is painted blue on all its faces. The cube is then cut into 27 smaller cubes, each measuring 1 inch on a side. How many of these smaller cubes have at least one painted face?",
+        "selected": "option3",
+        "correct_answer": "option3",
+        "isCorrect": true,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "A shopkeeper sells a bicycle for Rs. 350. The bicycle cost him Rs. 300. A tourist pays with four Rs. 100 traveler's cheques. The shopkeeper, having no change, gets cash for the cheques from his neighbor. He gives the tourist Rs. 50 change. Later, the neighbor discovers the cheques are counterfeit and demands his Rs. 400 back. The shopkeeper refunds him. How much money did the shopkeeper lose in total?",
+        "selected": "option1",
+        "correct_answer": "option3",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "What goes up but never comes down?",
+        "selected": "kojou0u",
+        "correct_answer": [
+          "Age",
+          "age",
+          "AGE"
+        ],
+        "isCorrect": false,
+        "type": "Riddle",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "Find the missing",
+        "selected": "option1",
+        "correct_answer": "option4",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "Next term: 0, 3, 8, 15, 24, 35, ?",
+        "selected": "option4",
+        "correct_answer": "option1",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "Complete: 13, 21, 34, 55, 89, ?",
+        "selected": "option2",
+        "correct_answer": "option1",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "What is full of holes but still holds water?",
+        "selected": "hgugujgbj",
+        "correct_answer": [
+          "Sponge",
+          "sponge",
+          "SPONGE"
+        ],
+        "isCorrect": false,
+        "type": "Riddle",
+        "positive_mark": 1,
+        "negative_mark": 0
+      }
+    ]
+  },
+  {
+    "teamId": "22",
+    "score": 0,
+    "timeTaken": 19057,
+    "answeredQuestions": 0,
+    "totalQuestions": 5,
+    "status": "Completed",
+    "detailedAnswers": [
+      {
+        "question": "When the above is folded to form a cube, which is the only one of the following that can be produced?",
+        "selected": "Skipped",
+        "correct_answer": "option4",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 5,
+        "negative_mark": -3
+      },
+      {
+        "question": "Find the missing figure:",
+        "selected": "Skipped",
+        "correct_answer": "option4",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 4,
+        "negative_mark": -3
+      },
+      {
+        "question": "In the below question the problem figures follow a specific series. Find the option which maintains the correct next series.",
+        "selected": "Skipped",
+        "correct_answer": "2",
+        "isCorrect": false,
+        "type": "Integer",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "What is the missing number in the sequence?\n10,100,20,90,30,80,...?",
+        "selected": "Skipped",
+        "correct_answer": "40",
+        "isCorrect": false,
+        "type": "Integer",
+        "positive_mark": 2,
+        "negative_mark": 0
+      },
+      {
+        "question": "I have many different faces, but I never show one. I am at the center of a puzzle, but I'm not a piece. What am I?",
+        "selected": "Skipped",
+        "correct_answer": [
+          "Answer",
+          "answer",
+          "ANSWER",
+          "An answer",
+          "an answer",
+          "AN ANSWER",
+          "The answer",
+          "the answer",
+          "THE ANSWER"
+        ],
+        "isCorrect": false,
+        "type": "Riddle",
+        "positive_mark": 3,
+        "negative_mark": 0
+      }
+    ]
+  },
+  {
+    "teamId": "21",
+    "score": 0,
+    "timeTaken": 23598,
+    "quizStartTime": "2025-10-08T21:41:36.390Z",
+    "answeredQuestions": 10,
+    "totalQuestions": 10,
+    "status": "Completed",
+    "detailedAnswers": [
+      {
+        "question": "Find the missing figure:",
+        "selected": "option2",
+        "correct_answer": "option1",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "What loses its head in the morning but gets it back at night?",
+        "selected": "jhuhui",
+        "correct_answer": [
+          "Pillow",
+          "pillow",
+          "PILLOW"
+        ],
+        "isCorrect": false,
+        "type": "Riddle",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "A taxi driver's number plate has a number such that when divided by 2, 3, 4, 5, or 6, there is always a remainder of 1. But when divided by 11, there is no remainder. What is the lowest such number?",
+        "selected": "option2",
+        "correct_answer": "option1",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "What is the longest word in the dictionary? ",
+        "selected": "khihi",
+        "correct_answer": [
+          "pneumonoultramicroscopicsilicovolcanoconiosis",
+          "Pneumonoultramicroscopicsilicovolcanoconiosis",
+          "PNEUMONOULTRAMICROSCOPICSILICOVOLCANOCONIOSIS"
+        ],
+        "isCorrect": false,
+        "type": "Riddle",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": " I love to dance and twist. I shake my tail as I sail away. When I fly wingless into the sky. What am I?",
+        "selected": "khihihi",
+        "correct_answer": [
+          "Kite",
+          "kite",
+          "KITE"
+        ],
+        "isCorrect": false,
+        "type": "Riddle",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "A standard-sized cigarette can be rolled out of 6 standard-sized cigarette butts. How many cigarettes can be made and smoked from 36 butts?",
+        "selected": "option2",
+        "correct_answer": "option1",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "What kind of tree can you carry in your hand? ",
+        "selected": "khbiiu",
+        "correct_answer": [
+          "palm tree",
+          "Palm tree",
+          "PALM TREE"
+        ],
+        "isCorrect": false,
+        "type": "Riddle",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "Series: 655, 439, 314, 250, 223, ? ",
+        "selected": "option3",
+        "correct_answer": "option1",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "Find out:",
+        "selected": "option1",
+        "correct_answer": "option4",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": " I have a money pouch containing Rs. 700. There are equal number of 25 paise coins, 50 paise coins and one rupee coins. How many of each are there? ",
+        "selected": "option2",
+        "correct_answer": "option3",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      }
+    ]
+  },
+  {
+    "teamId": "23",
+    "score": 0,
+    "timeTaken": 18292,
+    "quizStartTime": "2025-10-08T21:48:12.591Z",
+    "answeredQuestions": 1,
+    "totalQuestions": 10,
+    "status": "Completed",
+    "detailedAnswers": [
+      {
+        "question": "Find the missing figure:",
+        "selected": "Skipped",
+        "correct_answer": "option1",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "What loses its head in the morning but gets it back at night?",
+        "selected": "jhi",
+        "correct_answer": [
+          "Pillow",
+          "pillow",
+          "PILLOW"
+        ],
+        "isCorrect": false,
+        "type": "Riddle",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "A taxi driver's number plate has a number such that when divided by 2, 3, 4, 5, or 6, there is always a remainder of 1. But when divided by 11, there is no remainder. What is the lowest such number?",
+        "selected": "Skipped",
+        "correct_answer": "option1",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "What is the longest word in the dictionary? ",
+        "selected": "Skipped",
+        "correct_answer": [
+          "pneumonoultramicroscopicsilicovolcanoconiosis",
+          "Pneumonoultramicroscopicsilicovolcanoconiosis",
+          "PNEUMONOULTRAMICROSCOPICSILICOVOLCANOCONIOSIS"
+        ],
+        "isCorrect": false,
+        "type": "Riddle",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": " I love to dance and twist. I shake my tail as I sail away. When I fly wingless into the sky. What am I?",
+        "selected": "Skipped",
+        "correct_answer": [
+          "Kite",
+          "kite",
+          "KITE"
+        ],
+        "isCorrect": false,
+        "type": "Riddle",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "A standard-sized cigarette can be rolled out of 6 standard-sized cigarette butts. How many cigarettes can be made and smoked from 36 butts?",
+        "selected": "Skipped",
+        "correct_answer": "option1",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "What kind of tree can you carry in your hand? ",
+        "selected": "Skipped",
+        "correct_answer": [
+          "palm tree",
+          "Palm tree",
+          "PALM TREE"
+        ],
+        "isCorrect": false,
+        "type": "Riddle",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "Series: 655, 439, 314, 250, 223, ? ",
+        "selected": "Skipped",
+        "correct_answer": "option1",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "Find out:",
+        "selected": "Skipped",
+        "correct_answer": "option4",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": " I have a money pouch containing Rs. 700. There are equal number of 25 paise coins, 50 paise coins and one rupee coins. How many of each are there? ",
+        "selected": "Skipped",
+        "correct_answer": "option3",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      }
+    ]
+  },
+  {
+    "teamId": "23",
+    "score": 0,
+    "timeTaken": 16074,
+    "quizStartTime": "2025-10-08T21:49:15.820Z",
+    "answeredQuestions": 0,
+    "totalQuestions": 5,
+    "status": "Completed",
+    "detailedAnswers": [
+      {
+        "question": "A number of cats killed a total of 999919 mice. Each cat killed an equal number of mice. Each cat killed more mice than there were cats. How many cats were there?",
+        "selected": "Skipped",
+        "correct_answer": "option1",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 4,
+        "negative_mark": -3
+      },
+      {
+        "question": "We have a circular dining table with a diameter 15 times the diameter of some circular saucers. How many saucers can be placed on the table, so they do not overlap each other or the edge of the table?",
+        "selected": "Skipped",
+        "correct_answer": "option2",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 5,
+        "negative_mark": -3
+      },
+      {
+        "question": "Complete the sequence: 6, 12, 21, 33, 48, ?",
+        "selected": "Skipped",
+        "correct_answer": "66",
+        "isCorrect": false,
+        "type": "Integer",
+        "positive_mark": 3,
+        "negative_mark": 0
+      },
+      {
+        "question": "There is a number whose double is greater than its half by 45, Find the number",
+        "selected": "Skipped",
+        "correct_answer": "30",
+        "isCorrect": false,
+        "type": "Integer",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "I am a word. If you remove my first letter, I sound the same. If you remove my second letter, I still sound the same. I am the first human to fly to the moon. What word am I?",
+        "selected": "Skipped",
+        "correct_answer": [
+          "Neil Armstrong",
+          "neil armstrong",
+          "NEIL ARMSTRONG",
+          "Neil armstrong",
+          "neil Armstrong",
+          "NEIL armstrong",
+          "Armstrong",
+          "armstrong",
+          "ARMSTRONG",
+          "neil",
+          "Neil",
+          "NEIL"
+        ],
+        "isCorrect": false,
+        "type": "Riddle",
+        "positive_mark": 2,
+        "negative_mark": 0
+      }
+    ]
+  },
+  {
+    "teamId": "20",
+    "score": 0,
+    "timeTaken": 8800,
+    "quizStartTime": "2025-10-08T21:58:06.232Z",
+    "answeredQuestions": 0,
+    "totalQuestions": 10,
+    "status": "Completed",
+    "detailedAnswers": [
+      {
+        "question": "What comes next: 3, 7, 15, 31, 63, ?",
+        "selected": "Skipped",
+        "correct_answer": "option1",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "I have cities, but no houses. I have mountains, but no trees. I have water, but no fish. What am I?",
+        "selected": "Skipped",
+        "correct_answer": [
+          "Map",
+          "map",
+          "MAP"
+        ],
+        "isCorrect": false,
+        "type": "Riddle",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "Fill in the space",
+        "selected": "Skipped",
+        "correct_answer": "option3",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "A solid cube measuring 3 inches on each side is painted blue on all its faces. The cube is then cut into 27 smaller cubes, each measuring 1 inch on a side. How many of these smaller cubes have at least one painted face?",
+        "selected": "Skipped",
+        "correct_answer": "option3",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "A shopkeeper sells a bicycle for Rs. 350. The bicycle cost him Rs. 300. A tourist pays with four Rs. 100 traveler's cheques. The shopkeeper, having no change, gets cash for the cheques from his neighbor. He gives the tourist Rs. 50 change. Later, the neighbor discovers the cheques are counterfeit and demands his Rs. 400 back. The shopkeeper refunds him. How much money did the shopkeeper lose in total?",
+        "selected": "Skipped",
+        "correct_answer": "option3",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "What goes up but never comes down?",
+        "selected": "Skipped",
+        "correct_answer": [
+          "Age",
+          "age",
+          "AGE"
+        ],
+        "isCorrect": false,
+        "type": "Riddle",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "Find the missing",
+        "selected": "Skipped",
+        "correct_answer": "option4",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "Next term: 0, 3, 8, 15, 24, 35, ?",
+        "selected": "Skipped",
+        "correct_answer": "option1",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "Complete: 13, 21, 34, 55, 89, ?",
+        "selected": "Skipped",
+        "correct_answer": "option1",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "What is full of holes but still holds water?",
+        "selected": "Skipped",
+        "correct_answer": [
+          "Sponge",
+          "sponge",
+          "SPONGE"
+        ],
+        "isCorrect": false,
+        "type": "Riddle",
+        "positive_mark": 1,
+        "negative_mark": 0
+      }
+    ]
+  },
+  {
+    "teamId": "20",
+    "score": 0,
+    "timeTaken": 8752,
+    "quizStartTime": "2025-10-08T21:59:37.941Z",
+    "answeredQuestions": 0,
+    "totalQuestions": 10,
+    "status": "Completed",
+    "detailedAnswers": [
+      {
+        "question": "What comes next: 3, 7, 15, 31, 63, ?",
+        "selected": "Skipped",
+        "correct_answer": "option1",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "I have cities, but no houses. I have mountains, but no trees. I have water, but no fish. What am I?",
+        "selected": "Skipped",
+        "correct_answer": [
+          "Map",
+          "map",
+          "MAP"
+        ],
+        "isCorrect": false,
+        "type": "Riddle",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "Fill in the space",
+        "selected": "Skipped",
+        "correct_answer": "option3",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "A solid cube measuring 3 inches on each side is painted blue on all its faces. The cube is then cut into 27 smaller cubes, each measuring 1 inch on a side. How many of these smaller cubes have at least one painted face?",
+        "selected": "Skipped",
+        "correct_answer": "option3",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "A shopkeeper sells a bicycle for Rs. 350. The bicycle cost him Rs. 300. A tourist pays with four Rs. 100 traveler's cheques. The shopkeeper, having no change, gets cash for the cheques from his neighbor. He gives the tourist Rs. 50 change. Later, the neighbor discovers the cheques are counterfeit and demands his Rs. 400 back. The shopkeeper refunds him. How much money did the shopkeeper lose in total?",
+        "selected": "Skipped",
+        "correct_answer": "option3",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "What goes up but never comes down?",
+        "selected": "Skipped",
+        "correct_answer": [
+          "Age",
+          "age",
+          "AGE"
+        ],
+        "isCorrect": false,
+        "type": "Riddle",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "Find the missing",
+        "selected": "Skipped",
+        "correct_answer": "option4",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "Next term: 0, 3, 8, 15, 24, 35, ?",
+        "selected": "Skipped",
+        "correct_answer": "option1",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "Complete: 13, 21, 34, 55, 89, ?",
+        "selected": "Skipped",
+        "correct_answer": "option1",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "What is full of holes but still holds water?",
+        "selected": "Skipped",
+        "correct_answer": [
+          "Sponge",
+          "sponge",
+          "SPONGE"
+        ],
+        "isCorrect": false,
+        "type": "Riddle",
+        "positive_mark": 1,
+        "negative_mark": 0
+      }
+    ]
+  },
+  {
+    "teamId": "20",
+    "score": 0,
+    "timeTaken": 12239,
+    "quizStartTime": "2025-10-08T22:01:06.359Z",
+    "answeredQuestions": 0,
+    "totalQuestions": 10,
+    "status": "Completed",
+    "detailedAnswers": [
+      {
+        "question": "What comes next: 3, 7, 15, 31, 63, ?",
+        "selected": "Skipped",
+        "correct_answer": "option1",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "I have cities, but no houses. I have mountains, but no trees. I have water, but no fish. What am I?",
+        "selected": "Skipped",
+        "correct_answer": [
+          "Map",
+          "map",
+          "MAP"
+        ],
+        "isCorrect": false,
+        "type": "Riddle",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "Fill in the space",
+        "selected": "Skipped",
+        "correct_answer": "option3",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "A solid cube measuring 3 inches on each side is painted blue on all its faces. The cube is then cut into 27 smaller cubes, each measuring 1 inch on a side. How many of these smaller cubes have at least one painted face?",
+        "selected": "Skipped",
+        "correct_answer": "option3",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "A shopkeeper sells a bicycle for Rs. 350. The bicycle cost him Rs. 300. A tourist pays with four Rs. 100 traveler's cheques. The shopkeeper, having no change, gets cash for the cheques from his neighbor. He gives the tourist Rs. 50 change. Later, the neighbor discovers the cheques are counterfeit and demands his Rs. 400 back. The shopkeeper refunds him. How much money did the shopkeeper lose in total?",
+        "selected": "Skipped",
+        "correct_answer": "option3",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "What goes up but never comes down?",
+        "selected": "Skipped",
+        "correct_answer": [
+          "Age",
+          "age",
+          "AGE"
+        ],
+        "isCorrect": false,
+        "type": "Riddle",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "Find the missing",
+        "selected": "Skipped",
+        "correct_answer": "option4",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "Next term: 0, 3, 8, 15, 24, 35, ?",
+        "selected": "Skipped",
+        "correct_answer": "option1",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "Complete: 13, 21, 34, 55, 89, ?",
+        "selected": "Skipped",
+        "correct_answer": "option1",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "What is full of holes but still holds water?",
+        "selected": "Skipped",
+        "correct_answer": [
+          "Sponge",
+          "sponge",
+          "SPONGE"
+        ],
+        "isCorrect": false,
+        "type": "Riddle",
+        "positive_mark": 1,
+        "negative_mark": 0
+      }
+    ]
+  },
+  {
+    "teamId": "20",
+    "score": 0,
+    "timeTaken": 9350,
+    "quizStartTime": "2025-10-08T22:02:30.526Z",
+    "answeredQuestions": 0,
+    "totalQuestions": 10,
+    "status": "Completed",
+    "detailedAnswers": [
+      {
+        "question": "What comes next: 3, 7, 15, 31, 63, ?",
+        "selected": "Skipped",
+        "correct_answer": "option1",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "I have cities, but no houses. I have mountains, but no trees. I have water, but no fish. What am I?",
+        "selected": "Skipped",
+        "correct_answer": [
+          "Map",
+          "map",
+          "MAP"
+        ],
+        "isCorrect": false,
+        "type": "Riddle",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "Fill in the space",
+        "selected": "Skipped",
+        "correct_answer": "option3",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "A solid cube measuring 3 inches on each side is painted blue on all its faces. The cube is then cut into 27 smaller cubes, each measuring 1 inch on a side. How many of these smaller cubes have at least one painted face?",
+        "selected": "Skipped",
+        "correct_answer": "option3",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "A shopkeeper sells a bicycle for Rs. 350. The bicycle cost him Rs. 300. A tourist pays with four Rs. 100 traveler's cheques. The shopkeeper, having no change, gets cash for the cheques from his neighbor. He gives the tourist Rs. 50 change. Later, the neighbor discovers the cheques are counterfeit and demands his Rs. 400 back. The shopkeeper refunds him. How much money did the shopkeeper lose in total?",
+        "selected": "Skipped",
+        "correct_answer": "option3",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "What goes up but never comes down?",
+        "selected": "Skipped",
+        "correct_answer": [
+          "Age",
+          "age",
+          "AGE"
+        ],
+        "isCorrect": false,
+        "type": "Riddle",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "Find the missing",
+        "selected": "Skipped",
+        "correct_answer": "option4",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "Next term: 0, 3, 8, 15, 24, 35, ?",
+        "selected": "Skipped",
+        "correct_answer": "option1",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "Complete: 13, 21, 34, 55, 89, ?",
+        "selected": "Skipped",
+        "correct_answer": "option1",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "What is full of holes but still holds water?",
+        "selected": "Skipped",
+        "correct_answer": [
+          "Sponge",
+          "sponge",
+          "SPONGE"
+        ],
+        "isCorrect": false,
+        "type": "Riddle",
+        "positive_mark": 1,
+        "negative_mark": 0
+      }
+    ]
+  },
+  {
+    "teamId": "20",
+    "score": 0,
+    "timeTaken": 8737,
+    "quizStartTime": "2025-10-08T22:07:11.286Z",
+    "answeredQuestions": 0,
+    "totalQuestions": 10,
+    "status": "Completed",
+    "detailedAnswers": [
+      {
+        "question": "What comes next: 3, 7, 15, 31, 63, ?",
+        "selected": "Skipped",
+        "correct_answer": "option1",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "I have cities, but no houses. I have mountains, but no trees. I have water, but no fish. What am I?",
+        "selected": "Skipped",
+        "correct_answer": [
+          "Map",
+          "map",
+          "MAP"
+        ],
+        "isCorrect": false,
+        "type": "Riddle",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "Fill in the space",
+        "selected": "Skipped",
+        "correct_answer": "option3",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "A solid cube measuring 3 inches on each side is painted blue on all its faces. The cube is then cut into 27 smaller cubes, each measuring 1 inch on a side. How many of these smaller cubes have at least one painted face?",
+        "selected": "Skipped",
+        "correct_answer": "option3",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "A shopkeeper sells a bicycle for Rs. 350. The bicycle cost him Rs. 300. A tourist pays with four Rs. 100 traveler's cheques. The shopkeeper, having no change, gets cash for the cheques from his neighbor. He gives the tourist Rs. 50 change. Later, the neighbor discovers the cheques are counterfeit and demands his Rs. 400 back. The shopkeeper refunds him. How much money did the shopkeeper lose in total?",
+        "selected": "Skipped",
+        "correct_answer": "option3",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "What goes up but never comes down?",
+        "selected": "Skipped",
+        "correct_answer": [
+          "Age",
+          "age",
+          "AGE"
+        ],
+        "isCorrect": false,
+        "type": "Riddle",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "Find the missing",
+        "selected": "Skipped",
+        "correct_answer": "option4",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "Next term: 0, 3, 8, 15, 24, 35, ?",
+        "selected": "Skipped",
+        "correct_answer": "option1",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "Complete: 13, 21, 34, 55, 89, ?",
+        "selected": "Skipped",
+        "correct_answer": "option1",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "What is full of holes but still holds water?",
+        "selected": "Skipped",
+        "correct_answer": [
+          "Sponge",
+          "sponge",
+          "SPONGE"
+        ],
+        "isCorrect": false,
+        "type": "Riddle",
+        "positive_mark": 1,
+        "negative_mark": 0
+      }
+    ]
+  },
+  {
+    "teamId": "20",
+    "score": 0,
+    "timeTaken": 22219,
+    "quizStartTime": "2025-10-08T22:07:53.022Z",
+    "answeredQuestions": 0,
+    "totalQuestions": 5,
+    "status": "Completed",
+    "detailedAnswers": [
+      {
+        "question": "When the above is folded to form a cube, which is the only one of the following that can be produced?",
+        "selected": "Skipped",
+        "correct_answer": "option4",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 5,
+        "negative_mark": -3
+      },
+      {
+        "question": "Find the missing figure:",
+        "selected": "Skipped",
+        "correct_answer": "option4",
+        "isCorrect": false,
+        "type": "MCQ",
+        "positive_mark": 4,
+        "negative_mark": -3
+      },
+      {
+        "question": "In the below question the problem figures follow a specific series. Find the option which maintains the correct next series.",
+        "selected": "Skipped",
+        "correct_answer": "2",
+        "isCorrect": false,
+        "type": "Integer",
+        "positive_mark": 1,
+        "negative_mark": 0
+      },
+      {
+        "question": "What is the missing number in the sequence?\n10,100,20,90,30,80,...?",
+        "selected": "Skipped",
+        "correct_answer": "40",
+        "isCorrect": false,
+        "type": "Integer",
+        "positive_mark": 2,
+        "negative_mark": 0
+      },
+      {
+        "question": "I have many different faces, but I never show one. I am at the center of a puzzle, but I'm not a piece. What am I?",
+        "selected": "Skipped",
+        "correct_answer": [
+          "Answer",
+          "answer",
+          "ANSWER",
+          "An answer",
+          "an answer",
+          "AN ANSWER",
+          "The answer",
+          "the answer",
+          "THE ANSWER"
+        ],
+        "isCorrect": false,
+        "type": "Riddle",
+        "positive_mark": 3,
+        "negative_mark": 0
+      }
+    ]
   }
 ]

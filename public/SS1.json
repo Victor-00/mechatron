@@ -1,0 +1,127 @@
+{
+  "title": "The Starship Murder - Part 1: Investigation",
+  "sections": [
+    {
+      "type": "story_intro",
+      "paragraphs": [
+        "The Aurora's Promise drifted in silence, her engines humming like a heartbeat in the void. Aboard, panic spread like fire through dry grass—Elara, the lead researcher, had been found stabbed to death in her sealed containment at 9:46. You, summoned from Earth, stepped into a ship full of frightened faces and quiet secrets.",
+        "Your first stop was with the Protégé. A wiry young woman, sharp-eyed beyond her years, she kept her voice low as she spoke of her mentor. \"She was brilliant, yes… but ruthless. She was secretive and informative.\" Her gaze lingered on the floor, shadows of old questions flickering across her face. Later, someone whispered to you that she was an orphan, her parents dead under mysterious circumstances long before she joined the program. Strange, then, how she watched you with a mix of eagerness and suspicion—like someone holding back a personal vendetta, or perhaps old doubts about the hand her mentor may have played in her parents' fate. The Protégé, on the other hand, confessed a different unease: she seemed wary around the security guard. While talking with her, a soft shuffle in the corridor made it feel as though someone was listening in.",
+        "In the lower decks, the Security Guard leaned against the wall, his hands trembling as he lit a cigarette. \"Nothing to say, detective. I did my rounds, like always.\" Yet you noticed how he flinched when Elara's name was mentioned. His record wasn't clean—he had been arrested for smuggling goods in the past—and rumors of other misdeeds circled like vultures. When Elara was alive, she had a way of unearthing dirty pasts. As you weighed his words, the bathroom door creaked. The guard exhaled smoke and muttered, \"If you ask me, detective, that engineer—Dave—he's the one to watch. Doesn't talk, doesn't mingle. Sometimes he slips and says 'we' instead of 'I,' like he isn't alone in his own head. One moment he's puffing on a smoke like it's his best friend, the next he glares at me like I'm poison. Creeps me out more than anyone.\" Before you could respond, Bob stumbled in, muttering something about the \"wrong door,\" then vanished just as quickly. The guard cursed under his breath, shaking his head.",
+        "The engineer, Dave, kept mostly to himself. Quiet and diligent, he spent long hours in the engine bay, shaped by poverty and hardship. To most, he seemed harmless, but crew sometimes noticed odd quirks—switching hands mid-task, muttering under his breath, or flashing a sharpness that didn't match his usual timid demeanor. Once, when a heavy panel fell on his hand, he yelped, then straightened and smirked in a way that unnerved everyone—but later couldn't remember it. During a minor hull breach, alarms blared and panic spread, yet someone remembered a figure calmly moving among the chaos, smirking and giving quiet orders—certainly not the timid engineer they usually knew. Normally harmless, yet these flashes—and the gaps in his memory—hinted at a side of him that thrived where others faltered. Lately, he had also been watching the Captain with a wary eye, something about his calm control making Dave uneasy.",
+        "The Captain received you in his quarters with forced authority. His uniform was impeccable, but his eyes betrayed sleepless nights. \"She didn't like me,\" he admitted. \"Made that clear from day one. I was here to command; she wanted control.\" You later learned from the Protégé that Elara had dug into the Captain's past, because the Captain was her half-sister's husband and had been assigned the post without Elara's approval. A disaster, a shipwreck years ago—an error that cost lives but was quietly brushed under the carpet. Was that why he looked so relieved, almost lighter, since her death? Before you left, he leaned forward, lowering his voice. \"And that alien envoy… there's something off about him. In the meetings, he hides his hands under the table, or folds them away too neatly. Once, I could've sworn there was something… missing. Maybe I imagined it, but it unsettles me all the same.\"",
+        "In the observatory, the Alien envoy gazed out at the stars, his silhouette sharp against the glass. His voice was calm, melodic. \"Your kind rush to build, to burn, to consume. Elara was… difficult. She questioned our presence.\" You noticed his hands resting lightly on the railing, fingers splayed in an unfamiliar rhythm—four delicate fingers, perfectly balanced, moving with an elegance humans rarely managed. You heard whispers later from the engineers: he had tried, in vain, to contact his home world, his messages vanishing into static. Without his people's guidance, could his loyalty waver? Could Elara have stood in the way of whatever silent agenda he carried? Then, with an almost alien detachment, he murmured, \"Her sister… she carries silence like a blade. Among my kind, when one walks too softly, it means they are preparing to strike.\" A sudden clatter pulled your attention away. Bob crawled out of a maintenance hatch, covered in dust, muttering something about \"checking for echoes\" before vanishing again.",
+        "The Half-sister was found in the infirmary, tending to a scraped hand. Unlike Elara, who always commanded attention, she blended into the background. But the bitterness in her eyes told a different story. \"She had everything,\" she muttered. \"The admiration, the respect. Even Father favored her.\" Married to the Captain, yet always overshadowed by her younger sibling, she carried decades of resentment like a quiet storm. She added, almost casually, that two nights ago she had seen the Protégé at Elara's laptop, slipping away the moment she was spotted.",
+        "And then, of course, there was Bob. Just Bob. Always turning up in the wrong place at the wrong time—wandering into locked rooms, crawling out of hatches, or muttering excuses as he stumbled past. To most, he seemed harmless, almost comical. Yet somehow, wherever suspicion brewed, Bob wasn't far behind. Some crew joked quietly: \"He walks like he's using a 20cm ruler—each second, he covers exactly the same tiny stretch, never faster, never slower.\".",
+        "Piece by piece, the picture formed. A guard whose past still clung to him. A Captain carrying secrets best forgotten. A Protégé watching too closely, questions unspoken. A sister with old wounds that never healed. An alien whose words hid more than they revealed. And in the quiet corners, an engineer who was never quite the same man twice. And Bob—always there, drifting through locked doors and maintenance hatches, never doing much, yet somehow never far from the heart of suspicion.",
+        "On the Aurora's Promise, every face hid a reason. Elara had played her dangerous game of secrets for too long. Someone decided to end it.",
+        "And now it was your move."
+      ]
+    },
+    {
+      "type": "investigation",
+      "title": "INVESTIGATION",
+      "paragraphs": [
+        "You reached Elara's lab, the heart of her research. The room was immaculate, filled with softly glowing consoles and panels humming with low energy. At the centre of the workstation, your eyes fell on a small device, no larger than a deck of cards, pulsing faintly— her microcontroller, the \"NeuroCore 9X\".",
+        "Closer inspection revealed tampering. Wires were frayed, and a thin scorch mark ran across the circuit. Whoever had done this knew exactly what they were handling. The device still held promise: it contained logs of who had accessed her lab.",
+        "You carefully lifted it onto a diagnostic table. \"Time to see what you were hiding,\" you muttered, beginning to repair the NeuroCore 9X."
+      ]
+    }
+  ],
+  "image_note": "Aurora's Promise — Deck blueprint (schematic view). The diagram above is the ship's engineering blueprint used by the crew for routine work and by the detective as a map of possible movements and hiding spots.",
+  "logic_puzzles": {
+    "circuit_1": {
+        "description": "XOR gate expression: Y = ~AB + A~B, Fixed Inputs: A=1, B=0",
+        "options": {
+            "A": "Y = AND(A, NOT B) OR XOR(A, B)",
+            "B": "Y = AND(NOT A, B) AND NOT B",
+            "C": "Y = NAND(A,B) AND NOT A",
+            "D": "Y = OR(AND(A,B), NOT B)",
+            "E": "Y = AND(A, NAND(A,B))",
+            "F": "Y = NOR(A,B) AND XOR(A,B)",
+            "G": "Y = NAND(A, OR(A,B))",
+            "H": "Y = AND(NOT(A XOR B), B)",
+            "I": "Y = OR(AND(A,B), NOT A)",
+            "J": "Y = NAND(A, NAND(A,B))",
+            "K": "Y = OR(NOT A, AND(A,B)) AND NOT B",
+            "L": "Y = AND(A, (B OR A))",
+            "M": "Y = NOR(A,B) OR (A AND B)",
+            "N": "Y = AND(A, NOT(A OR B))",
+            "O": "Y = NAND(XOR(A,B), OR(A,B))",
+            "P": "Y = AND(A, AND(A,B))",
+            "Q": "Y = OR(A XOR B, NOT B) AND NOT A",
+            "R": "Y = AND(A, NAND(A,B))",
+            "S": "Y = AND(NOR(A,B), NOT B)",
+            "T": "Y = NAND(A, XOR(B,A))",
+            "U": "Y = AND(A, NOT B) AND NOT(A XOR B)",
+            "V": "Y = OR(AND(A, NOT B), B XOR A)",
+            "X": "Y = NAND(OR(A,B), NOT(A AND B))",
+            "Y": "Y = XOR(NOT A, B) AND NOT B",
+            "Z": "Y = AND(A, NOT(B XOR A))"
+        }
+    },
+    "circuit_2": {
+      "description": "Fixed inputs: A=1, B=0",
+      "options": {
+        "A": "Y = AND(A, NOT B) OR XOR(A,B)",
+        "B": "Y = AND(NOT A, B) AND NOT B",
+        "C": "Y = NAND(A,B) AND NOT A",
+        "D": "Y = OR(AND(A,B), NOT B)",
+        "E": "Y = AND(A, NAND(A,B))",
+        "F": "Y = NOR(A,B) AND XOR(A,B)",
+        "G": "Y = NAND(A, OR(A,B))",
+        "H": "Y = AND(NOT(A XOR B), B)",
+        "I": "Y = AND(NAND(A,B), NOT A)",
+        "J": "Y = NAND(A, NAND(A,B))",
+        "K": "Y = OR(NOT A, AND(A,B)) AND NOT B",
+        "L": "Y = AND(A, NOT(B OR A))",
+        "M": "Y = NOR(A,B) OR (A AND B)",
+        "N": "Y = AND(A, NOT(A OR B))",
+        "O": "Y = NAND(XOR(A,B), OR(A,B))",
+        "P": "Y = NAND(A, AND(A,B))",
+        "Q": "Y = OR(A XOR B, NOT B) AND NOT A",
+        "R": "Y = AND(A, NOR(A,B))",
+        "S": "Y = AND(NOR(A,B), NOT B)",
+        "T": "Y = NAND(A, XOR(B,A))",
+        "U": "Y = AND(A, NOT B) AND NOT(A XOR B)",
+        "V": "Y = OR(AND(A, NOT B), B XOR A)",
+        "W": "Y = NOR(A,B) AND (A XOR B)",
+        "X": "Y = NAND(OR(A,B), NOT(A AND B))",
+        "Y": "Y = XOR(NOT A, B) AND NOT B",
+        "Z": "Y = AND(A, NOT(B XOR A))"
+      }
+    },
+    "circuit_3": {
+      "description": "Circuit 3 with various input combinations",
+      "options": {
+        "A": "Y = AND(NOT A, B), A=1, B=1",
+        "B": "Y = AND(A, B), A=1, B=1",
+        "C": "Y = NAND(A, B) AND NOT A, A=1, B=1",
+        "D": "Y = AND(NAND(A,B), NOT(B OR A)), A=1, B=0",
+        "E": "Y = NAND(NOT(A XOR B), B AND A), A=1, B=1",
+        "F": "Y = OR(NAND(A,B), NOT A) AND B, A=1, B=1",
+        "G": "Y = AND(NOR(A,B), XOR(A,B)), A=0, B=1",
+        "H": "Y = NAND(A, OR(A,B)) AND NOT B, A=1, B=1",
+        "I": "Y = AND(NOT A, NOR(A,B)), A=1, B=0",
+        "J": "Y = AND(A, NAND(A,B)) AND NOT B, A=1, B=1",
+        "K": "Y = NOR(A,B) AND NOT(A OR B), A=1, B=0",
+        "L": "Y = NAND(NOT(A XOR B), B), A=1, B=1",
+        "M": "Y = AND(NAND(A,B), NOR(A,B)), A=1, B=1",
+        "N": "Y = AND(NOT A, NOT(B OR A)), A=1, B=1",
+        "O": "Y = AND(A, NOT B), A=1, B=0",
+        "P": "Y = NAND(A, OR(A,B)) AND NOT(A XOR B), A=1, B=1",
+        "Q": "Y = AND(NOT(A OR B), B XOR A), A=0, B=1",
+        "R": "Y = NAND(NAND(A,B), NOT(A AND B)), A=1, B=0",
+        "S": "Y = NOR(A,B) AND AND(A,B), A=1, B=1",
+        "T": "Y = AND(NOT(A XOR B), NOR(A,B)), A=1, B=0",
+        "U": "Y = AND(NAND(A,B), NOT(A XOR B)), A=1, B=0",
+        "V": "Y = AND(NOT A, NOT B) AND NAND(A,B), A=1, B=0",
+        "W": "Y = NOR(A,B) AND AND(NOT A, B), A=1, B=1",
+        "X": "Y = AND(NOT(A OR B), NAND(A,B)), A=1, B=1",
+        "Y": "Y = AND(NOT(A XOR B), NOT(A AND B)), A=0, B=1",
+        "Z": "Y = AND(NOT A, B AND A), A=1, B=0"
+      }
+    }
+  }
+}
+
+

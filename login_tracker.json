@@ -1,4 +1,24 @@
 {
   "loggedInTeams": [
+    {
+      "teamId": "20",
+      "regNum": "123456",
+      "loginTime": "2025-10-09T06:47:28.867Z",
+      "quizStartTime": null,
+      "marks": null,
+      "endTime": null,
+      "timeTaken": null,
+      "answers": []
+    },
+    {
+      "teamId": "18",
+      "regNum": "123456",
+      "loginTime": "2025-10-08T22:27:22.840Z",
+      "quizStartTime": null,
+      "marks": null,
+      "endTime": null,
+      "timeTaken": null,
+      "answers": []
+    }
   ]
 }

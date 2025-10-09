@@ -1,0 +1,33 @@
+{
+  "paper": "1A",
+  "questions": [
+    [{
+      "question": "Who are the suspects with evidence?",
+      "type": "Riddle"
+    },
+    {
+      "question": "Provide proof/evidence supporting your claim",
+      "type": "Riddle"
+    }],
+    
+
+    [{
+      "question": "Who's the hand that did the killing?",
+      "type": "Riddle"
+    },
+    {
+      "question": "How do you prove it?",
+      "type": "Riddle"
+    }],
+
+
+    [{
+      "question": "Who's the accomplice?",
+      "type": "Riddle"
+    },
+    {
+      "question": "State your proof",
+      "type": "Riddle"
+    }]
+  ]
+}

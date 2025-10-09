@@ -41,7 +41,7 @@
         }
         .resume-button:hover { transform: scale(1.05); }
         .quiz-wrapper {
-            width: 90%; max-width: 1200px; display: grid; grid-template-columns: 1fr 1fr;
+            width: 90%; max-width: 1200px; display: none; grid-template-columns: 1fr 1fr;
             grid-template-rows: auto 1fr; gap: 20px;
             grid-template-areas: "meta timer" "main menu";
         }
@@ -57,41 +57,32 @@
         .timer-box h2 { margin: 0; font-size: 1.5rem; color: var(--primary-color); }
         #quiz-timer { font-weight: 700; font-size: 1.8rem; }
         .quiz-container { grid-area: main; display: flex; flex-direction: column; }
-        #question-counter { font-size: 1rem; font-weight: 600; color: var(--dark-grey); }
+        #main-content-area { flex-grow: 1; overflow-y: auto; }
         
-        #question-marks {
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: var(--dark-grey);
+        #story-paragraphs {
+            max-height: 50vh;
+            overflow-y: auto;
+            text-align: left;
+            padding-right: 15px;
         }
-        #question-marks .positive { color: var(--success-color); }
-        #question-marks .negative { color: var(--danger-color); }
-
-        #question-image-container {
-            width: 100%;
-            max-height: 250px;
-            margin-bottom: 20px;
-            display: none;
-            justify-content: center;
+        #logic-puzzle-area {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 15px;
+        }
+        .logic-puzzle-item {
+            display: flex;
             align-items: center;
+            margin-bottom: 8px;
+            gap: 10px;
         }
-        #question-image-container img {
-            max-width: 100%;
-            max-height: 100%;
-            border-radius: 15px;
-            object-fit: contain;
+        .logic-puzzle-item label {
+            flex: 1;
+            font-weight: 500;
         }
 
-        .question-text { font-size: 1.4rem; font-weight: 600; margin-bottom: 25px; flex-grow: 1; }
-        .options-list { list-style: none; padding: 0; margin: 0 0 25px 0; }
-        .option-item { background: var(--light-grey); padding: 15px; margin-bottom: 12px; border-radius: 12px; border: 2px solid transparent; cursor: pointer; transition: all 0.2s ease-in-out; display: flex; align-items: center; justify-content: center; }
-        .option-item:hover { border-color: var(--primary-color); transform: translateY(-2px); }
-        .option-item.selected { background-color: var(--primary-color); color: var(--text-light); border-color: var(--primary-color); font-weight: 600; }
-        .option-item img { max-width: 100%; max-height: 80px; border-radius: 8px; }
-        
-        #riddle-answer-container { margin-bottom: 25px; }
-        #riddle-answer { 
+        .answer-input-container { margin-bottom: 25px; }
+        .answer-input { 
             width: 100%; 
             padding: 15px; 
             border-radius: 12px; 
@@ -101,20 +92,14 @@
             box-sizing: border-box;
         }
 
-        .control-buttons { display: flex; gap: 15px; margin-top: auto; }
+        .control-buttons { display: flex; gap: 15px; margin-top: auto; padding-top: 20px; }
         .control-button { padding: 12px 24px; border-radius: 12px; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; transition: all 0.2s ease; flex-grow: 1; }
         .control-button:hover { transform: scale(1.05); }
-        #skip-button { background-color: var(--warning-color); color: var(--text-light); }
-        #clear-button { background-color: var(--danger-color); color: var(--text-light); }
-        #next-button { background-color: var(--success-color); color: var(--text-light); }
         .menu-container { grid-area: menu; }
         .menu-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 20px; color: var(--primary-color); }
-        .dice-menu { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 15px; }
-        .menu-dice { width: 90%; aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; border-radius: 10px; cursor: pointer; transition: all 0.3s ease; border: 2px solid var(--light-grey); background-color: #fff; }
-        .menu-dice:not(.answered):not(.skipped):hover { border-color: var(--primary-color); color: var(--primary-color); }
+        .dice-menu { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 15px; }
+        .menu-dice { width: 100%; padding: 15px 5px; aspect-ratio: auto; display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: bold; border-radius: 10px; cursor: pointer; transition: all 0.3s ease; border: 2px solid var(--light-grey); background-color: #fff; }
         .menu-dice.active { border-color: var(--primary-color); transform: scale(1.1); box-shadow: 0 0 15px rgba(109, 40, 217, 0.5); }
-        .menu-dice.answered { background-color: var(--success-color); color: white; border-color: var(--success-color); }
-        .menu-dice.skipped { background-color: var(--danger-color); color: white; border-color: var(--danger-color); }
         
         #click-prompt-overlay {
             position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.5); z-index: 2000;
@@ -144,18 +129,9 @@
             <div class="info-box meta-data"><h2>Team ID</h2><span id="team-id">Loading...</span></div>
             <div class="info-box timer-box"><h2>Time Left</h2><span id="quiz-timer">15:00</span></div>
             <div class="quiz-container">
-                <div id="question-counter">Question 1/5</div>
-                <div id="question-marks">Marks: +1</div>
-                <div id="question-image-container"></div>
-                <h3 class="question-text" id="question-text">Loading question...</h3>
-                <ul id="options-list" class="options-list"></ul>
-                <div id="riddle-answer-container" style="display: none;">
-                    <input type="text" id="riddle-answer" placeholder="Type your answer here...">
-                </div>
+                <div id="main-content-area"></div>
                 <div class="control-buttons">
-                    <button id="skip-button" class="control-button">Skip</button>
-                    <button id="clear-button" class="control-button" style="display:none;">Clear Choice</button>
-                    <button id="next-button" class="control-button">Next</button>
+                    <button class="control-button" id="finish-quiz-btn" style="background-color: var(--success-color);">Finish Quiz</button>
                 </div>
             </div>
             <div class="menu-container"><h4 class="menu-title">Question Menu</h4><div id="dice-menu" class="dice-menu"></div></div>
@@ -168,6 +144,10 @@
       const clickPrompt = document.getElementById('click-prompt-overlay');
       const contentWrapper = document.querySelector('.content-wrapper');
       const quizWrapper = document.querySelector('.quiz-wrapper');
+      const mainContentArea = document.getElementById('main-content-area');
+      const diceMenu = document.getElementById('dice-menu');
+      const teamIdDisplay = document.getElementById('team-id');
+      const quizTimerDisplay = document.getElementById('quiz-timer');
       
       const overlays = {
           warning1: document.getElementById('warning-1'),
@@ -175,32 +155,19 @@
       };
       
       document.querySelectorAll('.resume-button').forEach(btn => btn.addEventListener('click', resumeFromWarning));
-      
-      const questionText = document.getElementById('question-text');
-      const optionsList = document.getElementById('options-list');
-      const questionCounter = document.getElementById('question-counter');
-      const questionMarks = document.getElementById('question-marks');
-      const quizTimerDisplay = document.getElementById('quiz-timer');
-      const teamIdDisplay = document.getElementById('team-id');
-      const diceMenu = document.getElementById('dice-menu');
-      const skipButton = document.getElementById('skip-button');
-      const nextButton = document.getElementById('next-button');
-      const clearButton = document.getElementById('clear-button');
-      const imageContainer = document.getElementById('question-image-container');
-      const riddleContainer = document.getElementById('riddle-answer-container');
-      const riddleInput = document.getElementById('riddle-answer');
 
-      let questions = [];
-      let currentQuestionIndex = 0;
-      let score = 0;
       let quizTimer;
       let quizStartTime;
       let quizHasEnded = false;
       let teamId = '';
       let violationCount = 0;
       let warningInProgress = false;
-      let timeLeft = 900; // 15 minutes in seconds
-      let initialWidth, initialHeight;
+      let timeLeft = 900;
+
+      // Special Round variables
+      let isSpecialRound = false;
+      let storyData = null;
+      let currentViewIndex = -1; // -1: story, -2: puzzles
 
       teamId = localStorage.getItem('currentTeamId');
       if (!teamId) {
@@ -220,8 +187,6 @@
                   console.error(`Fullscreen request failed: ${err.message} (${err.name})`);
               });
           }
-          initialWidth = window.screen.width;
-          initialHeight = window.screen.height;
           activateSecurityListeners();
           fetchQuestions();
       }
@@ -241,10 +206,8 @@
           function handleViolation() {
               if (quizHasEnded || warningInProgress) return;
               warningInProgress = true;
-
               violationCount++;
               pauseTimer();
-
               if (violationCount === 1) overlays.warning1.style.display = 'flex';
               else if (violationCount === 2) overlays.warning2.style.display = 'flex';
               else {
@@ -252,28 +215,9 @@
                   endQuiz({ reason: 'violation_limit' });
               }
           }
-
           document.addEventListener('visibilitychange', () => { if (document.hidden) handleViolation(); });
           window.addEventListener('blur', handleViolation);
-          
-          document.addEventListener('fullscreenchange', () => {
-              if (!document.fullscreenElement && !quizHasEnded) {
-                  handleViolation();
-              }
-          });
-          
-          window.addEventListener('resize', () => {
-            if (quizHasEnded || !initialWidth || !initialHeight) return;
-            if (window.innerWidth < (initialWidth * 0.6) || window.innerHeight < (initialHeight * 0.6)) {
-                alert("Cheating detected. Splitting the screen is not allowed.");
-                endQuiz({ reason: 'violation_limit' });
-            }
-          });
-          
-          document.addEventListener('contextmenu', (e) => e.preventDefault());
-          const disableEvent = (e) => e.preventDefault();
-          ['copy', 'paste', 'cut'].forEach(event => document.addEventListener(event, disableEvent));
-          document.addEventListener('keydown', (e) => { if (!quizHasEnded && (e.key === 'F5' || (e.ctrlKey && e.key === 'r'))) { e.preventDefault(); } });
+          document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && !quizHasEnded) handleViolation(); });
       }
       
       function pauseTimer() { clearInterval(quizTimer); }
@@ -286,37 +230,39 @@
           if (timeLeft <= 0) { clearInterval(quizTimer); endQuiz(); }
         }, 1000);
       }
-      function startTimer() { timeLeft = 900; resumeTimer(); }
+      function startTimer(duration) { timeLeft = duration; resumeTimer(); }
       
       async function endQuiz(options = {}) {
         if (quizHasEnded) return;
         quizHasEnded = true;
         pauseTimer();
+        saveCurrentViewAnswers(); 
 
-        calculateScore();
-        const timeTakenMs = Date.now() - quizStartTime;
-        const totalPossibleMarks = questions.reduce((acc, q) => acc + (q.positive_mark || 1), 0);
+        const puzzleAnswers = [];
+        if(storyData.logic_puzzles && storyData.logic_puzzles.userAnswers){
+            for(const key in storyData.logic_puzzles.userAnswers){
+                puzzleAnswers.push({
+                    question: `Logic Puzzle: ${key}`,
+                    selected: storyData.logic_puzzles.userAnswers[key] || "Not Answered"
+                });
+            }
+        }
         
+        const timeTakenMs = Date.now() - quizStartTime;
+        const quizStartTimeISO = new Date(quizStartTime).toISOString();
+
         const submissionData = {
-          teamId: teamId, 
-          score: score, 
-          timeTaken: timeTakenMs,
-          answeredQuestions: questions.filter(q => q.answered).length, 
-          totalQuestions: questions.length, 
-          status: 'Completed'
+          teamId, 
+          score: 0, // No score for this round type
+          timeTaken: timeTakenMs, 
+          quizStartTime: quizStartTimeISO,
+          status: 'Completed', 
+          detailedAnswers: puzzleAnswers
         };
         
-        if (options.reason === 'violation_limit') {
-            submissionData.status = 'Terminated - Cheating Detected';
-        }
+        if (options.reason === 'violation_limit') submissionData.status = 'Terminated - Cheating Detected';
 
-        localStorage.setItem('quizResults', JSON.stringify({
-          teamId: teamId, 
-          score: score, 
-          totalQuestions: questions.length, 
-          timeTaken: timeTakenMs,
-          totalMarks: totalPossibleMarks
-        }));
+        localStorage.setItem('quizResults', JSON.stringify({ teamId, score: 0, timeTaken: timeTakenMs }));
         
         try {
             await fetch('submit-quiz', {
@@ -338,222 +284,94 @@
           }
           const data = await response.json(); 
 
-          if (!data || !Array.isArray(data.questions)) {
-            throw new Error("The question data received from the server is not a valid list.");
+          if (data.isSpecialRound) {
+              isSpecialRound = true;
+              storyData = data.storyData;
+              startTimer(data.timeLimit || 900);
+              setupSpecialRoundLayout();
+          } else {
+             alert("This round format is not yet supported.");
           }
-          
-          questions = data.questions;
-          questions.forEach(q => { q.answered = false; q.skipped = false; q.selected = null; }); 
-          startQuiz(); 
         } catch (error) { 
           console.error('Failed to fetch questions:', error); 
-          questionText.textContent = 'Error: Could not load quiz questions.'; 
+          mainContentArea.innerHTML = '<h2>Error: Could not load quiz questions.</h2>'; 
           alert('Failed to load questions: ' + error.message);
         } 
       }
+      
+      function setupSpecialRoundLayout() {
+        diceMenu.innerHTML = '';
+        const items = ['Story', 'Logic Puzzles'];
+        const viewIndexes = [-1, -2];
 
-      function startQuiz() { renderDiceMenu(); renderQuestion(); startTimer(); }
+        items.forEach((item, i) => {
+            const dice = document.createElement('div');
+            dice.textContent = item;
+            dice.classList.add('menu-dice');
+            dice.onclick = () => showView(viewIndexes[i]);
+            diceMenu.appendChild(dice);
+        });
+        
+        document.getElementById('finish-quiz-btn').onclick = () => {
+            if(confirm("Are you sure you want to finish and submit your answers?")) endQuiz();
+        }
+        
+        showView(-1);
+      }
 
-      function renderQuestion() { 
-          document.querySelectorAll('.menu-dice').forEach(dice => dice.classList.remove('active')); 
-          document.getElementById(`dice-${currentQuestionIndex}`).classList.add('active'); 
-          const currentQuestion = questions[currentQuestionIndex]; 
-          questionCounter.textContent = `Question ${currentQuestionIndex + 1} / ${questions.length}`; 
-          
-          const pos = currentQuestion.positive_mark || 1;
-          const neg = currentQuestion.negative_mark || 0;
-          questionMarks.innerHTML = `Marks: <span class="positive">+${pos}</span> / <span class="negative">-${neg}</span>`;
-
-          imageContainer.innerHTML = '';
-          if (currentQuestion.image) {
-              const img = document.createElement('img');
-              img.src = `images/${currentQuestion.image}`;
-              img.alt = `Question ${currentQuestionIndex + 1} Image`;
-              imageContainer.appendChild(img);
-              imageContainer.style.display = 'flex';
-          } else {
-              imageContainer.style.display = 'none';
-          }
-
-          questionText.textContent = currentQuestion.question; 
-          
-          optionsList.innerHTML = '';
-          optionsList.style.display = 'none';
-          riddleContainer.style.display = 'none';
-
-          if (currentQuestion.type === 'MCQ') {
-              optionsList.style.display = 'block';
-              
-              const options = ['option1', 'option2', 'option3', 'option4']
-                  .filter(key => currentQuestion[key])
-                  .map(key => ({ key, value: currentQuestion[key] }));
-
-              options.forEach(opt => { 
-                  const li = document.createElement('li'); 
-                  li.classList.add('option-item'); 
-                  li.dataset.key = opt.key;
-
-                  if (opt.value.toLowerCase().endsWith('.png')) {
-                      const img = document.createElement('img');
-                      img.src = `images/${opt.value}`;
-                      li.appendChild(img);
-                  } else {
-                      li.textContent = opt.value; 
+      function saveCurrentViewAnswers() {
+          if (currentViewIndex === -2) { // Logic Puzzle
+              if (!storyData.logic_puzzles.userAnswers) storyData.logic_puzzles.userAnswers = {};
+              for (const circuitKey in storyData.logic_puzzles) {
+                  if (circuitKey === 'userAnswers') continue;
+                  for (const optionKey in storyData.logic_puzzles[circuitKey].options) {
+                      const input = document.getElementById(`logic-${circuitKey}-${optionKey}`);
+                      if (input) storyData.logic_puzzles.userAnswers[`${circuitKey}-${optionKey}`] = input.value;
                   }
-                  
-                  if (currentQuestion.selected === opt.key) {
-                      li.classList.add('selected');
-                  }
-
-                  li.onclick = () => selectOption(opt.key); 
-                  optionsList.appendChild(li); 
-              });
-
-          } else if (currentQuestion.type === 'Riddle' || currentQuestion.type === 'Integer') {
-              riddleContainer.style.display = 'block';
-              riddleInput.value = currentQuestion.selected || '';
-              if (currentQuestion.type === 'Integer') {
-                  riddleInput.type = 'number';
-                  riddleInput.placeholder = 'Type your numerical answer here...';
-              } else {
-                  riddleInput.type = 'text';
-                  riddleInput.placeholder = 'Type your answer here...';
-              }
-          }
-          
-          updateButtonStates();
-      }
-
-      function selectOption(key) { 
-          const currentQuestion = questions[currentQuestionIndex];
-          currentQuestion.selected = key; 
-          currentQuestion.answered = true; 
-          
-          Array.from(optionsList.children).forEach(li => { 
-              li.classList.toggle('selected', li.dataset.key === key); 
-          }); 
-          
-          updateButtonStates();
-          updateDiceStatus(); 
-      }
-      
-      function clearChoice() { 
-          const currentQuestion = questions[currentQuestionIndex]; 
-          currentQuestion.selected = null; 
-          currentQuestion.answered = false; 
-          Array.from(optionsList.children).forEach(li => li.classList.remove('selected')); 
-          riddleInput.value = '';
-          updateButtonStates(); 
-          updateDiceStatus(); 
-      }
-      
-      function skipQuestion() { 
-          questions[currentQuestionIndex].skipped = true; 
-          questions[currentQuestionIndex].answered = false;
-          questions[currentQuestionIndex].selected = null;
-          updateDiceStatus(); 
-          goToNextQuestion(); 
-      }
-
-      function handleNextClick() {
-          const currentQuestion = questions[currentQuestionIndex];
-          const isInputType = currentQuestion.type === 'Riddle' || currentQuestion.type === 'Integer';
-
-          if(isInputType && riddleInput.value.trim() !== '') {
-              currentQuestion.selected = riddleInput.value.trim();
-              currentQuestion.answered = true;
-          } else if (isInputType && riddleInput.value.trim() === '') {
-              currentQuestion.answered = false;
-          }
-          
-          updateDiceStatus();
-          goToNextQuestion();
-      }
-      
-      function goToNextQuestion() {
-          const next = questions.findIndex((q, i) => !q.answered && !q.skipped && i > currentQuestionIndex); 
-          if (next !== -1) { 
-              currentQuestionIndex = next; 
-              renderQuestion(); 
-          } else { 
-              const firstUnanswered = questions.findIndex((q, i) => !q.answered && !q.skipped);
-              if (firstUnanswered !== -1) {
-                  currentQuestionIndex = firstUnanswered;
-                  renderQuestion();
-              } else {
-                 endQuiz(); 
               }
           }
       }
 
-      function updateButtonStates() {
-          const currentQuestion = questions[currentQuestionIndex];
-          const isInputType = currentQuestion.type === 'Riddle' || currentQuestion.type === 'Integer';
-          const isAnswered = currentQuestion.answered || (isInputType && riddleInput.value.trim());
+      function showView(index) {
+          saveCurrentViewAnswers();
+          currentViewIndex = index;
+          
+          document.querySelectorAll('.menu-dice').forEach(dice => dice.classList.remove('active'));
+          let activeDiceIndex = index === -1 ? 0 : 1;
+          if(diceMenu.children[activeDiceIndex]) diceMenu.children[activeDiceIndex].classList.add('active');
 
-          clearButton.style.display = isAnswered ? 'block' : 'none';
-          skipButton.style.display = !isAnswered ? 'block' : 'none';
-          nextButton.style.display = 'block';
-      }
-
-      function renderDiceMenu() { 
-          diceMenu.innerHTML = ''; 
-          questions.forEach((q, i) => { 
-              const dice = document.createElement('div'); 
-              dice.classList.add('menu-dice'); 
-              dice.id = `dice-${i}`; 
-              dice.textContent = i + 1; 
-              dice.addEventListener('click', () => { 
-                  currentQuestionIndex = i; 
-                  renderQuestion(); 
-              }); 
-              diceMenu.appendChild(dice); 
-          }); 
+          let mainContent = '';
+          if (index === -1) { // Story View
+              mainContent = `
+                <h2 style="color: var(--primary-color);">${storyData.title || "Story"}</h2>
+                <div id="story-paragraphs">${(storyData.sections || []).flatMap(s => s.paragraphs).map(p => `<p>${p}</p>`).join('')}</div>
+                <p style="font-style: italic; font-size: 0.9rem;">${storyData.image_note || ""}</p>`;
+          } else if (index === -2) { // Logic Puzzle View
+              let puzzleHTML = `<h2 style="color: var(--primary-color);">Logic Puzzles</h2><div id="logic-puzzle-area">`;
+              for (const circuitKey in storyData.logic_puzzles) {
+                  if (circuitKey === 'userAnswers') continue;
+                  const circuit = storyData.logic_puzzles[circuitKey];
+                  puzzleHTML += `<h3 style="margin-top: 20px;">${circuit.description}</h3>`;
+                  for (const optionKey in circuit.options) {
+                      const savedAnswer = (storyData.logic_puzzles.userAnswers && storyData.logic_puzzles.userAnswers[`${circuitKey}-${optionKey}`]) || '';
+                      puzzleHTML += `<div class="logic-puzzle-item">
+                                      <label for="logic-${circuitKey}-${optionKey}">${optionKey}: ${circuit.options[optionKey]}</label>
+                                      <input type="text" id="logic-${circuitKey}-${optionKey}" value="${savedAnswer}" class="answer-input" style="width: 150px;">
+                                    </div>`;
+                  }
+              }
+              puzzleHTML += `</div>`;
+              mainContent = puzzleHTML;
+          }
+          
+          mainContentArea.innerHTML = mainContent;
       }
       
-      function updateDiceStatus() { 
-          questions.forEach((q, i) => { 
-              const dice = document.getElementById(`dice-${i}`); 
-              dice.classList.remove('answered', 'skipped'); 
-              if (q.answered) dice.classList.add('answered'); 
-              else if (q.skipped) dice.classList.add('skipped'); 
-          }); 
-      }
-      
-      function calculateScore() {
-        score = questions.reduce((acc, q) => {
-            if (q.answered && q.selected) {
-                let isCorrect = false;
-                if (q.type === 'MCQ' && q.selected === q.correct_answer) {
-                    isCorrect = true;
-                }
-                if (q.type === 'Riddle' && Array.isArray(q.correct_answer)) {
-                    const correctAnswers = q.correct_answer.map(ans => ans.toLowerCase());
-                    if (correctAnswers.includes(q.selected.toLowerCase())) {
-                       isCorrect = true;
-                    }
-                }
-                if (q.type === 'Integer') {
-                    if (String(q.selected) === String(q.correct_answer)) {
-                        isCorrect = true;
-                    }
-                }
+      window.showView = showView;
 
-                if (isCorrect) {
-                    return acc + (q.positive_mark || 1);
-                } else {
-                    return acc - (q.negative_mark || 0);
-                }
-            }
-            return acc;
-        }, 0);
-      }
-      
-      skipButton.addEventListener('click', skipQuestion); 
-      nextButton.addEventListener('click', handleNextClick); 
-      clearButton.addEventListener('click', clearChoice);
     });
   </script>
 </body>
 </html>
+
 
