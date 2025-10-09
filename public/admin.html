@@ -358,6 +358,16 @@
                 </div>
             </div>
 
+            <div class="control-group">
+                <h3 style="margin-bottom: 15px; color: #667eea;">Round 1 Navigation</h3>
+                <div class="controls" style="align-items: center; margin-bottom: 0;">
+                    <button class="primary action-btn" onclick="forceView('story')">Force to Story</button>
+                    <button class="primary action-btn" onclick="forceView('puzzles')">Force to Logic Puzzles</button>
+                    <button class="primary action-btn" onclick="forceView('qb1')">Force to QB1</button>
+                    <button class="primary action-btn" onclick="forceView('qb2')">Force to QB2</button>
+                </div>
+            </div>
+
             <h2 style="margin-top: 30px;">Team Selection</h2>
             <div class="controls" style="align-items: center;">
                 <input type="text" id="team-ids" placeholder="Team IDs (e.g., TEAM_ID_1,TEAM_ID_2)">
@@ -518,6 +528,17 @@
                 if(data.success) { showMessage('Start signal sent! Users will be redirected for 2 minutes.', 'success'); } 
                 else { showMessage('Failed to send start signal.', 'error'); }
             }).catch(err => showMessage('Error sending start signal.', 'error'));
+        }
+
+        function forceView(view) {
+            fetch('/admin/force-view', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ view: view })
+            }).then(res => res.json()).then(data => {
+                if(data.success) showMessage(data.message, 'success');
+                else showMessage(data.message, 'error');
+            }).catch(err => showMessage('Error sending force view command.', 'error'));
         }
 
         function toggleSelectAll() {

@@ -18,6 +18,7 @@ let resultsPublished = false;
 let activeRound = 'round1';
 let forceRedirectToLogin = false;
 let startQuizSignal = false;
+let forceViewTarget = null; // New state for Round 1 navigation
 
 // CORS configuration
 const corsOptions = {
@@ -132,6 +133,7 @@ app.get('/api/status', (req, res) => res.json({ success: true, activeRound, resu
 app.get('/api/results-status', (req, res) => res.json({ published: resultsPublished }));
 app.get('/api/redirect-status', (req, res) => res.json({ redirect: forceRedirectToLogin }));
 app.get('/api/start-quiz-status', (req, res) => res.json({ start: startQuizSignal }));
+app.get('/api/view-status', (req, res) => res.json({ view: forceViewTarget }));
 
 app.post('/login', (req, res) => {
     const { teamId, regNum } = req.body;
@@ -231,7 +233,6 @@ app.post('/submit-quiz', (req, res) => {
     res.json({ success: true, message: 'Quiz submitted successfully' });
 });
 
-// ... (rest of the admin routes and server setup remain the same)
 // ============================================
 // ADMIN ROUTES (Login and Protected)
 // ============================================
@@ -294,6 +295,22 @@ app.get('/admin/export', authMiddleware, async (req, res) => {
     } catch (error) {
         console.error('Error exporting data:', error);
         res.status(500).send('Error generating Excel file');
+    }
+});
+
+app.post('/admin/force-view', authMiddleware, (req, res) => {
+    const { view } = req.body;
+    const validViews = ['story', 'puzzles', 'qb1', 'qb2'];
+    if (view && validViews.includes(view)) {
+        forceViewTarget = view;
+        console.log(`Force view signal set to: ${forceViewTarget}`);
+        setTimeout(() => {
+            forceViewTarget = null;
+            console.log('Force view signal reset.');
+        }, 5000); 
+        res.json({ success: true, message: `Signal sent to force view to ${view}.` });
+    } else {
+        res.status(400).json({ success: false, message: 'Invalid view target.' });
     }
 });
 

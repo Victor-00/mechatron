@@ -1333,5 +1333,338 @@
         "negative_mark": 0
       }
     ]
+  },
+  {
+    "teamId": "20",
+    "score": 0,
+    "timeTaken": 11397,
+    "quizStartTime": "2025-10-09T07:14:02.502Z",
+    "status": "Completed",
+    "detailedAnswers": [
+      {
+        "question": "Block 1 - Q1: Who are the suspects with evidence?",
+        "selected": "Skipped"
+      },
+      {
+        "question": "Block 1 - Q2: Provide proof/evidence supporting your claim",
+        "selected": "Skipped"
+      },
+      {
+        "question": "Block 2 - Q1: Who's the hand that did the killing?",
+        "selected": "Skipped"
+      },
+      {
+        "question": "Block 2 - Q2: How do you prove it?",
+        "selected": "Skipped"
+      },
+      {
+        "question": "Logic Puzzle: circuit_1-A",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_1-B",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_1-C",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_1-D",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_1-E",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_1-F",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_1-G",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_1-H",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_1-I",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_1-J",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_1-K",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_1-L",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_1-M",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_1-N",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_1-O",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_1-P",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_1-Q",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_1-R",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_1-S",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_1-T",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_1-U",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_1-V",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_1-X",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_1-Y",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_1-Z",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_2-A",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_2-B",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_2-C",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_2-D",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_2-E",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_2-F",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_2-G",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_2-H",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_2-I",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_2-J",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_2-K",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_2-L",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_2-M",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_2-N",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_2-O",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_2-P",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_2-Q",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_2-R",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_2-S",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_2-T",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_2-U",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_2-V",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_2-W",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_2-X",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_2-Y",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_2-Z",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_3-A",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_3-B",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_3-C",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_3-D",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_3-E",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_3-F",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_3-G",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_3-H",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_3-I",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_3-J",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_3-K",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_3-L",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_3-M",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_3-N",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_3-O",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_3-P",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_3-Q",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_3-R",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_3-S",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_3-T",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_3-U",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_3-V",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_3-W",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_3-X",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_3-Y",
+        "selected": "Not Answered"
+      },
+      {
+        "question": "Logic Puzzle: circuit_3-Z",
+        "selected": "Not Answered"
+      }
+    ]
   }
 ]

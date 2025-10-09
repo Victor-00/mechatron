@@ -165,9 +165,9 @@
       let timeLeft = 900;
 
       // Special Round variables
-      let isSpecialRound = false;
       let storyData = null;
-      let currentViewIndex = -1; // -1: story, -2: puzzles
+      let questionBlocks = [];
+      let currentViewIndex = -1;
 
       teamId = localStorage.getItem('currentTeamId');
       if (!teamId) {
@@ -238,6 +238,10 @@
         pauseTimer();
         saveCurrentViewAnswers(); 
 
+        const blockAnswers = questionBlocks.slice(0, 2).flat().map((q, index) => ({
+            question: `Block ${Math.floor(index / 2) + 1} - Q${(index % 2) + 1}: ${q.question}`,
+            selected: q.userAnswer || "Skipped",
+        }));
         const puzzleAnswers = [];
         if(storyData.logic_puzzles && storyData.logic_puzzles.userAnswers){
             for(const key in storyData.logic_puzzles.userAnswers){
@@ -247,17 +251,14 @@
                 });
             }
         }
+        const detailedAnswers = [...blockAnswers, ...puzzleAnswers];
         
         const timeTakenMs = Date.now() - quizStartTime;
         const quizStartTimeISO = new Date(quizStartTime).toISOString();
 
         const submissionData = {
-          teamId, 
-          score: 0, // No score for this round type
-          timeTaken: timeTakenMs, 
-          quizStartTime: quizStartTimeISO,
-          status: 'Completed', 
-          detailedAnswers: puzzleAnswers
+          teamId, score: 0, timeTaken: timeTakenMs, quizStartTime: quizStartTimeISO,
+          status: 'Completed', detailedAnswers
         };
         
         if (options.reason === 'violation_limit') submissionData.status = 'Terminated - Cheating Detected';
@@ -285,8 +286,8 @@
           const data = await response.json(); 
 
           if (data.isSpecialRound) {
-              isSpecialRound = true;
               storyData = data.storyData;
+              questionBlocks = data.questionBlocks.map(block => block.map(q => ({...q, userAnswer: ''})));
               startTimer(data.timeLimit || 900);
               setupSpecialRoundLayout();
           } else {
@@ -301,14 +302,20 @@
       
       function setupSpecialRoundLayout() {
         diceMenu.innerHTML = '';
-        const items = ['Story', 'Logic Puzzles'];
-        const viewIndexes = [-1, -2];
+        const items = ['Story', 'Logic Puzzles', 'QB1', 'QB2'];
+        const viewIndexes = [-1, -2, 0, 1];
 
         items.forEach((item, i) => {
             const dice = document.createElement('div');
             dice.textContent = item;
             dice.classList.add('menu-dice');
             dice.onclick = () => showView(viewIndexes[i]);
+
+            // Hide QB1 and QB2 initially
+            if(i >= 2) {
+                dice.style.display = 'none';
+            }
+
             diceMenu.appendChild(dice);
         });
         
@@ -316,11 +323,44 @@
             if(confirm("Are you sure you want to finish and submit your answers?")) endQuiz();
         }
         
+        startViewPolling();
         showView(-1);
+      }
+      
+      function startViewPolling() {
+          const viewPollInterval = setInterval(() => {
+              if (quizHasEnded) {
+                  clearInterval(viewPollInterval);
+                  return;
+              }
+              fetch('/api/view-status').then(res => res.json()).then(data => {
+                  if (data.view) {
+                      const viewMap = { 'story': -1, 'puzzles': -2, 'qb1': 0, 'qb2': 1 };
+                      const targetIndex = viewMap[data.view];
+                      
+                      if (targetIndex !== undefined) {
+                          if (targetIndex === 0) { // Unhide QB1
+                              diceMenu.children[2].style.display = 'flex';
+                          } else if (targetIndex === 1) { // Unhide QB2
+                              diceMenu.children[3].style.display = 'flex';
+                          }
+                          showView(targetIndex);
+                      }
+                  }
+              }).catch(err => console.error("Error polling for view status:", err));
+          }, 3000);
       }
 
       function saveCurrentViewAnswers() {
-          if (currentViewIndex === -2) { // Logic Puzzle
+          if (currentViewIndex >= 0) { // Question Block
+              const block = questionBlocks[currentViewIndex];
+              if (block) {
+                  block.forEach((q, qIndex) => {
+                      const input = document.getElementById(`answer-${currentViewIndex}-${qIndex}`);
+                      if (input) q.userAnswer = input.value;
+                  });
+              }
+          } else if (currentViewIndex === -2) { // Logic Puzzle
               if (!storyData.logic_puzzles.userAnswers) storyData.logic_puzzles.userAnswers = {};
               for (const circuitKey in storyData.logic_puzzles) {
                   if (circuitKey === 'userAnswers') continue;
@@ -337,7 +377,10 @@
           currentViewIndex = index;
           
           document.querySelectorAll('.menu-dice').forEach(dice => dice.classList.remove('active'));
-          let activeDiceIndex = index === -1 ? 0 : 1;
+          let activeDiceIndex = -1;
+          if(index === -1) activeDiceIndex = 0;
+          else if(index === -2) activeDiceIndex = 1;
+          else activeDiceIndex = index + 2;
           if(diceMenu.children[activeDiceIndex]) diceMenu.children[activeDiceIndex].classList.add('active');
 
           let mainContent = '';
@@ -362,6 +405,14 @@
               }
               puzzleHTML += `</div>`;
               mainContent = puzzleHTML;
+          } else { // Question Block View (QB1 or QB2)
+              const block = questionBlocks[index];
+              let blockHTML = `<div id="question-counter">Block ${index + 1}</div><div id="question-block-area">`;
+              block.forEach((q, qIndex) => {
+                  blockHTML += `<div class="answer-input-container"><h4>${q.question}</h4><textarea id="answer-${index}-${qIndex}" class="answer-input" placeholder="Your answer...">${q.userAnswer || ''}</textarea></div>`;
+              });
+              blockHTML += `</div>`;
+              mainContent = blockHTML;
           }
           
           mainContentArea.innerHTML = mainContent;
